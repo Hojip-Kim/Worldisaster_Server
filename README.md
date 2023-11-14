@@ -1,3 +1,105 @@
+#Worldisaster
+
+---
+
+# **[  🗓  Project Rules & DOCS  ]**
+
+### **📌 Directory Structure**
+
+    📦Worldisaster_Server
+     ┃  ┣ 📂src
+     ┃  ┃ ┣ 📜app.controller.spec.ts
+     ┃  ┃ ┣ 📜app.controller.ts
+     ┃  ┃ ┣ 📜app.module.ts
+     ┃  ┃ ┣ 📜app.service.ts
+     ┃  ┃ ┗ 📜main.ts
+     ┃  ┣ 📂test
+     ┃  ┃ ┣ 📜app.e2e-spec.ts
+     ┃  ┃ ┗ 📜jest-e2e.json
+     ┣ 📜.eslintrc.js
+     ┣ 📜.gitignore
+     ┣ 📜.prettierrc
+     ┣ 📜README.md
+     ┣ 📜nest-cli.json
+     ┣ 📜package-lock.json
+     ┣ 📜package.json
+     ┣ 📜tsconfig.build.json
+     ┗ 📜tsconfig.json
+
+---
+
+### 📌 Early Settinged Module
+
+    ┣ Class-validator
+    ┣ Class-transformer
+    ┣ @nestjs/typeorm : nestjs에서 typeorm을 사용하기위해 연동시켜주는 모듈
+    ┣ Typeorm : typeORM 모듈
+    ┣ Pg : postgres 모듈
+    ┣ Bcryptjs
+    ┣ @nestjs/jwt : nestjs에서 jwt를 사용하기 위해 필요한 모듈
+    ┣ @nestjs/passport : nestjs에서 passport를 사용하기위해 필요한 모듈
+    ┣ Passport : passport 모듈
+    ┣ Passport-jwt : jwt모듈
+
+```bash
+$ npm install
+```
+
+---
+
+### **:octocat:Commit Rule** ###
+```
+$ <type>(<scope>): <subject>    -- 헤더
+  <BLANK LINE>                  -- 빈 줄
+  <body>                        -- 본문
+  <BLANK LINE>                  -- 빈 줄
+  <footer>                      -- 바닥 글
+```
+
+📌 type은 해당 commit의 성격을 나타내며 아래 중 하나여야 함.
+
+```
+feat : 새로운 기능에 대한 커밋
+fix : build 빌드 관련 파일 수정에 대한 커밋
+build : 빌드 관련 파일 수정에 대한 커밋
+chore : 그 외 자잘한 수정에 대한 커밋(rlxk qusrud)
+ci : CI 관련 설정 수정에 대한 커밋
+docs : 문서 수정에 대한 커밋
+style : 코드 스타일 혹은 포맷 등에 관한 커밋
+refactor : 코드 리팩토링에 대한 커밋
+test : 테스트 코드 수정에 대한 커밋
+```
+
+**example**
+
+```
+Feat: 관심지역 알림 ON/OFF 기능 추가(#123)
+
+시군구의 알림을 각각 ON/OFF 할 수 있도록 기능을 추가함
+ - opnion0055: 구분 코드
+
+해결: close #123
+```
+
+---
+### 📌 Branch Strategy (Git Flow Strategy)
+
+![스크린샷 2023-11-14 오후 2 48 18](https://github.com/Hojip-Kim/Worldisaster_Server/assets/101489057/e5d379d9-836e-4157-9dc0-8abc6c150050)
+
+
+### Example Branch Shape
+```
+              ┏ Hojip
+              ┃
+main ━ dev┏━━━┣ Kiyeoung
+          ┃   ┃
+          ┃   ┗ YuJeong
+          ┃
+          ┗━━━━ (Optional)release
+```
+
+---
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
