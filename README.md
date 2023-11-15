@@ -41,12 +41,6 @@
     ┣ Passport : passport 모듈
     ┣ Passport-jwt : jwt모듈
 
-    ┣ @nestjs/schedule : API를 주기적으로 스케쥴링
-    ┣ @nextjs/axios : HTTP Request 생성
-    ┣ axios
-    ┣ @types/sanitize-html : HTML 태그 제거
-    ┣ sanitize-html
-
 ```bash
 $ npm install
 ```

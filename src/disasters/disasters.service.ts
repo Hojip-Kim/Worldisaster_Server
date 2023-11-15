@@ -2,44 +2,61 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { DisastersListEntity } from './disasters-list.entity';
-import { DisasterDetailEntity } from './disasters-detail.entity';
+import { DisastersList } from './disasters-list.entity';
+import { DisastersDetailEntity } from './disasters-detail.entity';
 
 import { HttpService } from '@nestjs/axios'; // HTTP 요청 라이브러리
-import * as sanitizeHtml from 'sanitize-html';
+import * as sanitizeHtml from 'sanitize-html'; // HTTP 태그 정리 라이브러리
 import { Cron, CronExpression } from '@nestjs/schedule'; // 스케쥴링 라이브러리
 import { firstValueFrom } from 'rxjs'; // 첫 요청을 promise로 돌려줌
 
 // 새로운 재난이 발생하면 Push 해주는 웹소켓 등이 없으니, 주기적으로 리스트 확인이 필요함
 @Injectable()
-export class DisastersListService {
+export class DisastersService {
     private baseUrl = 'https://api.reliefweb.int/v1/disasters?appname=apidoc&limit=1000';
 
     constructor(
         private httpService: HttpService, // HTTP 요청 라이브러리를 가져오고
-        @InjectRepository(DisastersListEntity) // 재난 목록 Entity의 리포지토리를 가져오고
-        private disasterListRepository: Repository<DisastersListEntity>,
-        @InjectRepository(DisasterDetailEntity)
-        private disasterDetailRepository: Repository<DisasterDetailEntity>,
+        @InjectRepository(DisastersList) // 재난 목록 Entity의 리포지토리를 가져오고
+        private disasterListRepository: Repository<DisastersList>,
+        @InjectRepository(DisastersDetailEntity)
+        private disasterDetailRepository: Repository<DisastersDetailEntity>,
     ) { }
 
-    async fetchAndCompareCount(): Promise<{ success: boolean }> {
+    /* 여기서부터는 API에 대응하는 Service */
 
-        // API에서 'count' 필드를 추출
-        const apiResponse = await firstValueFrom(this.httpService.get(this.baseUrl));
-        const countFromApi = apiResponse.data.totalCount;
+    async getAllDisasters(): Promise<DisastersDetailEntity[]> {
+        return this.disasterDetailRepository.createQueryBuilder('disaster').getMany();
+    }
 
-        // DB에서 entity 개수를 확인
-        const countInDb = await this.disasterListRepository.count();
+    /* 여기서부터는 주기적으로 데이터를 갱신해주는 역할 */
 
-        // 두개를 비교해서, 차이가 난다면 fetchAndStoreAllDisasters() 호출
-        if (countFromApi !== countInDb) {
-            await this.fetchAndStoreAllDisasters();
-            return { success: true };
+    async fetchAndCompareCount(): Promise<{ success: boolean, message: string }> {
+
+        console.log('Updating disaster lists table...');
+
+        try {
+            // API에서 'count' 필드를 추출
+            const apiResponse = await firstValueFrom(this.httpService.get(this.baseUrl));
+            const countFromApi = apiResponse.data.totalCount;
+
+            // DB에서 entity 개수를 확인
+            const countInDb = await this.disasterListRepository.count();
+
+            // 두개를 비교해서, 차이가 난다면 fetchAndStoreAllDisasters() 호출
+            if (countFromApi !== countInDb) {
+                await this.fetchAndStoreAllDisasters();
+                console.log('@ Disaster Auto Update Finished - DB update complete');
+                return { success: true, message: 'Updated (Disasters)' };
+            } else {
+                // 숫자가 맞으니 굳이 업데이트 필요 없음 + forceRefresh를 위한 리턴값
+                console.log('@ Disaster Auto Update Finished - Nothing to update');
+                return { success: false, message: 'No Updates to make (Disasters)' };
+            }
+        } catch (error) {
+            console.log('@ Disaster AUto Update Failed: ' + error.message);
+            return { success: false, message: 'Update Failed (Disasters)' };
         }
-
-        // 숫자가 맞으니 굳이 업데이트 필요 없음 + forceRefresh를 위한 리턴값
-        return { success: false };
     }
 
     async fetchAndStoreAllDisasters() {
@@ -47,13 +64,20 @@ export class DisastersListService {
         // ReliefWeb 구조를 참고, currentUrl 변수를 바꿔가면서 활용
         let currentUrl = this.baseUrl;
 
-        // 각각의 1000개 단위 리스트를 배열에 저장하기 위함
+        // 각각의 1000개 단위 리스트를 배열에 저장하기 위해 우선 set으로 정의 (API 결과에 duplicate들이 있음)
         const allEntries = [];
+        const uniqueIds = new Set();
 
-        // 순회하면서 값들을 배열에 저장
+        // ReliefWeb API가 중복값을 뱉기도 해서, 순회하면서 값들을 Set에 저장하는 식으로 처리 -> 서버 첫 구동시 1분 사이클이 3-4번 돌면 중복없이 완전해짐
         while (currentUrl) {
             const response = await firstValueFrom(this.httpService.get(currentUrl));
-            allEntries.push(...response.data.data); // 각 배열 요소를 넣기 위해서 Spread Operator 사용
+            // console.log('thousand-batch has this many entries in list: ', response.data.data.length);
+            response.data.data.forEach(entry => {
+                if (!uniqueIds.has(entry.id)) {
+                    uniqueIds.add(entry.id);
+                    allEntries.push(entry);
+                }
+            });
 
             currentUrl = response.data.links.next ? response.data.links.next.href : null;
         }
@@ -73,27 +97,25 @@ export class DisastersListService {
         // 삭제 결과를 한번 확인하고
         const count = await this.disasterListRepository.count();
         if (count !== 0) {
-            console.log('최초 재난 리스트 추출 시 DB 리셋 실패');
+            console.log('Failed to update the disaster list properly');
             throw new Error('Failed in updating the list of disasters');
         }
 
-        // 인자로 전달받은 배열을 삽입할 수 있도록 준비 (Response 구조를 정리)
-        // flatMap은 배열의 각 요소에 대하여 Map을 실행하고 Flatten 해서 반환
-        const allEntries = entries.map(entry => ({
-            dID: entry.id,
-            dTitle: entry.fields.name,
-            dApiUrl: entry.href
-        }));
+        // 배열의 각 요소들을 하나씩 정리해서 DB에 삽입
+        for (const entry of entries) {
+            const disasterEntry = {
+                dID: entry.id,
+                dTitle: entry.fields.name,
+                dApiUrl: entry.href
+            };
 
-        // 결과물을 삽입 (typeORM save()는 배열도 처리할 수 있음 for bulk handling)
-        try {
-            await this.disasterListRepository.save(allEntries);
-            console.log('New or updated disaster lists saved successfully');
-
-        } catch (error) {
-            console.error('Error saving to PostgreSQL:', error);
-            throw error;
+            try {
+                await this.disasterListRepository.save(disasterEntry);
+            } catch (error) {
+                console.error('Error saving to PostgreSQL:', error);
+            }
         }
+        console.log('Disaster list successfully saved to table');
     }
 
     async fetchAndSaveDisasterDetails(rawEntries: any[]) {
@@ -105,7 +127,8 @@ export class DisastersListService {
         // rawEntries 배열을 필터링 (DB에 매칭되는 DID가 없는 경우)
         const newEntries = rawEntries.filter(entry => !existingdIDs.has(entry.id));
         if (newEntries.length == 0) {
-            console.log('Detail을 저장하는 로직에 문제가 있음');
+            console.log('Disaster list updated, but no detailed entries to update');
+            return;
         } else if (newEntries.length > 100) {
             console.log('Tons of updates to Disaster Details DB');
         } else {
@@ -132,7 +155,7 @@ export class DisastersListService {
                 const fields = responseData.fields;
 
                 // 개별 엔티티 생성
-                const detail = new DisasterDetailEntity();
+                const detail = new DisastersDetailEntity();
                 detail.dID = fields.id;
                 detail.dStatus = fields.status;
                 detail.dCountry = fields.primary_country.name;
@@ -184,9 +207,10 @@ export class DisastersListService {
         console.log('New or updated disaster details saved successfully');
     }
 
-    // 매 시간마다 여기서 함수가 시작, fetchAndCompareCount를 실행
-    @Cron(CronExpression.EVERY_HOUR)
-    handleCron() {
-        this.fetchAndCompareCount();
+    // 정해진 시간마다 여기서 함수가 시작, fetchAndCompareCount를 실행
+    @Cron(CronExpression.EVERY_MINUTE)
+    async handleCron() {
+        console.log("\n@ Disaster Auto Update Started - Regular 1-minute API Request made to fetch Disasters");
+        await this.fetchAndCompareCount();
     }
 }

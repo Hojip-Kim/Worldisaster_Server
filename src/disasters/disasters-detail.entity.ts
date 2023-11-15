@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
-export class DisasterDetailEntity {
+export class DisastersDetailEntity {
 
     @Column()
     to_display: boolean;

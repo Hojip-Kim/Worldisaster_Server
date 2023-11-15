@@ -1,16 +1,21 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+
 import { DisastersModule } from './disasters/disasters.module';
+import { DisastersList } from './disasters/disasters-list.entity';
+import { DisastersDetailEntity } from './disasters/disasters-detail.entity';
 
-import { DisastersListEntity } from './disasters/disasters-list.entity';
-import { DisasterDetailEntity } from './disasters/disasters-detail.entity';
-
+import { CountryModule } from './country/country.module';
+import { CountryEntity } from './country/country.entity';
+import { CountryMappings } from './country/script_init/country-table.entity';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(), // Cron, Scheduled 업데이트를 위함
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
@@ -19,12 +24,15 @@ import { DisasterDetailEntity } from './disasters/disasters-detail.entity';
       password: 'wjdrmf12#$',
       database: 'db_localhost',
       entities: [
-        DisastersListEntity,
-        DisasterDetailEntity,
+        DisastersList,
+        DisastersDetailEntity,
+        CountryEntity,
+        CountryMappings,
       ],
       synchronize: true,
     }),
-    DisastersModule
+    DisastersModule,
+    CountryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
