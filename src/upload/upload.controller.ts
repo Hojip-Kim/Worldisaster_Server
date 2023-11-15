@@ -17,6 +17,8 @@ export class UploadController {
         }),
     ) file: Express.Multer.File,
     ) {
+        console.log(file.originalname);
+        console.log(file.buffer);
         await this.uploadService.upload(file.originalname, file.buffer);
     }
 }
