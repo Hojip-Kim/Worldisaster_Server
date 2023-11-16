@@ -88,7 +88,7 @@ export class UploadService {
                     Bucket: 'worldisaster-test-bucket',
                     Key: `${baseName}/${file}`,
                     Body: fileStream,
-                    ContentDisposition: 'attachment'
+                    ContentDisposition: 'inline'
             }));
         }
     }
