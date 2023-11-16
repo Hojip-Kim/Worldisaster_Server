@@ -12,7 +12,7 @@ export class UploadService {
 
     async upload(fileName: string, file: Buffer) {
         //서버 공간에 동영상 임시 저장
-        const tempFilePath = path.join("home/ubuntu/temp", fileName);
+        const tempFilePath = path.join("/temp", fileName);
         //tempFilePath에 file을 저장
         fs.writeFileSync(tempFilePath, file);
         console.log('File saved to ${tempFilePath}');
@@ -38,7 +38,7 @@ export class UploadService {
         const baseName = path.basename(fileName, path.extname(fileName));
 
         //HLS 파일을 저장할 새로운 폴더경로
-        const hlsFolderPath = path.join("home/ubuntu/video_test", baseName);
+        const hlsFolderPath = path.join("/video_test", baseName);
         if (!fs.existsSync(hlsFolderPath)) {
             fs.mkdirSync(hlsFolderPath, { recursive: true });
         }
