@@ -7,7 +7,9 @@ import * as path from 'path';
 
 @Injectable()
 export class UploadService {
-    private readonly s3client = new S3Client({});
+    private readonly s3client = new S3Client({
+        region: 'ap-northeast-2',
+    });
     // constructor(private readonly configService: ConfigService) {}
 
     async upload(fileName: string, file: Buffer) {
