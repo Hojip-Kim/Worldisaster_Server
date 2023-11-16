@@ -34,6 +34,8 @@ export class UploadService {
 
         console.log('HLS files uploaded to S3');
 
+        //cloudfront로 배포한 url 제공
+        return `https:`
         // await this.s3client.send(
         //     //인코딩된 파일을 S3에 업로드
         //     new PutObjectCommand({
@@ -86,7 +88,7 @@ export class UploadService {
                     Bucket: 'worldisaster-test-bucket',
                     Key: `${baseName}/${file}`,
                     Body: fileStream,
-                    ContentDisposition: 'inline'
+                    ContentDisposition: 'attachment'
             }));
         }
     }
