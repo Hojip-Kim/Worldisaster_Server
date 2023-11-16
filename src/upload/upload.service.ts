@@ -88,7 +88,8 @@ export class UploadService {
                     Bucket: 'worldisaster-test-bucket',
                     Key: `${baseName}/${file}`,
                     Body: fileStream,
-                    ContentDisposition: 'inline'
+                    ContentDisposition: 'inline',
+                    ContentType: 'application/vnd.apple.mpegurl'    //HLS 파일의 경우 Content-Type을 지정해주어야 함
             }));
         }
     }
