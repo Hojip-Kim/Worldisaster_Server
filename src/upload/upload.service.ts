@@ -88,4 +88,5 @@ export class UploadService {
                     Body: fileStream,
             }));
         }
+    }
 }
