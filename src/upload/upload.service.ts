@@ -17,13 +17,13 @@ export class UploadService {
         const tempFilePath = path.join("/home/ubuntu/temp", fileName);
         //tempFilePath에 file을 저장
         fs.writeFileSync(tempFilePath, file);
-        console.log('File saved to ${tempFilePath}');
+        console.log(`File saved to ${tempFilePath}`);
         //HLS 인코딩
         await this.encodeToHLS(file, fileName, tempFilePath);
         //인코딩이 끝나면, 임시 저장해둔 파일 삭제
         if (fs.existsSync(tempFilePath)) {
             fs.unlinkSync(tempFilePath);
-            console.log('File deleted from ${tempFilePath}');
+            console.log(`File deleted from ${tempFilePath}`);
         }
         //HLS 파일 디렉토리
         const baseName = path.basename(fileName, path.extname(fileName));
