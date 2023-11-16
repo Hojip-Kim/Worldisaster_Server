@@ -20,8 +20,12 @@ export class UploadService {
         await this.encodeToHLS(file, fileName, tempFilePath);
 
         //인코딩이 끝나면, 임시 저장해둔 파일 삭제
-        fs.unlinkSync(tempFilePath);
-        console.log('File deleted from ${tempFilePath}'); 
+        if (fs.existsSync(tempFilePath)) {
+            fs.unlinkSync(tempFilePath);
+            console.log('File deleted from ${tempFilePath}');
+        }
+        
+         
 
         await this.s3client.send(
             //인코딩된 파일을 S3에 업로드
