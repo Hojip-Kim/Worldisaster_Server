@@ -33,9 +33,9 @@ export class UploadService {
         await this.uploadToS3(hlsFolderPath, baseName);
 
         console.log('HLS files uploaded to S3');
-
+        
         //cloudfront로 배포한 url 제공
-        return `https:`
+        return `https://d2v41mvu3zgnz0.cloudfront.net/${baseName}/${baseName}.m3u8`;
         // await this.s3client.send(
         //     //인코딩된 파일을 S3에 업로드
         //     new PutObjectCommand({
