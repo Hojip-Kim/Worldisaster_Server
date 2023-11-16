@@ -20,23 +20,28 @@ export class UploadService {
         console.log('File saved to ${tempFilePath}');
         //HLS 인코딩
         await this.encodeToHLS(file, fileName, tempFilePath);
-
         //인코딩이 끝나면, 임시 저장해둔 파일 삭제
         if (fs.existsSync(tempFilePath)) {
             fs.unlinkSync(tempFilePath);
             console.log('File deleted from ${tempFilePath}');
         }
-        
-         
+        //HLS 파일 디렉토리
+        const baseName = path.basename(fileName, path.extname(fileName));
+        const hlsFolderPath = path.join("/home/ubuntu/video", baseName);
 
-        await this.s3client.send(
-            //인코딩된 파일을 S3에 업로드
-            new PutObjectCommand({
-                Bucket: 'worldisaster-test-bucket',
-                Key: fileName,
-                Body: file 
-            })
-        )
+        //S3에 HLS 파일 업로드
+        await this.uploadToS3(hlsFolderPath, baseName);
+
+        console.log('HLS files uploaded to S3');
+
+        // await this.s3client.send(
+        //     //인코딩된 파일을 S3에 업로드
+        //     new PutObjectCommand({
+        //         Bucket: 'worldisaster-test-bucket',
+        //         Key: fileName,
+        //         Body: file 
+        //     })
+        // )
     }
 
     private async encodeToHLS(file: Buffer, fileName: string, tempFilePath: string): Promise<void> {
@@ -70,4 +75,17 @@ export class UploadService {
                 .run(); 
         });//FFMPEG를 사용하여 HLS로 인코딩
     }
+
+    private async uploadToS3(folderPath: string, baseName: string): Promise<void> {
+        const files = fs.readdirSync(folderPath);
+        for (const file of files) {
+            const filePath = path.join(folderPath, file);
+            const fileStream = fs.createReadStream(filePath);
+
+            await this.s3client.send(new PutObjectCommand({
+                    Bucket: 'worldisaster-test-bucket',
+                    Key: `${baseName}/${file}`,
+                    Body: fileStream,
+            }));
+        }
 }
