@@ -58,7 +58,7 @@ export class UploadService {
             // const tempFilePath = "C:/Programming/SWJungle_07/나만무/test동영상/file.mp4";   //임시 파일 경로 -> 로컬 환경 테스트 용이라 실제 파일 경로
             fs.writeFileSync(tempFilePath, file);   //임시 파일 생성
             ffmpeg(tempFilePath)
-                .output(path.join(hlsFolderPath, 'video.m3u8')) 
+                .output(path.join(hlsFolderPath, '${basename}.m3u8')) 
                 .format('hls')
                 .videoCodec('libx264')
                 .audioCodec('aac')
@@ -86,6 +86,7 @@ export class UploadService {
                     Bucket: 'worldisaster-test-bucket',
                     Key: `${baseName}/${file}`,
                     Body: fileStream,
+                    ContentDisposition: 'inline'
             }));
         }
     }
