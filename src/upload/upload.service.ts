@@ -38,7 +38,7 @@ export class UploadService {
         const baseName = path.basename(fileName, path.extname(fileName));
 
         //HLS 파일을 저장할 새로운 폴더경로
-        const hlsFolderPath = path.join("/video_test", baseName);
+        const hlsFolderPath = path.join("/video", baseName);
         if (!fs.existsSync(hlsFolderPath)) {
             fs.mkdirSync(hlsFolderPath, { recursive: true });
         }
