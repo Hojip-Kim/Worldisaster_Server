@@ -181,10 +181,11 @@ const rw_edge_cases = {
 };
 
 const pool = new Pool({
-    user: 'namamu',
-    host: 'localhost',
-    database: 'db_localhost',
-    password: 'wjdrmf12#$',
+    type: 'postgres',
+    username: 'postgres',
+    host: 'worldisaster-rds.c8vecnz23gk6.ap-northeast-2.rds.amazonaws.com',
+    database: 'worldisaster-test-db',
+    password: 'postdbwjd',
     port: 5432,
 });
 
