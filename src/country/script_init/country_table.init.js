@@ -181,21 +181,13 @@ const rw_edge_cases = {
 };
 
 const pool = new Pool({
-    type: 'postgres',
+    user: 'postgres',
     host: 'worldisaster-rds.c8vecnz23gk6.ap-northeast-2.rds.amazonaws.com',
     port: 5432,
-    username: 'postgres',
     password: 'postdbwjd',
     database: 'worldisaster-test-db',
-    entities: [__dirname + '/../**/*.entity.{js,ts}'],
-    synchronize: true,
-    ssl:{
-        rejectUnauthorized: false, // 이 부분을 추가하세요.
-    },
-    extra: {
-        trustServerCertificate: true,
-        Encrypt: true,
-        IntegratedSecurity: false,
+    ssl: {
+        rejectUnauthorized: false
     }
 });
 
