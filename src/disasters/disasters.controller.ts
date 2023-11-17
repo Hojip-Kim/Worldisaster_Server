@@ -1,16 +1,22 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Controller, Get } from '@nestjs/common';
+import { DisastersService } from './disasters.service';
+import { DisastersDetailEntity } from './disasters-detail.entity';
 
-@Entity()
-export class DisastersList {
-    @PrimaryGeneratedColumn()
-    objectId: number;
+@Controller('disasters')
+export class DisastersController {
+    constructor(private readonly disastersService: DisastersService) { }
 
-    @Column()
-    dID: string;
+    /* Debugger API (to-delete) */
 
-    @Column()
-    dTitle: string;
+    @Get('/')
+    async debug_get_all_disasters(): Promise<DisastersDetailEntity[]> {
+        console.log('API : GET call made to fetch all disasters');
+        return await this.disastersService.getAllDisasters();
+    }
 
-    @Column()
-    dApiUrl: string;
+    @Get('force')
+    async debug_force_refresh(): Promise<{ success: boolean, message: string }> {
+        console.log('API : GET call made to force refresh disasters DB (Debug)');
+        return await this.disastersService.fetchAndCompareCount();
+    }
 }
