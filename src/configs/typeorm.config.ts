@@ -8,7 +8,9 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     database: 'video',
     entities: [__dirname + '/../**/*.entity.{js,ts}'],
     synchronize: true,
-    ssl: true,
+    ssl:{
+        rejectUnauthorized: false, // 이 부분을 추가하세요.
+    },
     extra: {
         trustServerCertificate: true,
         Encrypt: true,
