@@ -36,6 +36,7 @@ export class UploadController {
             <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
             <script src="https://unpkg.com/video.js/dist/video.js"></script>
             <script src="https://unpkg.com/videojs-contrib-hls/dist/videojs-contrib-hls.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
         </head>
         <body>
             <video id="example-video" width="960" height="540" class="video-js vjs-default-skin" controls>
@@ -43,7 +44,18 @@ export class UploadController {
             </video>
             <script>
                 var player = videojs('example-video');
-                player.play();
+                // HLS.js specific script
+                if (Hls.isSupported()) {
+                    var hls = new Hls();
+                    hls.loadSource(player.src());
+                    hls.attachMedia(player.el());
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        player.play();
+                    });
+                } else if (player.canPlayType('application/vnd.apple.mpegurl')) {
+                    player.src('${video_url}');
+                    player.play();
+                }
             </script>
         </body>
         </html>`;   
