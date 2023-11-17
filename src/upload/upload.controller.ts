@@ -36,7 +36,7 @@ export class UploadController {
             <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
             <script src="https://unpkg.com/video.js/dist/video.js"></script>
             <script src="https://unpkg.com/videojs-contrib-hls/dist/videojs-contrib-hls.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/hls.js@canary"></script>
+            
         </head>
         <body>
             <video id="example-video" width="960" height="540" class="video-js vjs-default-skin" controls>
