@@ -7,5 +7,11 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     password: 'postdbwjd',
     database: 'video',
     entities: [__dirname + '/../**/*.entity.{js,ts}'],
-    synchronize: true
+    synchronize: true,
+    ssl: true,
+    extra: {
+        trustServerCertificate: true,
+        Encrypt: true,
+        IntegratedSecurity: false,
+    }
 }
