@@ -35,30 +35,32 @@ export class UploadController {
             <title>Video Test</title>
             <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
             <script src="https://unpkg.com/video.js/dist/video.js"></script>
-            <script src="https://unpkg.com/videojs-contrib-hls/dist/videojs-contrib-hls.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
         </head>
         <body>
             <video id="example-video" width="960" height="540" class="video-js vjs-default-skin" controls>
-                <source src="${video_url}" type="application/x-mpegURL">
             </video>
             <script>
-                var player = videojs('example-video');
-                // HLS.js specific script
+                var video = document.getElementById('example-video');
+                var videoSrc = '${video_url}';
+        
                 if (Hls.isSupported()) {
                     var hls = new Hls();
-                    hls.loadSource(player.src());
-                    hls.attachMedia(player.el());
+                    hls.loadSource(videoSrc);
+                    hls.attachMedia(video);
                     hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                        player.play();
+                        video.play();
                     });
-                } else if (player.canPlayType('application/vnd.apple.mpegurl')) {
-                    player.src('${video_url}');
-                    player.play();
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    video.src = videoSrc;
+                    video.addEventListener('loadedmetadata', function() {
+                        video.play();
+                    });
                 }
             </script>
         </body>
-        </html>`;   
+        </html>
+        
         res.status(200).send(htmlContent);
     }
 }
