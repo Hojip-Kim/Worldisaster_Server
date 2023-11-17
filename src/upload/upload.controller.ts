@@ -24,6 +24,9 @@ export class UploadController {
     async getVideoPage(@Param('id') id: number, @Res() res: Response) {
 
         const video_url = await this.uploadService.getVideoUrl(id);
+        if(!video_url) {
+            console.log('video_url is null');
+        }
         const htmlContent = `
         <!DOCTYPE html>
         <html lang="en">
