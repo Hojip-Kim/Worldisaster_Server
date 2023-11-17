@@ -1,21 +1,29 @@
-import { ConsoleLogger, Controller, Post, UseInterceptors, UploadedFile, ParseFilePipe } from '@nestjs/common';
+import { ConsoleLogger, Controller, Post, UseInterceptors, UploadedFile, ParseFilePipe, Get, Param, Body } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
 import { Response } from 'express';
 import { Res } from '@nestjs/common';
+import { UploadVideoDto } from './dto/upload-video.dto';
+import { Video } from './video.entity';
 @Controller('upload')
 export class UploadController {
     constructor(private readonly uploadService: UploadService) {}
+
+
     @Post()
     @UseInterceptors(FileInterceptor('file'))
     async uploadFile(
         @UploadedFile() file: Express.Multer.File,
-        @Res() res: Response
+        @Body() uploadVideoDto: UploadVideoDto
     ) {
-        console.log(file.originalname);
-        console.log(file.buffer);
-        const url = await this.uploadService.upload(file.originalname, file.buffer);
 
+        await this.uploadService.upload(uploadVideoDto, file.originalname, file.buffer);
+
+    }
+    @Get('/:id')
+    async getVideoPage(@Param('id') id: number, @Res() res: Response) {
+
+        const video_url = await this.uploadService.getVideoUrl(id);
         const htmlContent = `
         <!DOCTYPE html>
         <html lang="en">
@@ -28,7 +36,7 @@ export class UploadController {
         </head>
         <body>
             <video id="example-video" width="960" height="540" class="video-js vjs-default-skin" controls>
-                <source src="${url}" type="application/x-mpegURL">
+                <source src="${video_url}" type="application/x-mpegURL">
             </video>
 
             <script>

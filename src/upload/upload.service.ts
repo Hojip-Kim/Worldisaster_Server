@@ -1,18 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotfoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import * as ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Video } from './video.entity';
+import { VideoRepository } from './video.repository';
+import { UploadVideoDto } from './dto/upload-video.dto';
 
 @Injectable()
 export class UploadService {
     private readonly s3client = new S3Client({
         region: 'ap-northeast-2',
     });
-    // constructor(private readonly configService: ConfigService) {}
+    constructor(private videoRepository: VideoRepository) {}
 
-    async upload(fileName: string, file: Buffer) {
+    async upload(uploadVideoDto: UploadVideoDto, fileName: string, file: Buffer) {
         //서버 공간에 동영상 임시 저장
         const tempFilePath = path.join("/home/ubuntu/temp", fileName);
         //tempFilePath에 file을 저장
@@ -33,9 +36,17 @@ export class UploadService {
         await this.uploadToS3(hlsFolderPath, baseName);
 
         console.log('HLS files uploaded to S3');
-        
+        //db에 url 저장
+        const { video_url, video_name } = uploadVideoDto;
+
+        const video = this.videoRepository.create({
+            video_url: `https://d2v41mvu3zgnz0.cloudfront.net/${baseName}/${baseName}.m3u8`,
+            video_name: baseName
+        })
+
+        await this.videoRepository.save(video);
         //cloudfront로 배포한 url 제공
-        return `https://d2v41mvu3zgnz0.cloudfront.net/${baseName}/${baseName}.m3u8`;
+        // return `https://d2v41mvu3zgnz0.cloudfront.net/${baseName}/${baseName}.m3u8`;
         // await this.s3client.send(
         //     //인코딩된 파일을 S3에 업로드
         //     new PutObjectCommand({
@@ -92,5 +103,15 @@ export class UploadService {
                     ContentType: 'application/vnd.apple.mpegurl'    //HLS 파일의 경우 Content-Type을 지정해주어야 함
             }));
         }
+    }
+    //db objID 로 url 가져오기
+    async getVideoUrl(id: number) {
+        const video = await this.videoRepository.findOneBy({id});
+        const video_url = video.video_url;
+        // if(!video) {
+        //     throw new NotfoundException(`Video with ID "${id}" not found`);
+        // }
+
+        return video_url;
     }
 }
