@@ -1,4 +1,4 @@
-import { Injectable, NotfoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import * as ffmpeg from 'fluent-ffmpeg';
