@@ -59,7 +59,7 @@ export class UploadController {
                 }
             </script>
         </body>
-        </html>
+        </html>`
         
         res.status(200).send(htmlContent);
     }
