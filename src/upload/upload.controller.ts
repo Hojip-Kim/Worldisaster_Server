@@ -22,10 +22,10 @@ export class UploadController {
     }
     @Get('/:id')
     async getVideoPage(@Param('id') id: number, @Res() res: Response) {
-
         const video_url = await this.uploadService.getVideoUrl(id);
         if(!video_url) {
             console.log('video_url is null');
+            return res.status(404).send('Video not found');
         }
         const htmlContent = `
         <!DOCTYPE html>
@@ -43,23 +43,22 @@ export class UploadController {
                 <source src="${video_url}" type="application/x-mpegURL">
             </video>
             <script>
-                var video = document.getElementById('video');
                 var player = videojs('example-video');
-                // HLS.js specific script
                 if (Hls.isSupported()) {
                     var hls = new Hls();
-                    hls.loadSource(player.src());
+                    hls.loadSource('${video_url}');
                     hls.attachMedia(player.el());
                     hls.on(Hls.Events.MANIFEST_PARSED, function() {
                         player.play();
                     });
-                } else if (player.canPlayType('application/vnd.apple.mpegurl')) {
+                } else if (player.tech().canPlayType('application/vnd.apple.mpegurl')) {
                     player.src('${video_url}');
                     player.play();
                 }
-                </script>
-            </body>
-            </html>`;   
+            </script>
+        </body>
+        </html>`;
         res.status(200).send(htmlContent);
     }
+    
 }
