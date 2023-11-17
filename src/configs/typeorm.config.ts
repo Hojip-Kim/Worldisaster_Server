@@ -5,7 +5,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     port: 5432,
     username: 'postgres',
     password: 'postdbwjd',
-    database: 'video',
+    database: 'worldisaster-test-db',
     entities: [__dirname + '/../**/*.entity.{js,ts}'],
     synchronize: true,
     ssl:{
