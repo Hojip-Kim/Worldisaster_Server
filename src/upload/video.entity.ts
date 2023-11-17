@@ -1,0 +1,11 @@
+import { BaseEntity, Column, PrimaryGeneratedColumn } from "typeorm"
+export class Video extends BaseEntity {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @Column()
+    video_url: string;
+
+    @Column()
+    video_name: string;
+}
