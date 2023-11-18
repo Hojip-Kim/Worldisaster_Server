@@ -21,7 +21,7 @@ export class DisastersController {
     }
 
     /* disaster/archive */
-    @Get('archive/detail')
+    @Get('archive')
     async getDisastersArchiveDetail(): Promise<DisastersDetailEntity[]> {
         console.log('API : GET call made to fetch all disasters detail');
         return await this.disastersService.getAllDisasters();
