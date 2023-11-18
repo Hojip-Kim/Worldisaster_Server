@@ -29,6 +29,25 @@ export class DisastersService {
         return this.disasterDetailRepository.createQueryBuilder('disaster').getMany();
     }
 
+    /* 같은 Country끼리 묶는 service */
+    async getDisastersByCountry(country: string): Promise<DisastersDetailEntity[]> {
+        return this.disasterDetailRepository
+        .createQueryBuilder('disaster')
+        .where('disaster.dCountry = :country', { country })
+        .getMany();
+    }
+
+    /* 같은 Country 이면서 같은 연도끼리 묶는 service */
+    async getDisastersByCountryAndYear(country: string, year: string): Promise<DisastersDetailEntity[]> {
+        return this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('disaster.dCountry = :country', { country })
+            .andWhere('SUBSTRING(disaster.dDate, 1, 4) = :year', { year })
+            .getMany();
+    }
+    
+    
+    
     /* 여기서부터는 주기적으로 데이터를 갱신해주는 역할 */
 
     async fetchAndCompareCount(): Promise<{ success: boolean, message: string }> {

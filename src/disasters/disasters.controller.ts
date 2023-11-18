@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { DisastersService } from './disasters.service';
 import { DisastersDetailEntity } from './disasters-detail.entity';
 
@@ -21,9 +21,19 @@ export class DisastersController {
     }
 
     /* disaster/archive */
-    @Get('archive')
-    async getDisastersArchive(): Promise<DisastersDetailEntity[]> {
-        console.log('API : GET call made to fetch all disasters');
+    @Get('archive/detail')
+    async getDisastersArchiveDetail(): Promise<DisastersDetailEntity[]> {
+        console.log('API : GET call made to fetch all disasters detail');
         return await this.disastersService.getAllDisasters();
+    }
+
+    @Get('archive/:Country')
+    async getDisastersArchiveByCountry(@Param('Country') country: string): Promise<DisastersDetailEntity[]> {
+        return this.disastersService.getDisastersByCountry(country);
+    }
+
+    @Get('archive/:Country/:year')
+    async getDisastersArchiveByCountryAndYear(@Param('Country') country: string, @Param('year') year: string): Promise<DisastersDetailEntity[]> {
+        return this.disastersService.getDisastersByCountryAndYear(country, year);
     }
 }
