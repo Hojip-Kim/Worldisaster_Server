@@ -19,4 +19,11 @@ export class DisastersController {
         console.log('API : GET call made to force refresh disasters DB (Debug)');
         return await this.disastersService.fetchAndCompareCount();
     }
+
+    /* disaster/archive */
+    @Get('archive')
+    async getDisastersArchive(): Promise<DisastersDetailEntity[]> {
+        console.log('API : GET call made to fetch all disasters');
+        return await this.disastersService.getAllDisasters();
+    }
 }
