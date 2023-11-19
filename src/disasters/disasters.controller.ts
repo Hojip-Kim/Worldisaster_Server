@@ -32,7 +32,6 @@ export class DisastersController {
     @Get('archive/:countryName/:year')
     async getDisastersArchiveByCountryAndYear(@Param('countryName') countryName: string, @Param('year') year: string): Promise<DisastersDetailEntity[]> {
         console.log('API : GET call made to fetch all disasters by country and year')
-        // countryName = decodeURIComponent(countryName);
         return this.disastersService.getDisastersByCountryAndYear(countryName, year);
     }
 }
