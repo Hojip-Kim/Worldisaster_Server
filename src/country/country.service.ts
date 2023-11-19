@@ -105,16 +105,6 @@ export class CountryService {
         } // 기본적으로 ciaName을 사용하되, 없으면 rwName을 사용해보는 구조
     }
 
-    // private async fetchWithBackupName(code, continent: string, rw_name: string): Promise<void> {
-    //     const backupApiUrl = this.constructApiUrl(continent, rw_name);
-    //     try {
-    //         const response = await firstValueFrom(this.httpService.get(backupApiUrl));
-    //         await this.processAndSaveCountryData(code, rw_name, response.data);
-    //     } catch (error) {
-    //         this.logger.error(`Error fetching data with backup name ${rw_name}: ${error}`);
-    //     }
-    // }
-
     private constructApiUrl(continent: string, countryName: string): string {
         return `https://raw.githubusercontent.com/factbook/factbook.json/master/${continent}/${countryName}.json`;
     }
