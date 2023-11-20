@@ -22,14 +22,14 @@ export class CountryController {
 
     /* country/profile */
 
-    @Get('profile/:countryCode')
-    async getCountryProfileByCode(@Param('countryCode') countryCode: string) {
-        return await this.countryService.getCountryByCode(countryCode);
-    }
+    @Get('/:country')
+    async getCountryProfileByCode(@Param('country') country: string) {
+        console.log('API : GET call made to fetch country profile');
 
-    @Get('profile/:countryName')
-    async getCountryProfileByName(@Param('countryName') countryName: string) {
-        // countryName = decodeURIComponent(countryName);
-        return await this.countryService.getCountryByName(countryName);
+        if (country.length == 2) {
+            return await this.countryService.getCountryByCode(country);
+        } else {
+            return await this.countryService.getCountryByName(country);
+        }
     }
 }
