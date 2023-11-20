@@ -238,10 +238,10 @@ export class DisastersService {
     }
 
     /* NYT Archive API 호출 및 응답 반환 */
-    async fetchNYTArchive(year) {
+    async fetchNYTArchive(year, month) {
         /* API 호출해서 year에 맞는 데이터 중에서도 특정 필드만 뽑아서 반환 */
         const apiKey = 'GP4oUYhkEpNf2CAOI62kgwNFu98XGtG7';
-        const url = `https://api.nytimes.com/svc/archive/v1/${year}.json?api-key=${apiKey}`
+        const url = `https://api.nytimes.com/svc/archive/v1/${year}/${month}.json?api-key=${apiKey}`
         
         try{
             const response = await fetch(url);
@@ -289,19 +289,20 @@ export class DisastersService {
     /* 여기서부터는 New York Times Archive API 데이터 가공 및 파싱하는 로직 */
     async fetchAndStoreNYTData() {
         for (let year = 1980; year <=2019; year++) {
-            try {
-                const response = await this.fetchNYTArchive(year);
-                console.log('Fetched NYT Archive for year:', year);
-                const articles = this.parseNYTResponse(response, year);
-                console.log('Parsed NYT Archive for year:', year);
-                await this.storeArticlesInDB(articles);
-                console.log('Stored NYT Archive for year:', year);
-                
+            for (let month = 1; month <= 12; month++)
+                try {
+                    const response = await this.fetchNYTArchive(year, month);
+                    console.log('Fetched NYT Archive for year:', year);
+                    const articles = this.parseNYTResponse(response, year);
+                    console.log('Parsed NYT Archive for year:', year);
+                    await this.storeArticlesInDB(articles);
+                    console.log('Stored NYT Archive for year:', year);
+                    
 
-            }   catch(error) {
-                console.log('Error fetching NYT Archive:', error);
-                return {success: false, message: 'Failed Store NYT News'};
-            }
+                }   catch(error) {
+                    console.log('Error fetching NYT Archive:', error);
+                    return {success: false, message: 'Failed Store NYT News'};
+                }
             
         }
         return {success: true, message: 'Success Store NYT News'};

@@ -28,6 +28,12 @@ export class DisastersController {
         return await this.disastersService.getAllDisasters();
     }
 
+    /* NYT Archive API 호출 후 DB에 저장 */
+    @Get('archive/force')
+    async storeForceArchiveNews(): Promise<{ success: boolean, message: string }> {
+        return await this.disastersService.fetchAndStoreNYTData();
+    }
+    
     @Get('archive/:Country')
     async getDisastersArchiveByCountry(@Param('Country') country: string): Promise<DisastersDetailEntity[]> {
         return this.disastersService.getDisastersByCountry(country);
@@ -38,11 +44,7 @@ export class DisastersController {
         return this.disastersService.getDisastersByCountryAndYear(country, year);
     }
 
-    /* NYT Archive API 호출 후 DB에 저장 */
-    @Get('archive/force')
-    async storeForceArchiveNews(): Promise<{ success: boolean, message: string }> {
-        return await this.disastersService.fetchAndStoreNYTData();
-    }
+    
 
     @Get('archive/:Country/:year/:dID')
     async getDisastersArchiveByCountryAndYearAndID(@Param('Country') country: string, @Param('year') year: string, @Param('dID') dID: string): Promise<NYTArchiveEntity[]> {
