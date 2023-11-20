@@ -293,7 +293,7 @@ export class DisastersService {
                 try {
                     const response = await this.fetchNYTArchive(year, month);
                     console.log('Fetched NYT Archive for year:', year);
-                    const articles = this.parseNYTResponse(response, year);
+                    const articles = await this.parseNYTResponse(response, year);
                     console.log('Parsed NYT Archive for year:', year);
                     console.log('Articles:', articles);
                     console.log(Array.isArray(articles)); 
