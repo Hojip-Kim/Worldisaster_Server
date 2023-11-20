@@ -235,11 +235,17 @@ const populateTable = async () => {
             }
         }
 
-        // Handle edge cases
+        // Handle edge cases (ignore them)
         for (const [rwName, placeholderCode] of Object.entries(rw_edge_cases)) {
             const insertEdgeCaseQuery = 'INSERT INTO country_mappings (code, rw_name) VALUES ($1, $2) ON CONFLICT (code) DO NOTHING';
             await client.query(insertEdgeCaseQuery, [placeholderCode, rwName]);
         }
+
+        // Handle edge cases (Insert into parent country)
+        // for (const [edge_name, edge_code] of Object.entries(rw_edge_cases)) {
+        //     const updateEdgeCaseQuery = 'UPDATE country_mappings SET other_name = $1 WHERE code = $2';
+        //     await client.query(updateEdgeCaseQuery, [edge_name, edge_code]);
+        // }
 
         console.log('Table populated successfully');
     } catch (error) {
