@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { CountryMappings } from 'src/country/script_init/country-table.entity';
 import { DisastersList } from './disasters-list.entity';
 import { DisastersDetailEntity } from './disasters-detail.entity';
 
@@ -17,6 +18,8 @@ export class DisastersService {
 
     constructor(
         private httpService: HttpService, // HTTP 요청 라이브러리를 가져오고
+        @InjectRepository(CountryMappings) // CountryMappings 테이블도 불러오고
+        private countryMappingRepository: Repository<CountryMappings>,
         @InjectRepository(DisastersList) // 재난 목록 Entity의 리포지토리를 가져오고
         private disasterListRepository: Repository<DisastersList>,
         @InjectRepository(DisastersDetailEntity)
@@ -31,7 +34,15 @@ export class DisastersService {
     }
 
     // 국가 단위의 Disaster들을 호출하기
-    async getDisastersByCountry(country: string): Promise<DisastersDetailEntity[]> {
+
+    async getDisastersByCountryCode(countryCode: string): Promise<DisastersDetailEntity[]> {
+        return this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('disaster.dCountryCode = :countryCode', { countryCode })
+            .getMany();
+    }
+
+    async getDisastersByCountryName(country: string): Promise<DisastersDetailEntity[]> {
         return this.disasterDetailRepository
             .createQueryBuilder('disaster')
             .where('disaster.dCountry = :country', { country })
@@ -39,7 +50,16 @@ export class DisastersService {
     }
 
     // 같은 국가 내에서 특정 연도에 발생한 Disaster들을 호출하기
-    async getDisastersByCountryAndYear(country: string, year: string): Promise<DisastersDetailEntity[]> {
+
+    async getDisastersByCountryCodeAndYear(countryCode: string, year: string): Promise<DisastersDetailEntity[]> {
+        return this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('disaster.dCountryCode = :countryCode', { countryCode })
+            .andWhere('SUBSTRING(disaster.dDate, 1, 4) = :year', { year })
+            .getMany();
+    }
+
+    async getDisastersByCountryNameAndYear(country: string, year: string): Promise<DisastersDetailEntity[]> {
         return this.disasterDetailRepository
             .createQueryBuilder('disaster')
             .where('disaster.dCountry = :country', { country })
@@ -172,11 +192,22 @@ export class DisastersService {
                 }
                 const fields = responseData.fields;
 
+                // 해당 국가를 찾아서 코드를 넣어두기 (entity 연결시 maintenance가 더 복잡해짐 (cc. regular queries))
+                const countryEntity = await this.countryMappingRepository.findOne({
+                    where: [
+                        { cia_name: fields.primary_country.name },
+                        { rw_name: fields.primary_country.name },
+                        { other_name: fields.primary_country.name }
+                    ]
+                });
+                const countryEntityCode = countryEntity.code;
+
                 // 개별 엔티티 생성
                 const detail = new DisastersDetailEntity();
                 detail.dID = fields.id;
                 detail.dStatus = fields.status;
                 detail.dCountry = fields.primary_country.name;
+                detail.dCountryCode = countryEntityCode;
                 detail.dType = fields.primary_type.name;
 
                 // dateTtime 형식에서 T를 사용해서 date만 뽑아오기
@@ -201,13 +232,6 @@ export class DisastersService {
                 }) : null;
 
                 detail.dUrl = fields.url;
-
-                // 프론트를 위한 항목 (to_display로 요소 제어)
-                if (detail.dLatitude !== null || detail.dLatitude !== null || detail.dCountry == 'World') {
-                    detail.to_display = true;
-                } else {
-                    detail.to_display = false;
-                }
 
                 return this.disasterDetailRepository.save(detail);
 

@@ -50,6 +50,11 @@ export class CountryService {
             found = await this.countryRepository.findOneBy({ cCountry_rw: countryName });
         }
 
+        // 없다면 other_name도 탐색
+        if (!found) {
+            found = await this.countryRepository.findOneBy({ cCountry_other: countryName });
+        }
+
         // 끝까지 못찾으면 에러 반환
         if (!found) {
             throw new NotFoundException(`Can't find country with name ${countryName}`);
@@ -84,7 +89,7 @@ export class CountryService {
     // (2) 위에서 For문을 통해 각 Country Code 엔트리마다 작업 수행
     private async fetchAndUpdateCountryProfile(mapping: CountryMappings): Promise<void> {
 
-        const { code, continent, cia_name, rw_name } = mapping;
+        const { code, continent, cia_name, rw_name, other_name } = mapping;
 
         // Helper 함수를 통해서 api URL 생성
         const apiUrl = this.constructApiUrl(continent, code);
@@ -96,7 +101,7 @@ export class CountryService {
             const response = await firstValueFrom(this.httpService.get(apiUrl));
 
             // Helper 함수를 통해서 데이터 파싱 및 저장
-            await this.processAndSaveCountryData(code, cia_name, rw_name, response.data);
+            await this.processAndSaveCountryData(code, cia_name, rw_name, other_name, response.data);
 
         } catch (error) {
 
@@ -110,7 +115,7 @@ export class CountryService {
     }
 
     // (3) 각 countryTable 엔트리마다 조회 결과를 포맷해서 테이블에 저장
-    private async processAndSaveCountryData(countryCode: string, cia_name: string, rw_name: string, countryData: any): Promise<void> {
+    private async processAndSaveCountryData(countryCode: string, cia_name: string, rw_name: string, other_name: string, countryData: any): Promise<void> {
 
         // 인자로 전달받은 국가 이름에 맞는 Entry를 삭제
         const del_result = await this.countryRepository.delete({ cCountry: cia_name });
@@ -123,6 +128,7 @@ export class CountryService {
         profile.cCode = countryCode;
         profile.cCountry = cia_name;
         profile.cCountry_rw = rw_name ?? null;
+        profile.cCountry_other = other_name ?? null;
         profile.cContinent = countryData.Geography['Map references']?.text ?? null; // "Map references"
         profile.cTimeDifference = countryData.Government?.Capital?.['time difference']?.text ?? null; // "Government" - "Capital" - "time difference"
 

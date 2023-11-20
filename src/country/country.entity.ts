@@ -17,6 +17,9 @@ export class CountryEntity {
     @Column({ nullable: true })
     cCountry_rw: string;
 
+    @Column({ nullable: true })
+    cCountry_other: string;
+
     @Column()
     cContinent: string; // "Map references"
 
