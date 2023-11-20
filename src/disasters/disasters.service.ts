@@ -291,8 +291,11 @@ export class DisastersService {
         for (let year = 1980; year <=2019; year++) {
             try {
                 const response = await this.fetchNYTArchive(year);
+                console.log('Fetched NYT Archive for year:', year);
                 const articles = this.parseNYTResponse(response, year);
+                console.log('Parsed NYT Archive for year:', year);
                 await this.storeArticlesInDB(articles);
+                console.log('Stored NYT Archive for year:', year);
                 
 
             }   catch(error) {
