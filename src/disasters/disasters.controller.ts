@@ -39,8 +39,8 @@ export class DisastersController {
     }
 
     /* NYT Archive API 호출 후 DB에 저장 */
-    @Get('archive/:Country/:year/force')
-    async storeForceArchiveNews(@Param('Country') country: string, @Param('year') year: string): Promise<{ success: boolean, message: string }> {
+    @Get('archive/force')
+    async storeForceArchiveNews(): Promise<{ success: boolean, message: string }> {
         return await this.disastersService.fetchAndStoreNYTData();
     }
 
