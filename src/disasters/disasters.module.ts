@@ -6,12 +6,14 @@ import { DisastersController } from './disasters.controller';
 import { DisastersList } from './disasters-list.entity';
 import { DisastersDetailEntity } from './disasters-detail.entity';
 import { Type } from 'class-transformer';
+import { NYTArchiveEntity } from './archive_news.entity';
 
 @Module({
   imports: [
     HttpModule,
     TypeOrmModule.forFeature([DisastersList]),
     TypeOrmModule.forFeature([DisastersDetailEntity]),
+    TypeOrmModule.forFeature([NYTArchiveEntity])
   ],
   providers: [DisastersService],
   controllers: [DisastersController]
