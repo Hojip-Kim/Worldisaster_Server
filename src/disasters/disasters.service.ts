@@ -295,6 +295,7 @@ export class DisastersService {
                     const articles = this.parseNYTResponse(response, year);
                     console.log('Parsed NYT Archive for year:', year);
                     console.log('Articles:', articles);
+                    console.log(Array.isArray(articles)); 
                     await this.storeArticlesInDB(articles);
                     console.log('Stored NYT Archive for year:', year);
                     
