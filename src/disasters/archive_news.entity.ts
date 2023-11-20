@@ -8,7 +8,7 @@ export class NYTArchiveEntity {
     @Column()
     web_url: string;
 
-    @Column()
+    @Column({nullable: true})
     snippet: string;
 
     @Column()
@@ -23,10 +23,10 @@ export class NYTArchiveEntity {
     @Column()
     year: string;
 
-    @Column()
+    @Column({nullable: true})
     document_type: string;
 
-    @Column()
+    @Column({nullable: true})
     section_name: string;
 
     @Column()
