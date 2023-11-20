@@ -1,6 +1,7 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { DisastersService } from './disasters.service';
 import { DisastersDetailEntity } from './disasters-detail.entity';
+import { NYTArchiveEntity } from './archive_news.entity';
 
 @Controller('disasters')
 export class DisastersController {
@@ -35,5 +36,26 @@ export class DisastersController {
     @Get('archive/:Country/:year')
     async getDisastersArchiveByCountryAndYear(@Param('Country') country: string, @Param('year') year: string): Promise<DisastersDetailEntity[]> {
         return this.disastersService.getDisastersByCountryAndYear(country, year);
+    }
+
+    /* NYT Archive API 호출 후 DB에 저장 */
+    @Get('archive/:Country/:year/force')
+    async storeForceArchiveNews(@Param('Country') country: string, @Param('year') year: string): Promise<{ success: boolean, message: string }> {
+        return await this.disastersService.fetchAndStoreNYTData();
+    }
+
+    @Get('archive/:Country/:year/:dID')
+    async getDisastersArchiveByCountryAndYearAndID(@Param('Country') country: string, @Param('year') year: string, @Param('dID') dID: string): Promise<NYTArchiveEntity[]> {
+        /* dID로 재난 타입 가져와서 변수에 저장 */
+        const disasterTable = await this.disastersService.getDisastersTypeBydID(dID);
+        const dType = disasterTable.dType;
+        return this.disastersService.getNewsByID(dID);
+        /* 저장한 재난 타입 및 country, year를 뉴스 기사 필터링하는 함수에 인자로 넣기*/
+        // return this.disastersService.getDisastersByCountryAndYearAndTypeAndID(country, year, dType, dID);
+        /* 필터링 된 뉴스 기사는 해당 재난과 dID로 연결되어있기 떄문에, dID로 뉴스기사를 조회 */
+
+        /* 조회된 뉴스기사들을 return */
+        
+        // return this.disastersService.getDisastersByCountryAndYear(country, year);
     }
 }

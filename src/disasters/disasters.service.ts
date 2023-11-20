@@ -1,14 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, getRepository } from 'typeorm';
 
 import { DisastersList } from './disasters-list.entity';
 import { DisastersDetailEntity } from './disasters-detail.entity';
+
+import { NYTArchiveEntity } from './archive_news.entity';
 
 import { HttpService } from '@nestjs/axios'; // HTTP 요청 라이브러리
 import * as sanitizeHtml from 'sanitize-html'; // HTTP 태그 정리 라이브러리
 import { Cron, CronExpression } from '@nestjs/schedule'; // 스케쥴링 라이브러리
 import { firstValueFrom } from 'rxjs'; // 첫 요청을 promise로 돌려줌
+import { parse } from 'path';
 
 // 새로운 재난이 발생하면 Push 해주는 웹소켓 등이 없으니, 주기적으로 리스트 확인이 필요함
 @Injectable()
@@ -21,6 +24,8 @@ export class DisastersService {
         private disasterListRepository: Repository<DisastersList>,
         @InjectRepository(DisastersDetailEntity)
         private disasterDetailRepository: Repository<DisastersDetailEntity>,
+        @InjectRepository(NYTArchiveEntity)
+        private nytArchiveRepository: Repository<NYTArchiveEntity>,
     ) { }
 
     /* 여기서부터는 API에 대응하는 Service */
@@ -45,7 +50,6 @@ export class DisastersService {
             .andWhere('SUBSTRING(disaster.dDate, 1, 4) = :year', { year })
             .getMany();
     }
-    
     
     
     /* 여기서부터는 주기적으로 데이터를 갱신해주는 역할 */
@@ -231,5 +235,128 @@ export class DisastersService {
     async handleCron() {
         console.log("\n@ Disaster Auto Update Started - Regular 1-minute API Request made to fetch Disasters");
         await this.fetchAndCompareCount();
+    }
+
+    /* NYT Archive API 호출 및 응답 반환 */
+    async fetchNYTArchive(year) {
+        /* API 호출해서 year에 맞는 데이터 중에서도 특정 필드만 뽑아서 반환 */
+        const apiKey = 'GP4oUYhkEpNf2CAOI62kgwNFu98XGtG7';
+        const url = `https://api.nytimes.com/svc/archive/v1/${year}.json`
+        
+        try{
+            const response = await fetch(url);
+            if(!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch(error) {
+            console.log('Error fetching NYT Archive:', error);
+            throw error;    //오류를 다시 발생시켜 호출한 함수에 알린다
+        }   
+    }
+
+    async parseNYTResponse(response, year) {
+        // NYT 응답에서 'docs' 배열 추출
+        const articles = response.response.docs;
+
+        // 각 기사를 NYTArchiveEntity 형식으로 변환
+        return articles.map(article => {
+            return {
+                web_url : article.web_url,
+                snippet : article.snippet,
+                headline_main : article.headline.main,
+                keywords_name : article.keywords.map(keyword => keyword.name).join(', '),
+                keywords_value : article.keywords.map(keyword => keyword.value).join(', '),
+                document_type: article.document_type,
+                section_name: article.section_name,
+                _id: article._id,
+                pub_year: year,
+            };
+        });
+    }
+
+    async storeArticlesInDB(articles) {
+        const repository = getRepository(NYTArchiveEntity);
+
+        for (const article of articles) {
+            const nytArchiveEntity = repository.create(article);
+
+            await repository.save(nytArchiveEntity);
+        }
+    }
+
+    /* 여기서부터는 New York Times Archive API 데이터 가공 및 파싱하는 로직 */
+    async fetchAndStoreNYTData() {
+        for (let year = 1980; year <=2019; year++) {
+            try {
+                const response = await this.fetchNYTArchive(year);
+                const articles = this.parseNYTResponse(response, year);
+                await this.storeArticlesInDB(articles);
+                
+
+            }   catch(error) {
+                console.log('Error fetching NYT Archive:', error);
+                return {success: false, message: 'Failed Store NYT News'};
+            }
+            
+        }
+        return {success: true, message: 'Success Store NYT News'};
+    }
+
+    /* dID를 통해 재난 타입 가져오는 코드*/
+    async getDisastersTypeBydID(dID: string): Promise<{ dType: string, country: string, year: string }> {
+        const getDisasterDetail =  await this.disasterDetailRepository
+        .createQueryBuilder('disaster')
+        .where('disaster.dID = :dID', { dID })
+        .getOne();
+
+        const year = getDisasterDetail.dDate.split('-')[0];
+        const country = getDisasterDetail.dCountry;
+        const dType = getDisasterDetail.dType;
+
+
+
+        // const articles = await this.getDisastersByCountryAndYearAndTypeAndID(country, year, dType, dID);
+
+        return {
+            dType: getDisasterDetail.dType,
+            country: getDisasterDetail.dCountry,
+            year: year,
+        };
+    }
+
+    /* dType, country, year을 통해 필터링 */
+    async getArticlesByCountryAndYearAndTypeAndID(country: string, year: string, dType: string, dID: string): Promise<NYTArchiveEntity[]> {
+        /* headline_main,keywords_name, keyword_value, snippet dType, country가 포함되어있는 기사들을 dID를 포함시켜 저장 */
+        /* API엔드포인트에서 year도 받아와서 pub_year가 year와 일치하는것까지 필터링 */
+        /* 모두 일치하면 API 엔드포인트에 있는 dID 를 외래키로 저장 */
+        const repository = getRepository(NYTArchiveEntity);
+
+        const articles = await repository
+            .createQueryBuilder('article')
+            .where('article.pub_year = :year', { year })
+            .andWhere('article.keywords_value LIKE :dType', { dType: `%${dType}%` })
+            .andWhere('article.keywords_value LIKE :country', { country: `%${country}%` })
+            .getMany();
+
+        for (let article of articles) {
+            article.dID = dID; // 각 기사에 dID 설정
+            await repository.save(article); // 갱신된 기사 저장
+        }
+        return articles;
+    }
+
+    async getNewsByID(dID: string): Promise<NYTArchiveEntity[]> {
+        const disasterTable = await this.getDisastersTypeBydID(dID);
+
+        const dType = disasterTable.dType;
+        const year = disasterTable.year;
+        const country = disasterTable.country;
+
+        const articles = await this.getArticlesByCountryAndYearAndTypeAndID(country, year, dType, dID);
+
+        return articles;
+
     }
 }
