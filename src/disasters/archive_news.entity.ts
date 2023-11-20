@@ -14,10 +14,10 @@ export class NYTArchiveEntity {
     @Column()
     headline_main: string;
 
-    @Column()
+    @Column({nullable: true})
     keywords_name: string;
 
-    @Column()
+    @Column({nullable: true})
     keywords_value: string;
 
     @Column()
