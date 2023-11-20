@@ -241,7 +241,7 @@ export class DisastersService {
     async fetchNYTArchive(year) {
         /* API 호출해서 year에 맞는 데이터 중에서도 특정 필드만 뽑아서 반환 */
         const apiKey = 'GP4oUYhkEpNf2CAOI62kgwNFu98XGtG7';
-        const url = `https://api.nytimes.com/svc/archive/v1/${year}.json`
+        const url = `https://api.nytimes.com/svc/archive/v1/${year}.json?api-key=${apiKey}`
         
         try{
             const response = await fetch(url);
