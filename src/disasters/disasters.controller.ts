@@ -14,7 +14,7 @@ export class DisastersController {
         return await this.disastersService.fetchAndCompareCount();
     }
 
-    /* disasters/archive (uuuj) */
+    /* Actual API Implementation */
 
     @Get('/')
     async getAllDetails(): Promise<DisastersDetailEntity[]> {
@@ -22,28 +22,25 @@ export class DisastersController {
         return await this.disastersService.getAllDisasters();
     }
 
-    @Get('code/:countryCode')
-    async getByCountryCode(@Param('countryCode') countryCode: string): Promise<DisastersDetailEntity[]> {
-        console.log('API : GET call made to fetch all disasters per country code');
-        return this.disastersService.getDisastersByCountryCode(countryCode);
+    @Get('/:country')
+    async getByCountry(@Param('country') country: string): Promise<DisastersDetailEntity[]> {
+        console.log('API : GET call made to fetch all disasters by country');
+
+        if (country.length == 2) {
+            return this.disastersService.getDisastersByCountryCode(country);
+        } else {
+            return this.disastersService.getDisastersByCountryName(country);
+        }
     }
 
-    @Get('code/:countryCode/:year')
-    async getByCountryCodeAndYear(@Param('countryCode') countryCode: string, @Param('year') year: string): Promise<DisastersDetailEntity[]> {
-        console.log('API : GET call made to fetch all disasters by country code and year')
-        return this.disastersService.getDisastersByCountryCodeAndYear(countryCode, year);
-    }
+    @Get('/:country/:year')
+    async getByCountryAndYear(@Param('country') country: string, @Param('year') year: string): Promise<DisastersDetailEntity[]> {
+        console.log('API : GET call made to fetch all disasters by country and year')
 
-    @Get('name/:countryName')
-    async getByCountryName(@Param('countryName') countryName: string): Promise<DisastersDetailEntity[]> {
-        console.log('API : GET call made to fetch all disasters per country name');
-        // countryName = decodeURIComponent(countryName);
-        return this.disastersService.getDisastersByCountryName(countryName);
-    }
-
-    @Get('name/:countryName/:year')
-    async getByCountryNameAndYear(@Param('countryName') countryName: string, @Param('year') year: string): Promise<DisastersDetailEntity[]> {
-        console.log('API : GET call made to fetch all disasters per country name and year')
-        return this.disastersService.getDisastersByCountryNameAndYear(countryName, year);
+        if (country.length == 2) {
+            return this.disastersService.getDisastersByCountryCodeAndYear(country, year);
+        } else {
+            return this.disastersService.getDisastersByCountryNameAndYear(country, year);
+        }
     }
 }
