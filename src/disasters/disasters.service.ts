@@ -294,6 +294,7 @@ export class DisastersService {
                     console.log('Fetched NYT Archive for year:', year);
                     const articles = this.parseNYTResponse(response, year);
                     console.log('Parsed NYT Archive for year:', year);
+                    console.log('Articles:', articles);
                     await this.storeArticlesInDB(articles);
                     console.log('Stored NYT Archive for year:', year);
                     
@@ -334,9 +335,8 @@ export class DisastersService {
         /* headline_main,keywords_name, keyword_value, snippet dType, country가 포함되어있는 기사들을 dID를 포함시켜 저장 */
         /* API엔드포인트에서 year도 받아와서 pub_year가 year와 일치하는것까지 필터링 */
         /* 모두 일치하면 API 엔드포인트에 있는 dID 를 외래키로 저장 */
-        const repository = getRepository(NYTArchiveEntity);
 
-        const articles = await repository
+        const articles = await this.nytArchiveRepository
             .createQueryBuilder('article')
             .where('article.pub_year = :year', { year })
             .andWhere('article.keywords_value LIKE :dType', { dType: `%${dType}%` })
@@ -345,7 +345,7 @@ export class DisastersService {
 
         for (let article of articles) {
             article.dID = dID; // 각 기사에 dID 설정
-            await repository.save(article); // 갱신된 기사 저장
+            await this.nytArchiveRepository.save(article); // 갱신된 기사 저장
         }
         return articles;
     }
