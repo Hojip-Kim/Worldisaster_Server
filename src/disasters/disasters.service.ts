@@ -277,12 +277,11 @@ export class DisastersService {
     }
 
     async storeArticlesInDB(articles) {
-        const repository = getRepository(NYTArchiveEntity);
-
+        
         for (const article of articles) {
-            const nytArchiveEntity = repository.create(article);
+            const nytArchiveEntity = this.nytArchiveRepository.create(article);
 
-            await repository.save(nytArchiveEntity);
+            await this.nytArchiveRepository.save(nytArchiveEntity);
         }
     }
 
