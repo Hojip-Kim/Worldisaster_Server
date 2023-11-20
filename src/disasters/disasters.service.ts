@@ -272,7 +272,7 @@ export class DisastersService {
                 document_type: article.document_type,
                 section_name: article.section_name,
                 _id: article._id,
-                pub_year: year,
+                year: year,
             };
         });
     }
