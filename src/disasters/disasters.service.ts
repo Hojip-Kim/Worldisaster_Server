@@ -321,13 +321,13 @@ export class DisastersService {
                         continue;
                     }
                     const response = await this.fetchNYTArchive(year, month);
-                    console.log('Fetched NYT Archive for year:', year);
+                    console.log(`Fetched NYT Archive for year: ${year} month: ${month}`);
                     const articles = await this.parseNYTResponse(response, year);
-                    console.log('Parsed NYT Archive for year:', year);
+                    console.log(`Parsed NYT Archive for year: ${year} month: ${month}`);
                     // console.log('Articles:', articles);
                     // console.log(Array.isArray(articles)); 
                     await this.storeArticlesInDB(articles, month);
-                    console.log('Stored NYT Archive for year:', year);
+                    console.log(`Stored NYT Archive for year: ${year} month: ${month}`);
                     
 
                 }   catch(error) {
