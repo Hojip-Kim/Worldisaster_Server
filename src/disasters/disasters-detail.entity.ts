@@ -17,7 +17,7 @@ export class DisastersDetailEntity {
 
     @Column()
     dCountry: string;
-
+    
     @Column()
     dType: string;
 
