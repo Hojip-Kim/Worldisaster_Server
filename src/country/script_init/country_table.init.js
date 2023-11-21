@@ -182,11 +182,14 @@ const rw_edge_cases = {
 };
 
 const pool = new Pool({
-    user: 'namamu',
-    host: 'localhost',
-    database: 'db_localhost',
-    password: 'wjdrmf12#$',
+    user: 'postgres',
+    host: 'worldisaster-rds.c8vecnz23gk6.ap-northeast-2.rds.amazonaws.com',
     port: 5432,
+    password: 'postdbwjd',
+    database: 'worldisaster-test-db',
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 const createTable = async () => {
