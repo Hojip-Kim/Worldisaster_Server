@@ -50,6 +50,22 @@ export class DisastersService {
             .andWhere('SUBSTRING(disaster.dDate, 1, 4) = :year', { year })
             .getMany();
     }
+
+    //Status가 ongoing인 Disaster들을 호출하기
+    async getDisastersByStatusOngoing(): Promise<DisastersDetailEntity[]> {
+        return this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('disaster.dStatus = :status', { status: 'ongoing' })
+            .getMany();
+    }
+
+    //Status가 past인 Disaster들을 호출하기
+    async getDisastersByStatusPast(): Promise<DisastersDetailEntity[]> {
+        return this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('disaster.dStatus = :status', { status: 'past' })
+            .getMany();
+    }
     
     
     /* 여기서부터는 주기적으로 데이터를 갱신해주는 역할 */

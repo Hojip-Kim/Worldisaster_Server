@@ -60,4 +60,18 @@ export class DisastersController {
         
         // return this.disastersService.getDisastersByCountryAndYear(country, year);
     }
+
+    @Get('/live')
+    async getByStatusOngoing(): Promise<DisastersDetailEntity[]> {
+        console.log('API : GET call made to fetch all disasters by status (ongoing)');
+
+        return this.disastersService.getDisastersByStatusOngoing();
+    }
+
+    @Get('/archive')
+    async getByStatusPast(): Promise<DisastersDetailEntity[]> {
+        console.log('API : GET call made to fetch all disasters by status (past)');
+
+        return this.disastersService.getDisastersByStatusPast();
+    }
 }
