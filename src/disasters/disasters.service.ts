@@ -49,6 +49,22 @@ export class DisastersService {
             .getMany();
     }
 
+    //Status가 ongoing인 Disaster들을 호출하기
+    async getDisastersByStatusOngoing(): Promise<DisastersDetailEntity[]> {
+        return this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('disaster.dStatus = :status', { status: 'ongoing' })
+            .getMany();
+    }
+
+    //Status가 past인 Disaster들을 호출하기
+    async getDisastersByStatusPast(): Promise<DisastersDetailEntity[]> {
+        return this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('disaster.dStatus = :status', { status: 'past' })
+            .getMany();
+    }
+
     // 같은 국가 내에서 특정 연도에 발생한 Disaster들을 호출하기
 
     async getDisastersByCountryCodeAndYear(countryCode: string, year: string): Promise<DisastersDetailEntity[]> {
