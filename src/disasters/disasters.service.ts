@@ -77,6 +77,8 @@ export class DisastersService {
 
     async getDisastersByCountryNameAndType(country: string, dType: string): Promise<DisastersDetailEntity[]> {
         dType = dType.trim();
+        console.log('dType:', dType);
+        console.log('country:', country);
         return this.disasterDetailRepository
             .createQueryBuilder('disaster')
             .where('disaster.dCountry = :country', { country })
