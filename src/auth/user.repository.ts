@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { AuthCredentialsDto } from './dto/auth-credential.dto';
 import * as bcrypt from 'bcryptjs';
+import { GoogleUser } from './dto/googleUser.dto';
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -29,6 +30,34 @@ export class UserRepository extends Repository<User> {
                 throw new InternalServerErrorException();
             }
         }
+        return user;
+    }
+
+    async createGoogleUser(googleUser: GoogleUser): Promise<GoogleUser> {
+        const { provider, providerId, email, name } = googleUser;
+
+        let user = await this.findOneBy({ providerId });
+
+        if (!user) {
+            user = this.create({ 
+                provider, 
+                providerId, 
+                email, 
+                name,
+                // 여기서 추가적인 필드 설정이 필요할 수 있습니다.
+            });
+
+            try {
+                await this.save(user);
+            } catch (error) {
+                if (error.code === '23505') {
+                    throw new ConflictException('Existing user with this provider ID');
+                } else {
+                    throw new InternalServerErrorException();
+                }
+            }
+        }
+
         return user;
     }
 }

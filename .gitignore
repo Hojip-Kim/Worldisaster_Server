@@ -4,6 +4,7 @@
 
 #Preferences
 .env
+./src/configs/
 
 # Logs
 logs

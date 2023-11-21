@@ -7,20 +7,25 @@ import { UserRepository } from './user.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
+import { ConfigService } from '@nestjs/config';
+import { GoogleStrategy } from './Google/google.strategy';
 
 @Module({
     imports: [
         PassportModule.register({ defaultStrategy: 'jwt'}),
-        JwtModule.register({
-            secret: 'Secret1234',
-            signOptions: {
-                expiresIn: 60*60, // 한시간
-            }
+        JwtModule.registerAsync({
+            useFactory: (configService: ConfigService) => ({
+                secret: configService.get('JWT_SECRET'),
+                signOptions: {
+                    expiresIn: 60 * 60,
+                },
+            }),
+            inject: [ConfigService]
         }),
         TypeOrmModule.forFeature([User])
     ],
   controllers: [AuthController],
-  providers: [AuthService, UserRepository, JwtStrategy],
+  providers: [AuthService, UserRepository, JwtStrategy, GoogleStrategy],
   exports: [UserRepository, JwtStrategy, PassportModule]
 })
 export class AuthModule {}

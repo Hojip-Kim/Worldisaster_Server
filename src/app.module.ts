@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from './configs/typeorm.config';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { DonateModule } from './donate/donate.module';
 
 
 @Module({
@@ -11,6 +12,6 @@ import { ConfigModule } from '@nestjs/config';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot(typeORMConfig),
-  AuthModule],
+  AuthModule, DonateModule],
 })
 export class AppModule {}
