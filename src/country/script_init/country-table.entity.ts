@@ -1,7 +1,7 @@
 // src/country-mapping.entity.ts
 import { Entity, PrimaryColumn, Column } from 'typeorm';
 
-@Entity('country_mappings')
+@Entity('country_mappings', { synchronize: false })
 export class CountryMappings {
 
     @PrimaryColumn()

@@ -14,21 +14,22 @@ export class CountryController {
         return await this.countryService.getAllCountries();
     }
 
-    @Get('force')
+    @Get('forceSync')
     async debug_force_refresh(): Promise<{ success: boolean, message: string }> {
         console.log('API : GET call made to force refresh country DB (Debug)');
         return await this.countryService.updateCountryProfiles();
     }
 
-    /* Actual API */
+    /* country/profile */
 
-    @Get('code/:countryCode')
-    async getCountryProfileByCode(@Param('countryCode') countryCode: string) {
-        return await this.countryService.getCountryByCode(countryCode);
-    }
+    @Get('/:country')
+    async getCountryProfileByCode(@Param('country') country: string) {
+        console.log('API : GET call made to fetch country profile');
 
-    @Get('/name/:countryName')
-    async getCountryProfileByName(@Param('countryName') countryName: string) {
-        return await this.countryService.getCountryByName(countryName);
+        if (country.length == 2) {
+            return await this.countryService.getCountryByCode(country);
+        } else {
+            return await this.countryService.getCountryByName(country);
+        }
     }
 }

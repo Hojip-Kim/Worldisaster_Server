@@ -88,33 +88,34 @@ const name_to_code = {
     "Pacific Ocean": "zn",
     "Southern Ocean": "oo",
     // Plus additions after finding errors (edge-cases of mistmatching names between the EU and the CIA)
-    "the Republic of North Macedonia": "mk",
-    "United Republic of Tanzania": "tz",
-    "Syrian Arab Republic": "sy",
-    "Viet Nam": "vm",
-    "Democratic Republic of the Congo": "cg",
-    "Côte d'Ivoire": "iv",
-    "Bolivia (Plurinational State of)": "bl",
+    "Aruba (The Netherlands)": "aa",
     "Bahamas": "bf",
+    "Bolivia (Plurinational State of)": "bl",
+    "Brunei Darussalam": "bx",
     "Cabo Verde": "cv",
-    "Russian Federation": "rs",
-    "Iran (Islamic Republic of)": "ir",
+    "China - Hong Kong (Special Administrative Region)": "hk",
+    "China - Taiwan Province": "tw",
+    "Côte d'Ivoire": "iv",
     "Democratic People's Republic of Korea": "kn",
-    "Venezuela (Bolivarian Republic of)": "ve",
-    "United States of America": "us",
+    "Democratic Republic of the Congo": "cg",
+    "French Polynesia (France)": "fp",
     "Gambia": "ga",
+    "Iran (Islamic Republic of)": "ir",
+    "Lao People's Democratic Republic (the)": "la",
+    "Micronesia (Federated States of)": "fm",
+    "Myanmar": "bm",
+    "New Caledonia (France)": "nc",
+    "Republic of Korea": "ks",
+    "Russian Federation": "rs",
+    "Syrian Arab Republic": "sy",
     "Türkiye": "tu",
     "United Kingdom of Great Britain and Northern Ireland": "uk",
-    "Micronesia (Federated States of)": "fm",
-    "Republic of Korea": "ks",
-    "New Caledonia (France)": "nc",
-    "Lao People's Democratic Republic (the)": "la",
-    "China - Taiwan Province": "tw",
-    "French Polynesia (France)": "fp",
-    "Aruba (The Netherlands)": "aa",
-    "Brunei Darussalam": "bx",
+    "United Republic of Tanzania": "tz",
+    "United States of America": "us",
+    "Venezuela (Bolivarian Republic of)": "ve",
+    "Viet Nam": "vm",
     "occupied Palestinian territory": "we",
-    "Myanmar": "bm"
+    "the Republic of North Macedonia": "mk",
     // (엣지케이스로 처리해야 할듯) No country code found for Madeira (Portugal)
     // (엣지케이스로 처리해야 할듯) No country code found for Martinique (France)
 };
@@ -176,19 +177,16 @@ const code_to_continent = {
 };
 
 const rw_edge_cases = {
-    "Madeira (Portugal)": "1_edge_case",
-    "Martinique (France)": "2_edge_case"
+    "Madeira (Portugal)": "po",
+    "Martinique (France)": "fr"
 };
 
 const pool = new Pool({
-    user: 'postgres',
-    host: 'worldisaster-rds.c8vecnz23gk6.ap-northeast-2.rds.amazonaws.com',
+    user: 'namamu',
+    host: 'localhost',
+    database: 'db_localhost',
+    password: 'wjdrmf12#$',
     port: 5432,
-    password: 'postdbwjd',
-    database: 'worldisaster-test-db',
-    ssl: {
-        rejectUnauthorized: false
-    }
 });
 
 const createTable = async () => {
@@ -238,10 +236,16 @@ const populateTable = async () => {
             }
         }
 
-        // Handle edge cases
-        for (const [rwName, placeholderCode] of Object.entries(rw_edge_cases)) {
-            const insertEdgeCaseQuery = 'INSERT INTO country_mappings (code, rw_name) VALUES ($1, $2) ON CONFLICT (code) DO NOTHING';
-            await client.query(insertEdgeCaseQuery, [placeholderCode, rwName]);
+        // Handle edge cases (ignore them)
+        // for (const [rwName, placeholderCode] of Object.entries(rw_edge_cases)) {
+        //     const insertEdgeCaseQuery = 'INSERT INTO country_mappings (code, rw_name) VALUES ($1, $2) ON CONFLICT (code) DO NOTHING';
+        //     await client.query(insertEdgeCaseQuery, [placeholderCode, rwName]);
+        // }
+
+        // Handle edge cases (Insert into parent country)
+        for (const [edge_name, edge_code] of Object.entries(rw_edge_cases)) {
+            const updateEdgeCaseQuery = 'UPDATE country_mappings SET other_name = $1 WHERE code = $2';
+            await client.query(updateEdgeCaseQuery, [edge_name, edge_code]);
         }
 
         console.log('Table populated successfully');

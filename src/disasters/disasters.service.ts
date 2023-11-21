@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, getRepository } from 'typeorm';
 
+import { CountryMappings } from 'src/country/script_init/country-table.entity';
 import { DisastersList } from './disasters-list.entity';
 import { DisastersDetailEntity } from './disasters-detail.entity';
 
@@ -236,11 +237,22 @@ export class DisastersService {
                 }
                 const fields = responseData.fields;
 
+                // 해당 국가를 찾아서 코드를 넣어두기 (entity 연결시 maintenance가 더 복잡해짐 (cc. regular queries))
+                const countryEntity = await this.countryMappingRepository.findOne({
+                    where: [
+                        { cia_name: fields.primary_country.name },
+                        { rw_name: fields.primary_country.name },
+                        { other_name: fields.primary_country.name }
+                    ]
+                });
+                const countryEntityCode = countryEntity.code;
+
                 // 개별 엔티티 생성
                 const detail = new DisastersDetailEntity();
                 detail.dID = fields.id;
                 detail.dStatus = fields.status;
                 detail.dCountry = fields.primary_country.name;
+                detail.dCountryCode = countryEntityCode;
                 detail.dType = fields.primary_type.name;
 
                 // dateTtime 형식에서 T를 사용해서 date만 뽑아오기
@@ -265,13 +277,6 @@ export class DisastersService {
                 }) : null;
 
                 detail.dUrl = fields.url;
-
-                // 프론트를 위한 항목 (to_display로 요소 제어)
-                if (detail.dLatitude !== null || detail.dLatitude !== null || detail.dCountry == 'World') {
-                    detail.to_display = true;
-                } else {
-                    detail.to_display = false;
-                }
 
                 return this.disasterDetailRepository.save(detail);
 

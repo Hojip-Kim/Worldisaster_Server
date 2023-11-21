@@ -3,9 +3,6 @@ import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 @Entity()
 export class DisastersDetailEntity {
 
-    @Column()
-    to_display: boolean;
-
     @PrimaryGeneratedColumn()
     objectId: number;
 
@@ -17,7 +14,10 @@ export class DisastersDetailEntity {
 
     @Column()
     dCountry: string;
-    
+
+    @Column()
+    dCountryCode: string;
+
     @Column()
     dType: string;
 

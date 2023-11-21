@@ -1,7 +1,10 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+
 @Entity()
 export class CountryEntity {
+
     /* Basic Profile */
+
     @PrimaryGeneratedColumn()
     objectId: number;
 
@@ -14,6 +17,9 @@ export class CountryEntity {
     @Column({ nullable: true })
     cCountry_rw: string;
 
+    @Column({ nullable: true })
+    cCountry_other: string;
+
     @Column()
     cContinent: string; // "Map references"
 
@@ -21,6 +27,7 @@ export class CountryEntity {
     cTimeDifference: string; // "Government" - "Capital" - "time difference"
 
     /* Geography */
+
     @Column({ nullable: true })
     cLocation: string; // "Location"
 
@@ -31,15 +38,15 @@ export class CountryEntity {
     cSize: string; // "Area" - "total"
 
     /* Environment */
+
     @Column({ nullable: true })
-     cClimate: string; // "Environment" - "Climate"
-     
+    cClimate: string; // "Environment" - "Climate"
+
     @Column({ nullable: true })
     cNaturalHazards: string; // "Natural hazards"
 
     @Column({ nullable: true })
     cEnvironmentalIssues: string; // "Environment" - "Environment - current issues"
-
 
     /* People and Society information */
 
