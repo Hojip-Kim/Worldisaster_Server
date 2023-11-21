@@ -313,7 +313,7 @@ export class DisastersService {
         
         for (const article of articles) {
             
-            if (article.year == 1981 && month == 4) {
+            if (article.year == 2001 && month == 2) {
                 const existingArticle = await this.nytArchiveRepository.findOne({ where: { _id: article._id } });
                 if(!existingArticle){
                     // If the article does not exist, create and save it
@@ -330,12 +330,9 @@ export class DisastersService {
 
     /* 여기서부터는 New York Times Archive API 데이터 가공 및 파싱하는 로직 */
     async fetchAndStoreNYTData() {
-        for (let year = 1981; year <=2019; year++) {
+        for (let year = 2001; year <=2019; year++) {
             for (let month = 1; month <= 12; month++)
                 try {
-                    if (year <= 1981 && month <= 3) {
-                        continue;
-                    }
                     const response = await this.fetchNYTArchive(year, month);
                     console.log(`Fetched NYT Archive for year: ${year} month: ${month}`);
                     const articles = await this.parseNYTResponse(response, year);
