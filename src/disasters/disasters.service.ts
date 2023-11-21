@@ -296,15 +296,18 @@ export class DisastersService {
     async storeArticlesInDB(articles) {
         
         for (const article of articles) {
-            const nytArchiveEntity = this.nytArchiveRepository.create(article);
-
-            await this.nytArchiveRepository.save(nytArchiveEntity);
-        }
+            const existingArticle = await this.nytArchiveRepository.findOne({ _id: article._id });
+            if (!existingArticle) {
+                // If the article does not exist, create and save it
+                const nytArchiveEntity = this.nytArchiveRepository.create(article);
+                await this.nytArchiveRepository.save(nytArchiveEntity);
+            }
     }
+}
 
     /* 여기서부터는 New York Times Archive API 데이터 가공 및 파싱하는 로직 */
     async fetchAndStoreNYTData() {
-        for (let year = 1980; year <=2019; year++) {
+        for (let year = 1981; year <=2019; year++) {
             for (let month = 1; month <= 12; month++)
                 try {
                     const response = await this.fetchNYTArchive(year, month);
