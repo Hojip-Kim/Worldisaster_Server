@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { DisastersService } from './disasters.service';
 import { DisastersDetailEntity } from './disasters-detail.entity';
 import { NYTArchiveEntity } from './archive_news.entity';
@@ -75,13 +75,12 @@ export class DisastersController {
         return this.disastersService.getDisastersByStatusPast();
     }
 
-    @Get('/:country/:dType')
-    async getByCountryAndType(@Param('country') country: string, @Param('dType') dType: string): Promise<DisastersDetailEntity[]> {
-        // if (country.length == 2) {
-        //     return this.disastersService.getDisastersByCountryCodeAndType(country, dType);
-        // } else {
-        //     return this.disastersService.getDisastersByCountryNameAndType(country, dType);
-        // }
-        return this.disastersService.getDisastersByCountryNameAndType(country, dType);
+    @Get('/filtered')
+    async getDisasters(
+        @Query('country') country?: string, 
+        @Query('year') year?: string, 
+        @Query('type') type?: string
+    ): Promise<DisastersDetailEntity[]> {
+        return this.disastersService.getDisastersFiltered(country, year, type);
     }
 }

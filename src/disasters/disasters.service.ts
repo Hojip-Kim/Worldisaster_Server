@@ -86,6 +86,31 @@ export class DisastersService {
             .getMany();
     }
     
+    async getDisastersFiltered(country?: string, year?: string, type?: string): Promise<DisastersDetailEntity[]> {
+        // 필터링 로직 구현
+        // 예: country, year, type에 따라 다른 쿼리 실행
+        // 쿼리 빌더 시작
+        let query = this.disasterDetailRepository.createQueryBuilder('disaster');
+
+        // country 파라미터가 있으면 쿼리에 추가
+        if (country) {
+            query = query.andWhere('disaster.dCountry = :country', { country });
+        }
+
+        // year 파라미터가 있으면 쿼리에 추가
+        if (year) {
+            query = query.andWhere('SUBSTRING(disaster.dDate, 1, 4) = :year', { year });
+        }
+
+        // type 파라미터가 있으면 쿼리에 추가
+        if (type) {
+            query = query.andWhere('disaster.dType = :type', { type });
+        }
+        console.log(query.getSql());
+        // 결과 반환
+        return query.getMany();
+    }
+    }
     
     /* 여기서부터는 주기적으로 데이터를 갱신해주는 역할 */
 
