@@ -66,6 +66,22 @@ export class DisastersService {
             .where('disaster.dStatus = :status', { status: 'past' })
             .getMany();
     }
+
+    async getDisastersByCountryCodeAndType(countryCode: string, dType: string): Promise<DisastersDetailEntity[]> {
+        return this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('disaster.dCountryCode = :countryCode', { countryCode })
+            .andWhere('disaster.dType = :dType', { dType })
+            .getMany();
+    }
+
+    async getDisastersByCountryNameAndType(country: string, dType: string): Promise<DisastersDetailEntity[]> {
+        return this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('disaster.dCountry = :country', { country })
+            .andWhere('disaster.dType = :dType', { dType })
+            .getMany();
+    }
     
     
     /* 여기서부터는 주기적으로 데이터를 갱신해주는 역할 */

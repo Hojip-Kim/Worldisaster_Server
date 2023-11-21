@@ -74,4 +74,13 @@ export class DisastersController {
 
         return this.disastersService.getDisastersByStatusPast();
     }
+
+    @Get('/:country/:dType')
+    async getByCountryAndType(@Param('country') country: string, @Param('dType') dType: string): Promise<DisastersDetailEntity[]> {
+        if (country.length == 2) {
+            return this.disastersService.getDisastersByCountryCodeAndType(country, dType);
+        } else {
+            return this.disastersService.getDisastersByCountryNameAndType(country, dType);
+        }
+    }
 }
