@@ -293,12 +293,19 @@ export class DisastersService {
         });
     }
 
-    async storeArticlesInDB(articles) {
+    async storeArticlesInDB(articles, month) {
         
         for (const article of articles) {
-            const existingArticle = await this.nytArchiveRepository.findOne({ where: { _id: article._id } });
-            if (!existingArticle) {
-                // If the article does not exist, create and save it
+            
+            if (article.year == 1981 && month == 4) {
+                const existingArticle = await this.nytArchiveRepository.findOne({ where: { _id: article._id } });
+                if(!existingArticle){
+                    // If the article does not exist, create and save it
+                    const nytArchiveEntity = this.nytArchiveRepository.create(article);
+                    await this.nytArchiveRepository.save(nytArchiveEntity);
+                }      
+            }
+            else {
                 const nytArchiveEntity = this.nytArchiveRepository.create(article);
                 await this.nytArchiveRepository.save(nytArchiveEntity);
             }
@@ -310,13 +317,16 @@ export class DisastersService {
         for (let year = 1981; year <=2019; year++) {
             for (let month = 1; month <= 12; month++)
                 try {
+                    if (year <= 1981 && month <= 3) {
+                        continue;
+                    }
                     const response = await this.fetchNYTArchive(year, month);
                     console.log('Fetched NYT Archive for year:', year);
                     const articles = await this.parseNYTResponse(response, year);
                     console.log('Parsed NYT Archive for year:', year);
                     // console.log('Articles:', articles);
                     // console.log(Array.isArray(articles)); 
-                    await this.storeArticlesInDB(articles);
+                    await this.storeArticlesInDB(articles, month);
                     console.log('Stored NYT Archive for year:', year);
                     
 
