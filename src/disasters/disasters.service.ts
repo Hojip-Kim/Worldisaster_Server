@@ -23,6 +23,8 @@ export class DisastersService {
         private httpService: HttpService, // HTTP 요청 라이브러리를 가져오고
         @InjectRepository(DisastersList) // 재난 목록 Entity의 리포지토리를 가져오고
         private disasterListRepository: Repository<DisastersList>,
+        @InjectRepository(CountryMappings) // CountryMappings 테이블도 불러오고
+        private countryMappingRepository: Repository<CountryMappings>,
         @InjectRepository(DisastersDetailEntity)
         private disasterDetailRepository: Repository<DisastersDetailEntity>,
         @InjectRepository(NYTArchiveEntity)
