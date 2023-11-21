@@ -275,8 +275,8 @@ export class DisastersService {
     async parseNYTResponse(response, year) {
         // NYT 응답에서 'docs' 배열 추출
         const articles = response.response.docs;
-        console.log('in parseNYTResponse');
-        console.log(Array.isArray(response.response.docs)); // 이것이 true를 반환해야 합니다
+        // console.log('in parseNYTResponse');
+        // console.log(Array.isArray(response.response.docs)); // 이것이 true를 반환해야 합니다
         // 각 기사를 NYTArchiveEntity 형식으로 변환
         return articles.map(article => {
             return {
@@ -314,8 +314,8 @@ export class DisastersService {
                     console.log('Fetched NYT Archive for year:', year);
                     const articles = await this.parseNYTResponse(response, year);
                     console.log('Parsed NYT Archive for year:', year);
-                    console.log('Articles:', articles);
-                    console.log(Array.isArray(articles)); 
+                    // console.log('Articles:', articles);
+                    // console.log(Array.isArray(articles)); 
                     await this.storeArticlesInDB(articles);
                     console.log('Stored NYT Archive for year:', year);
                     
