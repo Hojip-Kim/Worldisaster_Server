@@ -110,7 +110,7 @@ export class DisastersService {
         // 결과 반환
         return query.getMany();
     }
-    }
+    
     
     /* 여기서부터는 주기적으로 데이터를 갱신해주는 역할 */
 
