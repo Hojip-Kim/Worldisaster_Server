@@ -296,7 +296,7 @@ export class DisastersService {
     async storeArticlesInDB(articles) {
         
         for (const article of articles) {
-            const existingArticle = await this.nytArchiveRepository.findOne(article._id);
+            const existingArticle = await this.nytArchiveRepository.findOne({ where: { _id: article._id } });
             if (!existingArticle) {
                 // If the article does not exist, create and save it
                 const nytArchiveEntity = this.nytArchiveRepository.create(article);
