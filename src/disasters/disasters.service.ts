@@ -296,14 +296,14 @@ export class DisastersService {
     async storeArticlesInDB(articles) {
         
         for (const article of articles) {
-            const existingArticle = await this.nytArchiveRepository.findOne({ _id: article._id });
+            const existingArticle = await this.nytArchiveRepository.findOne(article._id);
             if (!existingArticle) {
                 // If the article does not exist, create and save it
                 const nytArchiveEntity = this.nytArchiveRepository.create(article);
                 await this.nytArchiveRepository.save(nytArchiveEntity);
             }
+        }
     }
-}
 
     /* 여기서부터는 New York Times Archive API 데이터 가공 및 파싱하는 로직 */
     async fetchAndStoreNYTData() {
