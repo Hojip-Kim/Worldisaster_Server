@@ -106,7 +106,6 @@ export class DisastersService {
         if (type) {
             query = query.andWhere('disaster.dType = :type', { type });
         }
-        console.log(query.getSql());
         // 결과 반환
         return query.getMany();
     }
