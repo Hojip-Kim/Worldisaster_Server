@@ -4,6 +4,13 @@ import { typeORMConfig } from './configs/typeorm.config';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { DonateModule } from './donate/donate.module';
+import { ScheduleModule } from '@nestjs/schedule';
+
+import { DisastersModule } from './disasters/disasters.module';
+import { CountryModule } from './country/country.module';
+
+
+
 
 
 @Module({
@@ -11,7 +18,10 @@ import { DonateModule } from './donate/donate.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot(typeORMConfig),
-  AuthModule, DonateModule],
+    TypeOrmModule.forRoot(typeORMConfig), ScheduleModule.forRoot(),
+    AuthModule, DonateModule, DisastersModule,
+    CountryModule,],
 })
-export class AppModule {}
+
+
+export class AppModule { }
