@@ -420,11 +420,15 @@ export class DisastersService {
             .getMany();
         if(!articles) {
             console.log('getArticlesByCountryAndYearAndTypeAndID No articles found');
+        } else {
+            console.log(articles)
         }
         for (let article of articles) {
             article.dID = dID; // 각 기사에 dID 설정
             await this.nytArchiveRepository.save(article); // 갱신된 기사 저장
+            console.log(`success save article ${article.headline_main}`);
         }
+        
         return articles;
     }
 
