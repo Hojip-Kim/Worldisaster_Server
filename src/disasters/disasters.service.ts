@@ -395,7 +395,8 @@ export class DisastersService {
         const country = getDisasterDetail.dCountry;
         const dType = getDisasterDetail.dType;
 
-
+        console.log('In getDisastersTypeBydID');
+        console.log(`year: ${year}, country: ${country}, dType: ${dType}`);
 
         // const articles = await this.getDisastersByCountryAndYearAndTypeAndID(country, year, dType, dID);
 
@@ -418,10 +419,11 @@ export class DisastersService {
             .andWhere('article.headline_main LIKE :dType', { dType: `%${dType}%` })
             .andWhere('article.headline_main LIKE :country', { country: `%${country}%` })
             .getMany();
-        if(!articles) {
-            console.log('getArticlesByCountryAndYearAndTypeAndID No articles found');
-        } else {
-            console.log(articles)
+        if (articles.length === 0) {
+            // 에러 메시지 출력
+            const errorMessage = `No articles found for year: ${year}, country: ${country}, type: ${dType}`;
+            console.error(errorMessage);
+            throw new Error(errorMessage);
         }
         for (let article of articles) {
             article.dID = dID; // 각 기사에 dID 설정
@@ -433,6 +435,7 @@ export class DisastersService {
     }
 
     async getNewsByID(dID: string): Promise<NYTArchiveEntity[]> {
+        console.log('In getNewsByID');
         const disasterTable = await this.getDisastersTypeBydID(dID);
 
         const dType = disasterTable.dType;
