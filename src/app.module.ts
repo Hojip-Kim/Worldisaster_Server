@@ -13,6 +13,9 @@ import { CountryModule } from './country/country.module';
 import { CountryEntity } from './country/country.entity';
 import { CountryMappings } from './country/script_init/country-table.entity';
 
+import { ChatModule } from './chat/chat.module';
+import { ChatEntity } from './chat/chat.entity';
+
 @Module({
   imports: [
     ScheduleModule.forRoot(), // Cron, Scheduled 업데이트를 위함
@@ -28,6 +31,7 @@ import { CountryMappings } from './country/script_init/country-table.entity';
         DisastersDetailEntity,
         CountryEntity,
         CountryMappings,
+        ChatEntity,
       ],
       synchronize: true,
       // logging: true,
@@ -36,6 +40,7 @@ import { CountryMappings } from './country/script_init/country-table.entity';
     }),
     DisastersModule,
     CountryModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
