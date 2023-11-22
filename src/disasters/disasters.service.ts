@@ -113,6 +113,12 @@ export class DisastersService {
         return query.getMany();
     }
     
+    async getDisastersDetailBydID(dID: string): Promise<DisastersDetailEntity> {
+        return this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('disaster.dID = :dID', { dID })
+            .getOne();
+    }
     
     /* 여기서부터는 주기적으로 데이터를 갱신해주는 역할 */
 

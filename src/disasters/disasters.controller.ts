@@ -34,6 +34,29 @@ export class DisastersController {
         return await this.disastersService.fetchAndStoreNYTData();
     }
     
+    @Get('/live')
+    async getByStatusOngoing(): Promise<DisastersDetailEntity[]> {
+        console.log('API : GET call made to fetch all disasters by status (ongoing)');
+
+        return this.disastersService.getDisastersByStatusOngoing();
+    }
+
+    @Get('/archive')
+    async getByStatusPast(): Promise<DisastersDetailEntity[]> {
+        console.log('API : GET call made to fetch all disasters by status (past)');
+
+        return this.disastersService.getDisastersByStatusPast();
+    }
+
+    @Get('/filtered')
+    async getDisasters(
+        @Query('country') country?: string, 
+        @Query('year') year?: string, 
+        @Query('type') type?: string
+    ): Promise<DisastersDetailEntity[]> {
+        return this.disastersService.getDisastersFiltered(country, year, type);
+    }
+
     @Get('archive/:Country')
     async getDisastersArchiveByCountry(@Param('Country') country: string): Promise<DisastersDetailEntity[]> {
         return this.disastersService.getDisastersByCountry(country);
@@ -61,26 +84,10 @@ export class DisastersController {
         // return this.disastersService.getDisastersByCountryAndYear(country, year);
     }
 
-    @Get('/live')
-    async getByStatusOngoing(): Promise<DisastersDetailEntity[]> {
-        console.log('API : GET call made to fetch all disasters by status (ongoing)');
-
-        return this.disastersService.getDisastersByStatusOngoing();
+    @Get('/:dID')
+    async getDisastersDetailBydID(@Param('dID') dID: string): Promise<DisastersDetailEntity> {
+        return this.disastersService.getDisastersDetailBydID(dID);
     }
 
-    @Get('/archive')
-    async getByStatusPast(): Promise<DisastersDetailEntity[]> {
-        console.log('API : GET call made to fetch all disasters by status (past)');
-
-        return this.disastersService.getDisastersByStatusPast();
-    }
-
-    @Get('/filtered')
-    async getDisasters(
-        @Query('country') country?: string, 
-        @Query('year') year?: string, 
-        @Query('type') type?: string
-    ): Promise<DisastersDetailEntity[]> {
-        return this.disastersService.getDisastersFiltered(country, year, type);
-    }
+    
 }
