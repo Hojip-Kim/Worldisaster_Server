@@ -418,7 +418,9 @@ export class DisastersService {
             .andWhere('article.headline_main LIKE :dType', { dType: `%${dType}%` })
             .andWhere('article.headline_main LIKE :country', { country: `%${country}%` })
             .getMany();
-
+        if(!articles) {
+            console.log('getArticlesByCountryAndYearAndTypeAndID No articles found');
+        }
         for (let article of articles) {
             article.dID = dID; // 각 기사에 dID 설정
             await this.nytArchiveRepository.save(article); // 갱신된 기사 저장
@@ -434,7 +436,9 @@ export class DisastersService {
         const country = disasterTable.country;
 
         const articles = await this.getArticlesByCountryAndYearAndTypeAndID(country, year, dType, dID);
-
+        if (!articles) {
+            console.log('getNewsByID No articles found');
+        }
         return articles;
 
     }

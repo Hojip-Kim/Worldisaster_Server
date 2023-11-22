@@ -71,6 +71,7 @@ export class DisastersController {
 
     @Get('archive/:Country/:year/:dID')
     async getDisastersArchiveByCountryAndYearAndID(@Param('Country') country: string, @Param('year') year: string, @Param('dID') dID: string): Promise<NYTArchiveEntity[]> {
+        console.log('API get articles by dID');
         /* dID로 재난 타입 가져와서 변수에 저장 */
         const disasterTable = await this.disastersService.getDisastersTypeBydID(dID);
         const dType = disasterTable.dType;
