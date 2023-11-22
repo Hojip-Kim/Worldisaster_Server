@@ -414,7 +414,7 @@ export class DisastersService {
 
         const articles = await this.nytArchiveRepository
             .createQueryBuilder('article')
-            .where('article.pub_year = :year', { year })
+            .where('article.year = :year', { year })
             .andWhere('article.headline_main LIKE :dType', { dType: `%${dType}%` })
             .andWhere('article.headline_main LIKE :country', { country: `%${country}%` })
             .getMany();
