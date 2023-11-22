@@ -353,18 +353,10 @@ export class DisastersService {
         
         for (const article of articles) {
             
-            if (article.year == 2001 && month == 2) {
-                const existingArticle = await this.nytArchiveRepository.findOne({ where: { _id: article._id } });
-                if(!existingArticle){
-                    // If the article does not exist, create and save it
-                    const nytArchiveEntity = this.nytArchiveRepository.create(article);
-                    await this.nytArchiveRepository.save(nytArchiveEntity);
-                }      
-            }
-            else {
+            
                 const nytArchiveEntity = this.nytArchiveRepository.create(article);
                 await this.nytArchiveRepository.save(nytArchiveEntity);
-            }
+            
         }
     }
 
