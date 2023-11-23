@@ -67,8 +67,6 @@ export class DisastersService {
             .getMany();
     }
 
-    // 같은 국가 내에서 특정 연도에 발생한 Disaster들을 타입별로 호출하기
-
     // async getDisastersByCountryCodeTypeAndYear(countryCode: string, type: string, year: string): Promise<DisastersDetailEntity[]> {
     //     return this.disasterDetailRepository
     //         .createQueryBuilder('disaster')
