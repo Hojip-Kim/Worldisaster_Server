@@ -43,4 +43,15 @@ export class DisastersController {
             return this.disastersService.getDisastersByCountryNameAndYear(country, year);
         }
     }
+
+    // @Get('/:country/:type/:year')
+    // async getByCountryTypeYear(@Param('country') country: string, @Param('type') type: string, @Param('year') year: string): Promise<DisastersDetailEntity[]> {
+    //     console.log('API : GET call made to fetch disasters by country, type, and year');
+    //     console.log(country, type, year);
+    //     if (country.length == 2) {
+    //         return this.disastersService.getDisastersByCountryCodeTypeAndYear(country, type, year);
+    //     } else {
+    //         console.log('아직 안만들었다');
+    //     }
+    // }
 }

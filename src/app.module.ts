@@ -23,9 +23,9 @@ import { ChatEntity } from './chat/chat.entity';
       type: 'postgres',
       host: 'localhost',
       port: 5432,
-      username: 'namamu',
-      password: 'wjdrmf12#$',
-      database: 'db_localhost',
+      username: 'jungle',
+      password: 'wjdrmf!@#$',
+      database: 'db_test',
       entities: [
         DisastersList,
         DisastersDetailEntity,

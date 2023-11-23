@@ -182,10 +182,10 @@ const rw_edge_cases = {
 };
 
 const pool = new Pool({
-    user: 'namamu',
+    user: 'jungle',
     host: 'localhost',
-    database: 'db_localhost',
-    password: 'wjdrmf12#$',
+    database: 'db_test',
+    password: 'wjdrmf!@#$',
     port: 5432,
 });
 
