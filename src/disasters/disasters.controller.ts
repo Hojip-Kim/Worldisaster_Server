@@ -44,7 +44,7 @@ export class DisastersController {
         }
     }
 
-    // @Get('/:country/:type/:year')
+    // @Get('/:country/:type/:year') // type/year를 햇갈리니 조심해서 적용
     // async getByCountryTypeYear(@Param('country') country: string, @Param('type') type: string, @Param('year') year: string): Promise<DisastersDetailEntity[]> {
     //     console.log('API : GET call made to fetch disasters by country, type, and year');
     //     if (country.length == 2) {
