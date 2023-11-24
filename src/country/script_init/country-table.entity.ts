@@ -8,6 +8,9 @@ export class CountryMappings {
     code: string;
 
     @Column({ nullable: true })
+    iso3: string;
+
+    @Column({ nullable: true })
     continent: string;
 
     @Column({ name: 'cia_name', nullable: true })
@@ -18,5 +21,11 @@ export class CountryMappings {
 
     @Column({ name: 'other_name', nullable: true })
     other_name: string;
+
+    @Column({ name: 'wiki_name', nullable: true })
+    wiki_name: string;
+
+    @Column({ name: 'wiki_official', nullable: true })
+    wiki_official: string;
 
 }
