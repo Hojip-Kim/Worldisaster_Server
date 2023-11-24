@@ -5,9 +5,9 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-import { DisastersModule } from './disasters/disasters.module';
-import { DisastersList } from './disasters/disasters-list.entity';
-import { DisastersDetailEntity } from './disasters/disasters-detail.entity';
+import { OldDisastersModule } from './oldDisasters/oldDisasters.module';
+import { OldDisastersList } from './oldDisasters/oldDisasters-list.entity';
+import { OldDisastersEntity } from './oldDisasters/oldDisasters.entity';
 
 import { CountryModule } from './country/country.module';
 import { CountryEntity } from './country/country.entity';
@@ -23,12 +23,15 @@ import { ChatEntity } from './chat/chat.entity';
       type: 'postgres',
       host: 'localhost',
       port: 5432,
-      username: 'jungle',
-      password: 'wjdrmf!@#$',
-      database: 'db_test',
+      // username: 'jungle',
+      // password: 'wjdrmf!@#$',
+      // database: 'db_test',
+      username: 'namamu',
+      password: 'wjdrmf12#$',
+      database: 'db_localhost',
       entities: [
-        DisastersList,
-        DisastersDetailEntity,
+        OldDisastersList,
+        OldDisastersEntity,
         CountryEntity,
         CountryMappings,
         ChatEntity,
@@ -38,7 +41,7 @@ import { ChatEntity } from './chat/chat.entity';
       // synchronize: false, 
       // migrations: ["src/migrations"],
     }),
-    DisastersModule,
+    OldDisastersModule,
     CountryModule,
     ChatModule,
   ],

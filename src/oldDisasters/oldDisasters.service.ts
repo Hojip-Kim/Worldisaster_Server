@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { CountryMappings } from 'src/country/script_init/country-table.entity';
-import { DisastersList } from './disasters-list.entity';
-import { DisastersDetailEntity } from './disasters-detail.entity';
+import { OldDisastersList } from './oldDisasters-list.entity';
+import { OldDisastersEntity } from './oldDisasters.entity';
 
 import { HttpService } from '@nestjs/axios'; // HTTP 요청 라이브러리
 import * as sanitizeHtml from 'sanitize-html'; // HTTP 태그 정리 라이브러리
@@ -13,45 +13,40 @@ import { firstValueFrom } from 'rxjs'; // 첫 요청을 promise로 돌려줌
 
 // 새로운 재난이 발생하면 Push 해주는 웹소켓 등이 없으니, 주기적으로 리스트 확인이 필요함
 @Injectable()
-export class DisastersService {
+export class OldDisastersService {
     private baseUrl = 'https://api.reliefweb.int/v1/disasters?appname=apidoc&limit=1000';
 
     constructor(
         private httpService: HttpService, // HTTP 요청 라이브러리를 가져오고
         @InjectRepository(CountryMappings) // CountryMappings 테이블도 불러오고
         private countryMappingRepository: Repository<CountryMappings>,
-        @InjectRepository(DisastersList) // 재난 목록 Entity의 리포지토리를 가져오고
-        private disasterListRepository: Repository<DisastersList>,
-        @InjectRepository(DisastersDetailEntity)
-        private disasterDetailRepository: Repository<DisastersDetailEntity>,
+        @InjectRepository(OldDisastersList) // 재난 목록 Entity의 리포지토리를 가져오고
+        private disasterListRepository: Repository<OldDisastersList>,
+        @InjectRepository(OldDisastersEntity)
+        private disasterDetailRepository: Repository<OldDisastersEntity>,
     ) { }
 
     /* 여기서부터는 API에 대응하는 Service */
 
-    // 모든 Disaster들을 호출하기
-    async getAllDisasters(): Promise<DisastersDetailEntity[]> {
+    async getAllDisasters(): Promise<OldDisastersEntity[]> {
         return this.disasterDetailRepository.createQueryBuilder('disaster').getMany();
     }
 
-    // 국가 단위의 Disaster들을 호출하기
-
-    async getDisastersByCountryCode(countryCode: string): Promise<DisastersDetailEntity[]> {
+    async getDisastersByCountryCode(countryCode: string): Promise<OldDisastersEntity[]> {
         return this.disasterDetailRepository
             .createQueryBuilder('disaster')
             .where('disaster.dCountryCode = :countryCode', { countryCode })
             .getMany();
     }
 
-    async getDisastersByCountryName(country: string): Promise<DisastersDetailEntity[]> {
+    async getDisastersByCountryName(country: string): Promise<OldDisastersEntity[]> {
         return this.disasterDetailRepository
             .createQueryBuilder('disaster')
             .where('disaster.dCountry = :country', { country })
             .getMany();
     }
 
-    // 같은 국가 내에서 특정 연도에 발생한 Disaster들을 호출하기
-
-    async getDisastersByCountryCodeAndYear(countryCode: string, year: string): Promise<DisastersDetailEntity[]> {
+    async getDisastersByCountryCodeAndYear(countryCode: string, year: string): Promise<OldDisastersEntity[]> {
         return this.disasterDetailRepository
             .createQueryBuilder('disaster')
             .where('disaster.dCountryCode = :countryCode', { countryCode })
@@ -59,7 +54,7 @@ export class DisastersService {
             .getMany();
     }
 
-    async getDisastersByCountryNameAndYear(country: string, year: string): Promise<DisastersDetailEntity[]> {
+    async getDisastersByCountryNameAndYear(country: string, year: string): Promise<OldDisastersEntity[]> {
         return this.disasterDetailRepository
             .createQueryBuilder('disaster')
             .where('disaster.dCountry = :country', { country })
@@ -67,20 +62,11 @@ export class DisastersService {
             .getMany();
     }
 
-    // async getDisastersByCountryCodeTypeAndYear(countryCode: string, type: string, year: string): Promise<DisastersDetailEntity[]> {
-    //     return this.disasterDetailRepository
-    //         .createQueryBuilder('disaster')
-    //         .where('disaster.dCountryCode = :countryCode', { countryCode })
-    //         .andWhere('disaster.dType = :type', { type })
-    //         .andWhere('SUBSTRING(disaster.dDate, 1, 4) = :year', { year })
-    //         .getMany();
-    // }
-
-    /* 여기서부터는 주기적으로 데이터를 갱신해주는 역할 */
+    /* 여기서부터는 처음에 데이터를 로드해주는 역할 */
 
     async fetchAndCompareCount(): Promise<{ success: boolean, message: string }> {
 
-        console.log('Updating disaster lists table...');
+        console.log("@ Updating disaster lists table...");
 
         try {
             // API에서 'count' 필드를 추출
@@ -101,7 +87,7 @@ export class DisastersService {
                 return { success: false, message: 'No Updates to make (Disasters)' };
             }
         } catch (error) {
-            console.log('@ Disaster AUto Update Failed: ' + error.message);
+            console.log('@ Disaster Auto Update Failed: ' + error.message);
             return { success: false, message: 'Update Failed (Disasters)' };
         }
     }
@@ -115,17 +101,15 @@ export class DisastersService {
         const allEntries = [];
         const uniqueIds = new Set();
 
-        // ReliefWeb API가 중복값을 뱉기도 해서, 순회하면서 값들을 Set에 저장하는 식으로 처리 -> 서버 첫 구동시 1분 사이클이 3-4번 돌면 중복없이 완전해짐
+        // ReliefWeb API가 중복값을 뱉기도 해서, 순회하면서 값들을 Set에 저장하는 식으로 처리 -> 서버 첫 구동 후 사이클이 3-4번 돌면 중복없이 완전해짐
         while (currentUrl) {
             const response = await firstValueFrom(this.httpService.get(currentUrl));
-            // console.log('thousand-batch has this many entries in list: ', response.data.data.length);
             response.data.data.forEach(entry => {
                 if (!uniqueIds.has(entry.id)) {
                     uniqueIds.add(entry.id);
                     allEntries.push(entry);
                 }
             });
-
             currentUrl = response.data.links.next ? response.data.links.next.href : null;
         }
 
@@ -171,12 +155,12 @@ export class DisastersService {
         const existingDbDetails = await this.disasterDetailRepository.find();
         const existingdIDs = new Set(existingDbDetails.map(detail => detail.dID));
 
-        // rawEntries 배열을 필터링 (DB에 매칭되는 DID가 없는 경우)
+        // rawEntries 필터 : DB에 매칭되는 DID가 없는 경우에만 API 콜 실행
         const newEntries = rawEntries.filter(entry => !existingdIDs.has(entry.id));
         if (newEntries.length == 0) {
             console.log('Disaster list updated, but no detailed entries to update');
             return;
-        } else if (newEntries.length > 100) {
+        } else if (newEntries.length > 10) {
             console.log('Tons of updates to Disaster Details DB');
         } else {
             console.log('New update:', newEntries); // 첫 로딩에는 표시 안하도록
@@ -197,9 +181,16 @@ export class DisastersService {
                 const responseData = response.data.data[0];
                 if (!responseData || !responseData.fields) {
                     console.error(`Invalid response format for disaster dID: ${entry.dID}`);
-                    return; // 해당 데이터가 없는 Entry만 건너뛰기
+                    return; // fields 섹션이 없으면 데이터에 문제가 있다는 뜻이니, 해당 Entry만 건너뛰기
                 }
                 const fields = responseData.fields;
+
+                // rawEntries 2차 필터 : 2000년 1월 1일 이전의 데이터는 취급 않을 예정이니 저장할 필요 없음
+                const cutoffDate = new Date("2000-01-01T00:00:00+00:00");
+                const entryDate = new Date(fields.date.event.split('T')[0]);
+                if (entryDate < cutoffDate) {
+                    return;
+                }
 
                 // 해당 국가를 찾아서 코드를 넣어두기 (entity 연결시 maintenance가 더 복잡해짐 (cc. regular queries))
                 const countryEntity = await this.countryMappingRepository.findOne({
@@ -212,27 +203,32 @@ export class DisastersService {
                 const countryEntityCode = countryEntity.code;
 
                 // 개별 엔티티 생성
-                const detail = new DisastersDetailEntity();
+                const detail = new OldDisastersEntity();
                 detail.dID = fields.id;
-                detail.dStatus = fields.status;
+                detail.dSource = 'ReliefWeb';
+                detail.dStatus = 'past';
                 detail.dCountry = fields.primary_country.name;
+                detail.dDistrict = null; // 작업용 필드 (별도 파악)
                 detail.dCountryCode = countryEntityCode;
-                detail.dType = fields.primary_type.name;
 
-                // dateTtime 형식에서 T를 사용해서 date만 뽑아오기
+                // 국가 위도 경도 표시 (ReliefWeb 위도 경도는 국가 위치)
+                if (fields.primary_country && fields.primary_country.location) {
+                    detail.dCountryLatitude = fields.primary_country.location.lat;
+                    detail.dCountryLongitude = fields.primary_country.location.lon;
+                } else {
+                    detail.dCountryLatitude = null;
+                    detail.dCountryLongitude = null;
+                }
+
+                // 재난 타입, 날짜, 제목, 설명 등
+                detail.dType = fields.primary_type.name;
                 const rawDate = new Date(fields.date.event);
                 detail.dDate = rawDate.toISOString().split('T')[0];
 
-                // Lat/lon이 없는 경우가 있음
-                if (fields.primary_country && fields.primary_country.location) {
-                    detail.dLatitude = fields.primary_country.location.lat;
-                    detail.dLongitude = fields.primary_country.location.lon;
-                } else {
-                    detail.dLatitude = null;
-                    detail.dLongitude = null;
-                }
-
+                detail.dLatitude = null; // 작업용 필드 (별도 파악)
+                detail.dLongitude = null; // 작업용 필드 (별도 파악)
                 detail.dTitle = fields.name;
+                detail.dSummary = null; // 작업용 필드 (dDescription 요약)
 
                 // HTML Tag/Attribute 제거
                 detail.dDescription = fields.description ? sanitizeHtml(fields.description, {
@@ -240,7 +236,17 @@ export class DisastersService {
                     allowedAttributes: {},
                 }) : null;
 
-                detail.dUrl = fields.url;
+                detail.dUrl = fields.url; // 작업용 필드 (별도 추가)
+                detail.news1title = null; // 작업용 필드 (별도 추가)
+                detail.news1url = null; // 작업용 필드 (별도 추가)
+                detail.news2title = null; // 작업용 필드 (별도 추가)
+                detail.news2url = null; // 작업용 필드 (별도 추가)
+                detail.news3title = null; // 작업용 필드 (별도 추가)
+                detail.news3url = null; // 작업용 필드 (별도 추가)
+                detail.news4title = null; // 작업용 필드 (별도 추가)
+                detail.news4url = null; // 작업용 필드 (별도 추가)
+                detail.news5title = null; // 작업용 필드 (별도 추가)
+                detail.news5url = null; // 작업용 필드 (별도 추가)
 
                 return this.disasterDetailRepository.save(detail);
 
@@ -258,10 +264,10 @@ export class DisastersService {
         console.log('New or updated disaster details saved successfully');
     }
 
-    // 정해진 시간마다 여기서 함수가 시작, fetchAndCompareCount를 실행
-    @Cron(CronExpression.EVERY_MINUTE)
-    async handleCron() {
-        console.log("\n@ Disaster Auto Update Started - Regular 1-minute API Request made to fetch Disasters");
-        await this.fetchAndCompareCount();
-    }
+    // (Deprecated)
+    // @Cron(CronExpression.EVERY_MINUTE)
+    // async handleCron() {
+    //     console.log("\n@ Disaster Auto Update Started - Regular 1-minute API Request made to fetch Disasters");
+    //     await this.fetchAndCompareCount();
+    // }
 }

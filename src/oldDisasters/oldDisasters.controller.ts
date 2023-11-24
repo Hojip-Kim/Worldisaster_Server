@@ -1,30 +1,30 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { DisastersService } from './disasters.service';
-import { DisastersDetailEntity } from './disasters-detail.entity';
+import { OldDisastersService } from './oldDisasters.service';
+import { OldDisastersEntity } from './oldDisasters.entity';
 
-@Controller('disasters')
-export class DisastersController {
-    constructor(private readonly disastersService: DisastersService) { }
+@Controller('oldDisasters')
+export class OldDisastersController {
+    constructor(private readonly disastersService: OldDisastersService) { }
 
     /* Debugger API (to-delete) */
 
     @Get('forceSync')
     async debug_force_refresh(): Promise<{ success: boolean, message: string }> {
-        console.log('API : GET call made to force refresh disasters DB (Debug)');
+        console.log("\nAPI : GET call made to force refresh disasters DB (Debug)");
         return await this.disastersService.fetchAndCompareCount();
     }
 
     /* Actual API Implementation */
 
     @Get('/')
-    async getAllDetails(): Promise<DisastersDetailEntity[]> {
-        console.log('API : GET call made to fetch all disasters detail');
+    async getAllDetails(): Promise<OldDisastersEntity[]> {
+        console.log("\nAPI : GET call made to fetch all disasters detail");
         return await this.disastersService.getAllDisasters();
     }
 
     @Get('/:country')
-    async getByCountry(@Param('country') country: string): Promise<DisastersDetailEntity[]> {
-        console.log('API : GET call made to fetch all disasters by country');
+    async getByCountry(@Param('country') country: string): Promise<OldDisastersEntity[]> {
+        console.log("\nAPI : GET call made to fetch all disasters by country");
 
         if (country.length == 2) {
             return this.disastersService.getDisastersByCountryCode(country);
@@ -34,8 +34,8 @@ export class DisastersController {
     }
 
     @Get('/:country/:year')
-    async getByCountryAndYear(@Param('country') country: string, @Param('year') year: string): Promise<DisastersDetailEntity[]> {
-        console.log('API : GET call made to fetch all disasters by country and year')
+    async getByCountryAndYear(@Param('country') country: string, @Param('year') year: string): Promise<OldDisastersEntity[]> {
+        console.log("\nAPI : GET call made to fetch all disasters by country and year");
 
         if (country.length == 2) {
             return this.disastersService.getDisastersByCountryCodeAndYear(country, year);
