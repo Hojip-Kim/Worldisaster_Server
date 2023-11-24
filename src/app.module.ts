@@ -6,7 +6,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 import { OldDisastersModule } from './oldDisasters/oldDisasters.module';
-import { OldDisastersList } from './oldDisasters/oldDisasters-list.entity';
 import { OldDisastersEntity } from './oldDisasters/oldDisasters.entity';
 
 import { CountryModule } from './country/country.module';
@@ -30,7 +29,6 @@ import { ChatEntity } from './chat/chat.entity';
       password: 'wjdrmf12#$',
       database: 'db_localhost',
       entities: [
-        OldDisastersList,
         OldDisastersEntity,
         CountryEntity,
         CountryMappings,

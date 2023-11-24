@@ -6,12 +6,12 @@ import { OldDisastersEntity } from './oldDisasters.entity';
 export class OldDisastersController {
     constructor(private readonly disastersService: OldDisastersService) { }
 
-    /* Debugger API (to-delete) */
+    /* Initial Server Setup API */
 
     @Get('forceSync')
     async debug_force_refresh(): Promise<{ success: boolean, message: string }> {
         console.log("\nAPI : GET call made to force refresh disasters DB (Debug)");
-        return await this.disastersService.fetchAndCompareCount();
+        return await this.disastersService.fetchAndStoreAllDisasters();
     }
 
     /* Actual API Implementation */

@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { CountryMappings } from 'src/country/script_init/country-table.entity';
-import { OldDisastersList } from './oldDisasters-list.entity';
 import { OldDisastersEntity } from './oldDisasters.entity';
 
 import { HttpService } from '@nestjs/axios'; // HTTP 요청 라이브러리
@@ -20,8 +19,6 @@ export class OldDisastersService {
         private httpService: HttpService, // HTTP 요청 라이브러리를 가져오고
         @InjectRepository(CountryMappings) // CountryMappings 테이블도 불러오고
         private countryMappingRepository: Repository<CountryMappings>,
-        @InjectRepository(OldDisastersList) // 재난 목록 Entity의 리포지토리를 가져오고
-        private disasterListRepository: Repository<OldDisastersList>,
         @InjectRepository(OldDisastersEntity)
         private disasterDetailRepository: Repository<OldDisastersEntity>,
     ) { }
@@ -62,35 +59,7 @@ export class OldDisastersService {
             .getMany();
     }
 
-    /* 여기서부터는 처음에 데이터를 로드해주는 역할 */
-
-    async fetchAndCompareCount(): Promise<{ success: boolean, message: string }> {
-
-        console.log("@ Updating disaster lists table...");
-
-        try {
-            // API에서 'count' 필드를 추출
-            const apiResponse = await firstValueFrom(this.httpService.get(this.baseUrl));
-            const countFromApi = apiResponse.data.totalCount;
-
-            // DB에서 entity 개수를 확인
-            const countInDb = await this.disasterListRepository.count();
-
-            // 두개를 비교해서, 차이가 난다면 fetchAndStoreAllDisasters() 호출
-            if (countFromApi !== countInDb) {
-                await this.fetchAndStoreAllDisasters();
-                console.log('@ Disaster Auto Update Finished - DB update complete');
-                return { success: true, message: 'Updated (Disasters)' };
-            } else {
-                // 숫자가 맞으니 굳이 업데이트 필요 없음 + forceRefresh를 위한 리턴값
-                console.log('@ Disaster Auto Update Finished - Nothing to update');
-                return { success: false, message: 'No Updates to make (Disasters)' };
-            }
-        } catch (error) {
-            console.log('@ Disaster Auto Update Failed: ' + error.message);
-            return { success: false, message: 'Update Failed (Disasters)' };
-        }
-    }
+    /* 여기서부터는 처음에 데이터를 로드해주는 역할 (서버 최초 세팅시 3-4번만 수행하면 충분) */
 
     async fetchAndStoreAllDisasters() {
 
@@ -115,41 +84,18 @@ export class OldDisastersService {
 
         // 배열이 비어있지 않다면 DB에 저장
         if (allEntries.length > 0) {
-            await this.saveListToPostgreSQL(allEntries); // 리스트에 저장하고,
-            await this.fetchAndSaveDisasterDetails(allEntries); // 그 리스트에서 새로운 재난을 찾아 저장
-        }
-    }
-
-    async saveListToPostgreSQL(entries: any[]) {
-
-        // 현재 DisasterListEntity 테이블의 모든 값들을 삭제하고 (새로운 것만 추가할수가 없음 ㅠㅠ)
-        await this.disasterListRepository.delete({});
-
-        // 삭제 결과를 한번 확인하고
-        const count = await this.disasterListRepository.count();
-        if (count !== 0) {
-            console.log('Failed to update the disaster list properly');
-            throw new Error('Failed in updating the list of disasters');
-        }
-
-        // 배열의 각 요소들을 하나씩 정리해서 DB에 삽입
-        for (const entry of entries) {
-            const disasterEntry = {
-                dID: entry.id,
-                dTitle: entry.fields.name,
-                dApiUrl: entry.href
-            };
 
             try {
-                await this.disasterListRepository.save(disasterEntry);
+                await this.fetchAndSaveRwDisasterDetails(allEntries);
+                return { success: true, message: 'Updated (ReliefWeb Disasters)' };
             } catch (error) {
-                console.error('Error saving to PostgreSQL:', error);
+                console.log('@ Disaster Auto Update Failed: ' + error.message);
+                return { success: false, message: 'Update Failed (ReliefWeb Disasters)' };
             }
         }
-        console.log('Disaster list successfully saved to table');
     }
 
-    async fetchAndSaveDisasterDetails(rawEntries: any[]) {
+    async fetchAndSaveRwDisasterDetails(rawEntries: any[]) {
 
         // 먼저 앞서 저장한 DB에서 저장된 값들을 다 빼와서 배열에 저장하고, 거기서 dID의 Set를 생성
         const existingDbDetails = await this.disasterDetailRepository.find();
@@ -158,12 +104,12 @@ export class OldDisastersService {
         // rawEntries 필터 : DB에 매칭되는 DID가 없는 경우에만 API 콜 실행
         const newEntries = rawEntries.filter(entry => !existingdIDs.has(entry.id));
         if (newEntries.length == 0) {
-            console.log('Disaster list updated, but no detailed entries to update');
+            console.log('No new entries to update');
             return;
         } else if (newEntries.length > 10) {
             console.log('Tons of updates to Disaster Details DB');
         } else {
-            console.log('New update:', newEntries); // 첫 로딩에는 표시 안하도록
+            console.log('Less than 10 new updates:', newEntries);
         }
 
         // 만일 newEntries의 크기가 너무 크다면 네트워크/용량 제어
