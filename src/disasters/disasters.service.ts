@@ -445,7 +445,7 @@ export class DisastersService {
         const dDate = disasterTable.dDate;
         const country = disasterTable.dCountry;
 
-        const articles = await this.getArticlesByCountryAndYearAndTypeAndID(country, dDate, dType, dID);
+        const articles = await this.getArticlesByCountryAndYearAndTypeAndID(dID, country, dDate, dType);
         if (!articles) {
             console.log('getNewsByID No articles found');
         }
