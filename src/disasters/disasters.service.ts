@@ -489,17 +489,17 @@ export class DisastersService {
                 const isdCountryInDescription = description.includes(dCountry.toLowerCase());
 
                 if (isdTypeInName && isdTypeInDescription && isdCountryInName && isdCountryInDescription && disasterDate <= new Date(response.data.value[n].datePublished)) {
-                    
+                    const disasterDetail = await this.disasterDetailRepository.findOne({ where: {dID} });
                     const headline = response.data.value[n].name;
                     const url = response.data.value[n].url;
-                    console.log(dID);
-                    this.liveArticleRepository.save({
-                        headline,
-                        url,
-                        dID : dID
-                    })
-                    console.log(`success save article ${headline}`);
-                }
+                    const liveArticle = new LiveArticleEntity();
+                    liveArticle.headline = headline;
+                    liveArticle.url = url;
+                    liveArticle.disasterDetail = disasterDetail; // 할당
+
+                    await this.liveArticleRepository.save(liveArticle);
+                            console.log(`success save article ${headline}`);
+                        }
                 else{
                     console.log('No articles found');
                 }
