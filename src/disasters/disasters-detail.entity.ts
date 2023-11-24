@@ -6,7 +6,7 @@ export class DisastersDetailEntity {
     @PrimaryGeneratedColumn()
     objectId: number;
 
-    @Column()
+    @Column({ unique: true})
     dID: string;
 
     @Column()
