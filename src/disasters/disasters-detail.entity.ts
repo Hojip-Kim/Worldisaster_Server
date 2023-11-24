@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { LiveArticleEntity } from './live_news.entity';
 @Entity()
 export class DisastersDetailEntity {
 
@@ -44,5 +44,8 @@ export class DisastersDetailEntity {
 
     @Column()
     dUrl: string;
+
+    @OneToMany(() => LiveArticleEntity, liveArticle => liveArticle.disasterDetail)
+    liveArticles: LiveArticleEntity[];
 
 }

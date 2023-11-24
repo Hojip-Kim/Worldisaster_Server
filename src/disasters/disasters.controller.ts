@@ -2,6 +2,7 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { DisastersService } from './disasters.service';
 import { DisastersDetailEntity } from './disasters-detail.entity';
 import { NYTArchiveEntity } from './archive_news.entity';
+import { LiveArticleEntity } from './live_news.entity';
 
 @Controller('disasters')
 export class DisastersController {
@@ -41,6 +42,20 @@ export class DisastersController {
         return this.disastersService.getDisastersByStatusOngoing();
     }
 
+    @Get('live/force')
+    async storeDisastersLiveArticle() {
+        // test용으로 2023년 이후의 재난만 저장
+        const getDisastersIDList = await this.disastersService.getDisastersID();
+
+        for (let i = 0; i < getDisastersIDList.length; i++) {
+            const dID = getDisastersIDList[i].dID;
+            const infoDisaster = await this.disastersService.getDisastersTypeBydID(dID);
+            const dCountry = await infoDisaster.dCountry;
+            const dType = await infoDisaster.dType;
+            const dDate = await infoDisaster.dDate;
+            await this.disastersService.storeLiveArticle(dID, dDate, dType, dCountry);
+        }
+    }
     @Get('/archive')
     async getByStatusPast(): Promise<DisastersDetailEntity[]> {
         console.log('API : GET call made to fetch all disasters by status (past)');

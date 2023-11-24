@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, getRepository } from 'typeorm';
+import { In, Repository, getRepository } from 'typeorm';
 
 import { CountryMappings } from 'src/country/script_init/country-table.entity';
 import { DisastersList } from './disasters-list.entity';
 import { DisastersDetailEntity } from './disasters-detail.entity';
 
 import { NYTArchiveEntity } from './archive_news.entity';
+import { LiveArticleEntity } from './live_news.entity';
 
 import { HttpService } from '@nestjs/axios'; // HTTP 요청 라이브러리
 import * as sanitizeHtml from 'sanitize-html'; // HTTP 태그 정리 라이브러리
@@ -29,6 +30,8 @@ export class DisastersService {
         private disasterDetailRepository: Repository<DisastersDetailEntity>,
         @InjectRepository(NYTArchiveEntity)
         private nytArchiveRepository: Repository<NYTArchiveEntity>,
+        @InjectRepository(LiveArticleEntity)
+        private liveArticleRepository: Repository<LiveArticleEntity>,
     ) { }
 
     /* 여기서부터는 API에 대응하는 Service */
@@ -385,25 +388,25 @@ export class DisastersService {
     }
 
     /* dID를 통해 재난 타입 가져오는 코드*/
-    async getDisastersTypeBydID(dID: string): Promise<{ dType: string, country: string, year: string }> {
+    async getDisastersTypeBydID(dID: string): Promise<{ dType: string, dCountry: string, dDate: string }> {
         const getDisasterDetail =  await this.disasterDetailRepository
         .createQueryBuilder('disaster')
         .where('disaster.dID = :dID', { dID })
         .getOne();
 
-        const year = getDisasterDetail.dDate.split('-')[0];
-        const country = getDisasterDetail.dCountry;
+        const dDate = getDisasterDetail.dDate;
+        const dCountry = getDisasterDetail.dCountry;
         const dType = getDisasterDetail.dType;
 
         console.log('In getDisastersTypeBydID');
-        console.log(`year: ${year}, country: ${country}, dType: ${dType}`);
+        console.log(`year: ${dDate}, country: ${dCountry}, dType: ${dType}`);
 
         // const articles = await this.getDisastersByCountryAndYearAndTypeAndID(country, year, dType, dID);
 
         return {
             dType: getDisasterDetail.dType,
-            country: getDisasterDetail.dCountry,
-            year: year,
+            dCountry: getDisasterDetail.dCountry,
+            dDate: getDisasterDetail.dDate,
         };
     }
 
@@ -439,14 +442,72 @@ export class DisastersService {
         const disasterTable = await this.getDisastersTypeBydID(dID);
 
         const dType = disasterTable.dType;
-        const year = disasterTable.year;
-        const country = disasterTable.country;
+        const dDate = disasterTable.dDate;
+        const country = disasterTable.dCountry;
 
-        const articles = await this.getArticlesByCountryAndYearAndTypeAndID(country, year, dType, dID);
+        const articles = await this.getArticlesByCountryAndYearAndTypeAndID(country, dDate, dType, dID);
         if (!articles) {
             console.log('getNewsByID No articles found');
         }
         return articles;
 
     }
+
+    async getDisastersID() {
+        const result = await this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .select('disaster.dID')
+            .where('disaster.dDate >= :date', { date : '2022-12-31' })
+            .getMany();
+        if(result.length === 0) {
+            throw new Error('No disasters found after the specified date.');
+        }
+        return result;
+    }
+
+    async storeLiveArticle(dID: string, dDate: string, dType: string, dCountry: string) {
+        const axios = require('axios');
+        const apiKey = '2a25766d28854a45a21da9cd886bb9c9'; // 여기에 Bing API 키를 입력하세요.
+        const searchQuery = `${dType} ${dCountry} ${dDate}`; // 검색하고 싶은 키워드를 입력하세요.
+        const apiUrl = `https://api.bing.microsoft.com/v7.0/news/search?q=${encodeURIComponent(searchQuery)}&mkt=en-US&safeSearch=Moderate`;
+
+        try {
+            const response = await axios.get(apiUrl, {
+                headers: { 'Ocp-Apim-Subscription-Key': apiKey }
+            });
+
+            const disasterDate = new Date(`${dDate}`);
+            for (let n = 0; n < response.data.value.length; n++) {
+                
+
+                const headlineLower = response.data.value[n].name.toLowerCase();
+                const description = response.data.value[n].description.toLowerCase();
+
+                const isdTypeInName = headlineLower.includes(dType.toLowerCase());
+                const isdTypeInDescription = description.includes(dType.toLowerCase());
+                const isdCountryInName = headlineLower.includes(dCountry.toLowerCase());
+                const isdCountryInDescription = description.includes(dCountry.toLowerCase());
+
+                if (isdTypeInName && isdTypeInDescription && isdCountryInName && isdCountryInDescription && disasterDate <= new Date(response.data.value[n].datePublished)) {
+                    
+                    const headline = response.data.value[n].name;
+                    const url = response.data.value[n].url;
+
+                    this.liveArticleRepository.save({
+                        headline,
+                        url,
+                        dID
+                    })
+                    console.log(`success save article ${headline}`);
+                }
+                else{
+                    console.log('No articles found');
+                }
+                
+            }
+        } catch (error) {
+            console.error('Error fetching news:', error);
+        }
+    }
+
 }

@@ -6,6 +6,7 @@ import { DisastersService } from './disasters.service';
 import { DisastersController } from './disasters.controller';
 import { DisastersList } from './disasters-list.entity';
 import { DisastersDetailEntity } from './disasters-detail.entity';
+import { LiveArticleEntity } from './live_news.entity';
 import { Type } from 'class-transformer';
 import { NYTArchiveEntity } from './archive_news.entity';
 
@@ -16,6 +17,7 @@ import { NYTArchiveEntity } from './archive_news.entity';
     TypeOrmModule.forFeature([DisastersDetailEntity]),
     TypeOrmModule.forFeature([NYTArchiveEntity]),
     TypeOrmModule.forFeature([CountryMappings]),
+    TypeOrmModule.forFeature([LiveArticleEntity]),
   ],
   providers: [DisastersService],
   controllers: [DisastersController]
