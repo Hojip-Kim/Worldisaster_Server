@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository, getRepository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { CountryMappings } from 'src/country/script_init/country-table.entity';
 import { DisastersList } from './disasters-list.entity';
 import { DisastersDetailEntity } from './disasters-detail.entity';
 
 import { NYTArchiveEntity } from './archive_news.entity';
-import { LiveArticleEntity } from './live_news.entity';
+import { LiveArticleEntity } from './liveNews.entity';
 
 import { HttpService } from '@nestjs/axios'; // HTTP 요청 라이브러리
 import * as sanitizeHtml from 'sanitize-html'; // HTTP 태그 정리 라이브러리

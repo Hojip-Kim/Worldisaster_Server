@@ -6,18 +6,20 @@ import { DisastersService } from './disasters.service';
 import { DisastersController } from './disasters.controller';
 import { DisastersList } from './disasters-list.entity';
 import { DisastersDetailEntity } from './disasters-detail.entity';
-import { LiveArticleEntity } from './live_news.entity';
+import { LiveArticleEntity } from './liveNews.entity';
 import { Type } from 'class-transformer';
 import { NYTArchiveEntity } from './archive_news.entity';
 
 @Module({
   imports: [
     HttpModule,
-    TypeOrmModule.forFeature([DisastersList]),
-    TypeOrmModule.forFeature([DisastersDetailEntity]),
-    TypeOrmModule.forFeature([NYTArchiveEntity]),
-    TypeOrmModule.forFeature([CountryMappings]),
-    TypeOrmModule.forFeature([LiveArticleEntity]),
+    TypeOrmModule.forFeature([
+      DisastersList, 
+      DisastersDetailEntity, 
+      NYTArchiveEntity, 
+      CountryMappings, 
+      LiveArticleEntity
+    ]),
   ],
   providers: [DisastersService],
   controllers: [DisastersController]

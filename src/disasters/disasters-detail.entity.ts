@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { LiveArticleEntity } from './live_news.entity';
+import { LiveArticleEntity } from './liveNews.entity';
 @Entity()
 export class DisastersDetailEntity {
 

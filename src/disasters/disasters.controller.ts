@@ -2,7 +2,7 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { DisastersService } from './disasters.service';
 import { DisastersDetailEntity } from './disasters-detail.entity';
 import { NYTArchiveEntity } from './archive_news.entity';
-import { LiveArticleEntity } from './live_news.entity';
+import { LiveArticleEntity } from './liveNews.entity';
 
 @Controller('disasters')
 export class DisastersController {
