@@ -492,7 +492,7 @@ export class DisastersService {
                     
                     const headline = response.data.value[n].name;
                     const url = response.data.value[n].url;
-
+                    console.log(dID);
                     this.liveArticleRepository.save({
                         headline,
                         url,
