@@ -496,7 +496,7 @@ export class DisastersService {
                     this.liveArticleRepository.save({
                         headline,
                         url,
-                        dID
+                        dID : dID
                     })
                     console.log(`success save article ${headline}`);
                 }
