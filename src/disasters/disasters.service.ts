@@ -513,76 +513,35 @@ export class DisastersService {
     //!SECTION End Bing News API
 
     //!SECTION Mediastack API
-    // async storeLiveArticle(dID: string, dDate: string, dType: string, dCountry: string) {
-    //     const axios = require('axios');
-    //     const searchQuery = `${dType}, ${dCountry}`; // 검색하고 싶은 키워드를 입력하세요.
-    //     const disasterDetail = await this.disasterDetailRepository.findOne({ where: {dID} });
-
-    //     const params = stringify({
-    //         access_key: '5057f1372fdc2004d02af923fdeff472', // 여기에 실제 액세스 키를 입력하세요
-    //         category : 'general',
-    //         sort: 'published_desc',
-    //         keywords: `${dType},${dCountry}`,
-    //         date: `${dDate}`,
-    //         limit: 1,
-    //     });
-
-    //     // const params = 'access_key=5057f1372fdc2004d02af923fdeff472&category=general&sort=published_desc&keywords=flood,kenya&date=2023-10-15&limit=1';
-    //     console.log(params);
-    //     console.log(`https://api.mediastack.com/v1/news?${params}`);
-    //     try 
-    //     {
-    //         const response = await axios.get(`http://api.mediastack.com/v1/news?${params}`);
-    //         console.log(response.data);
-    //         for (let n = 0; n < response.data.length; n++) 
-    //         {
-    //             const headline = response.data[n].title;
-    //             const url = response.data[n].url;
-                
-    //             const liveArticle = new LiveArticleEntity();
-    //             liveArticle.headline = headline;
-    //             liveArticle.url = url;
-    //             liveArticle.disasterDetail = disasterDetail; // 할당
-
-    //             await this.liveArticleRepository.save(liveArticle);
-    //             console.log(`success save article ${headline}`);
-    //         }
-    //     } catch (error) {
-    //         if (error.response) {
-    //             // 서버에서 반환된 응답 내용을 로깅
-    //             console.error('Server response:', error.response.data);
-    //         } else {
-    //             // 그 외의 오류 처리
-    //             console.error('Error fetching news:', error.message);
-    //         }
-    //     }
-    // }
-    //!SECTION End Mediastack API
-
-    //!SECTION News API
+    //NOTE - 하루 1000번 제한, 기간 가늠 안됨
+    //다른 사람들 git issue에도 keywords 관련 문제가 올라와있으나, 해결되지 않은것으로 보임. https://github.com/apilayer/mediastack/issues/3
+    //하나만 검색하는건 되지만, 두개 검색은 안됨
+    //country를 따로 검색할 수 있으나, 해당 기사의 국가이며, 국가의 종류도 턱없이 적다. 13개다. 말도 안된다.
     async storeLiveArticle(dID: string, dDate: string, dType: string, dCountry: string) {
         const axios = require('axios');
         const searchQuery = `${dType}, ${dCountry}`; // 검색하고 싶은 키워드를 입력하세요.
         const disasterDetail = await this.disasterDetailRepository.findOne({ where: {dID} });
 
         const params = stringify({
-            q : `+${dType}AND${dCountry}`,
-            from: `${dDate}`,
-            to: `${dDate}`,
-            keywords: `${dType},${dCountry}`,
-            apikey: 'f18aeeded29546b798f6d02da93b75ba',
+            access_key: '5057f1372fdc2004d02af923fdeff472', // 여기에 실제 액세스 키를 입력하세요
+            category : 'general',
+            sort: 'published_desc',
+            keywords: `${dType} ${dCountry}`,
+            date: `${dDate}`,
+            limit: 1,
         });
 
         // const params = 'access_key=5057f1372fdc2004d02af923fdeff472&category=general&sort=published_desc&keywords=flood,kenya&date=2023-10-15&limit=1';
         console.log(params);
+        console.log(`https://api.mediastack.com/v1/news?${params}`);
         try 
         {
-            const response = await axios.get(`https://newsapi.org/v2/everything?${params}`);
+            const response = await axios.get(`http://api.mediastack.com/v1/news?${params}`);
             console.log(response.data);
-            for (let n = 0; n < response.articles.length; n++) 
+            for (let n = 0; n < response.data.length; n++) 
             {
-                const headline = response.articles[n].title;
-                const url = response.articles[n].url;
+                const headline = response.data[n].title;
+                const url = response.data[n].url;
                 
                 const liveArticle = new LiveArticleEntity();
                 liveArticle.headline = headline;
@@ -602,6 +561,52 @@ export class DisastersService {
             }
         }
     }
+    //!SECTION End Mediastack API
+
+    //!SECTION News API
+    //NOTE - 하루 100번 제한, 한달전까지만 검색 가능
+    // async storeLiveArticle(dID: string, dDate: string, dType: string, dCountry: string) {
+    //     const axios = require('axios');
+    //     const searchQuery = `${dType}, ${dCountry}`; // 검색하고 싶은 키워드를 입력하세요.
+    //     const disasterDetail = await this.disasterDetailRepository.findOne({ where: {dID} });
+
+    //     const params = stringify({
+    //         q : `+${dType}AND${dCountry}`,
+    //         from: `${dDate}`,
+    //         to: `${dDate}`,
+    //         keywords: `${dType},${dCountry}`,
+    //         apikey: 'f18aeeded29546b798f6d02da93b75ba',
+    //     });
+
+    //     // const params = 'access_key=5057f1372fdc2004d02af923fdeff472&category=general&sort=published_desc&keywords=flood,kenya&date=2023-10-15&limit=1';
+    //     console.log(params);
+    //     try 
+    //     {
+    //         const response = await axios.get(`https://newsapi.org/v2/everything?${params}`);
+    //         console.log(response.data);
+    //         for (let n = 0; n < response.articles.length; n++) 
+    //         {
+    //             const headline = response.articles[n].title;
+    //             const url = response.articles[n].url;
+                
+    //             const liveArticle = new LiveArticleEntity();
+    //             liveArticle.headline = headline;
+    //             liveArticle.url = url;
+    //             liveArticle.disasterDetail = disasterDetail; // 할당
+
+    //             await this.liveArticleRepository.save(liveArticle);
+    //             console.log(`success save article ${headline}`);
+    //         }
+    //     } catch (error) {
+    //         if (error.response) {
+    //             // 서버에서 반환된 응답 내용을 로깅
+    //             console.error('Server response:', error.response.data);
+    //         } else {
+    //             // 그 외의 오류 처리
+    //             console.error('Error fetching news:', error.message);
+    //         }
+    //     }
+    // }
     //!SECTION End News API
     
 
