@@ -45,7 +45,7 @@ export class DisastersDetailEntity {
     @Column()
     dUrl: string;
 
-    @OneToMany(() => LiveArticleEntity, liveArticle => liveArticle.disasterDetail)
+    @OneToMany(() => LiveArticleEntity, liveArticle => liveArticle.dID)
     liveArticles: LiveArticleEntity[];
 
 }
