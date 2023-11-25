@@ -1,6 +1,8 @@
 import { IsString } from 'class-validator';
 
-export class GoogleUser{
+export class GoogleUser {
+    @IsString()
+    id: string;
 
     @IsString()
     provider: string;

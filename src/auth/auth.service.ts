@@ -18,14 +18,14 @@ export class AuthService {
     constructor(
         private userRepository: UserRepository,
         private jwtService: JwtService
-    ){}
+    ) { }
 
     async findByProviderIdOrSave(googleUser: GoogleUser): Promise<User> {
-        const { providerId, provider, email, name} = googleUser;
+        const { providerId, provider, email, name } = googleUser;
 
         let user = await this.userRepository.findOneBy({ providerId });
 
-        if(!user){
+        if (!user) {
             user = this.userRepository.create({
                 provider,
                 providerId,
@@ -48,8 +48,29 @@ export class AuthService {
             secret: process.env.JWT_SECRET,
         })
 
-        return { accessToken, refreshToken};
+        return { accessToken, refreshToken };
     }
+
+    async refreshToken(refreshToken: string): Promise<string> {
+        try {
+            const decoded = this.jwtService.verify(refreshToken, {
+                secret: process.env.JWT_SECRET_REFRESH,
+            });
+
+            const payload = {
+                sub: decoded.sub,
+                email: decoded.email
+            };
+            return this.jwtService.sign(payload, {
+                secret: process.env.JWT_SECRET,
+                expiresIn: '2h', // 2시간
+            });
+
+        } catch (e) {
+            throw new UnauthorizedException('Invalid token');
+        }
+    }
+
 
     async updateHashedRefreshToken(userId: string, refreshToken: string): Promise<void> {
         const salt = await bcrypt.genSalt();
@@ -58,6 +79,10 @@ export class AuthService {
         await this.userRepository.update(userId, {
             hashedRefreshToken: hashedRefreshToken,
         });
+    }
+
+    async revokeToken(id: string): Promise<void> {
+        await this.userRepository.update(id, { hashedRefreshToken: null })
     }
 
     // async signUp(authCredentialsDto: AuthCredentialsDto): Promise<User> {

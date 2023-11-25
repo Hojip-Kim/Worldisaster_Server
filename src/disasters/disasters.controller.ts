@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { DisastersService } from './disasters.service';
 import { DisastersDetailEntity } from './disasters-detail.entity';
 
@@ -16,10 +16,41 @@ export class DisastersController {
 
     /* Actual API Implementation */
 
+    @Get('/live')
+    async getByStatusOngoing(): Promise<DisastersDetailEntity[]> {
+        console.log('API : GET call made to fetch all disasters by status (ongoing)');
+
+        return this.disastersService.getDisastersByStatusOngoing();
+    }
+
+    @Get('/archive')
+    async getByStatusPast(): Promise<DisastersDetailEntity[]> {
+        console.log('API : GET call made to fetch all disasters by status (past)');
+
+        return this.disastersService.getDisastersByStatusPast();
+    }
+
+    
+
     @Get('/')
     async getAllDetails(): Promise<DisastersDetailEntity[]> {
         console.log('API : GET call made to fetch all disasters detail');
         return await this.disastersService.getAllDisasters();
+    }
+    
+    @Get('/filtered')
+    async getDisasters(
+        @Query('country') country?: string,
+        @Query('year') year?: string,
+        @Query('type') type?: string
+    ): Promise<DisastersDetailEntity[]> {
+        console.log('API : filtered GET call');
+        return this.disastersService.getDisastersFiltered(country, year, type);
+    }
+    
+    @Get('/detailJson/:dID')
+    async getDisastersDetailBydID(@Param('dID') dID: string): Promise<DisastersDetailEntity> {
+        return this.disastersService.getDisastersDetailBydID(dID);
     }
 
     @Get('/:country')
@@ -44,17 +75,6 @@ export class DisastersController {
         }
     }
 
-    @Get('/live')
-    async getByStatusOngoing(): Promise<DisastersDetailEntity[]> {
-        console.log('API : GET call made to fetch all disasters by status (ongoing)');
 
-        return this.disastersService.getDisastersByStatusOngoing();
-    }
-
-    @Get('/archive')
-    async getByStatusPast(): Promise<DisastersDetailEntity[]> {
-        console.log('API : GET call made to fetch all disasters by status (past)');
-
-        return this.disastersService.getDisastersByStatusPast();
-    }
+    
 }

@@ -30,6 +30,10 @@ export class AuthController {
             throw new UnauthorizedException('No user from Google');
         }
 
+        const twoHours = 1000 * 60 * 60 * 2; // expires 5분
+        const expiresTime = new Date(Date.now() + twoHours);
+
+
         const user = await this.authService.findByProviderIdOrSave(req.user as GoogleUser);
         const payload: JwtPayload = { sub: user.id, email: user.email }
 
@@ -38,14 +42,13 @@ export class AuthController {
         await res.cookie('access-token', accessToken, {
             domain: 'worldisaster.com',
             path: '/',
-            httpOnly: true,
             secure: true,
-            sameSite: 'none'
+            sameSite: 'none',
+            expires: expiresTime
         });
         await res.cookie('refresh-token', refreshToken, {
             domain: 'worldisaster.com',
             path: '/',
-            httpOnly: true,
             secure: true,
             sameSite: 'none'
         });
@@ -54,6 +57,44 @@ export class AuthController {
 
         res.redirect('https://worldisaster.com/');
 
+    }
+    @UseGuards(AuthGuard('jwt-access'))
+    @Get('/logout')
+    async logout(@Req() req: CustomRequest, @Res() res: Response) {
+        // if (!req.user) {
+        //     await this.authService.revokeToken(req.user.id);
+        // }
+
+        res.clearCookie('access-token', {
+            domain: 'worldisaster.com',
+            path: '/',
+            secure: true,
+            sameSite: 'none'
+        });
+        res.clearCookie('refresh-token', {
+            domain: 'worldisaster.com',
+            path: '/',
+            secure: true,
+            sameSite: 'none'
+        });
+
+        res.redirect('https://worldisaster.com/');
+    }
+
+    @UseGuards(AuthGuard('jwt-access'))
+    @Get('Test')
+    async test(@Req() req: CustomRequest, @Res() res: Response) {
+        console.log('req.user', req.user);
+        res.send('test');
+    }
+
+    @UseGuards(AuthGuard('jwt-refresh'))
+    @Get('refresh')
+    async restoreAccessToken(@Req() req: Request): Promise<{ accessToken: string }> {
+        console.log(req.cookies);
+        const refreshToken = req.cookies['refresh-token'];
+        const accessToken = await this.authService.refreshToken(refreshToken);
+        return { accessToken };
     }
 
     // @Post('/signup')

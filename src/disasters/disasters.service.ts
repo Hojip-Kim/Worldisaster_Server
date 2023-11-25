@@ -83,6 +83,39 @@ export class DisastersService {
             .getMany();
     }
 
+    async getDisastersFiltered(country?: string, year?: string, type?: string): Promise<DisastersDetailEntity[]> {
+        // 필터링 로직 구현
+        // 예: country, year, type에 따라 다른 쿼리 실행
+        // 쿼리 빌더 시작
+
+        let query = this.disasterDetailRepository.createQueryBuilder('disaster');
+
+        // country 파라미터가 있으면 쿼리에 추가
+        if (country) {
+            query = query.andWhere('disaster.dCountry = :country', { country });
+        }
+
+        // year 파라미터가 있으면 쿼리에 추가
+        if (year) {
+            query = query.andWhere('SUBSTRING(disaster.dDate, 1, 4) = :year', { year });
+        }
+
+        // type 파라미터가 있으면 쿼리에 추가
+        if (type) {
+            query = query.andWhere('disaster.dType = :type', { type });
+        }
+        
+        // 결과 반환
+        return query.getMany();
+    }
+
+    async getDisastersDetailBydID(dID: string): Promise<DisastersDetailEntity> {
+        return this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('disaster.dID = :dID', { dID })
+            .getOne();
+    }
+
     /* 여기서부터는 주기적으로 데이터를 갱신해주는 역할 */
 
     async fetchAndCompareCount(): Promise<{ success: boolean, message: string }> {
@@ -271,4 +304,14 @@ export class DisastersService {
         console.log("\n@ Disaster Auto Update Started - Regular 1-minute API Request made to fetch Disasters");
         await this.fetchAndCompareCount();
     }
+
+
+
+
 }
+//구글어스형태의 ux => 실시간 구글어스 지구를 돌려가면서 땡겨보기도하고, 줌아웃도하고 하면서 재난이 일어난거것에대한 표기 => 누르면 자세한설명이 나오고, 전세계적인 재난상황을 exploring.
+//그 ux를 구현하지못하면 의미가 많이 떨어짐. 나라들을 찍어놓음. 채팅없어도됨. 부가적인 기능이 필요없음. => 메인기능을 더 다듬어야함.
+//기사 크롤링 => 지역 이름 => api에 때려박아서 위도와 경도를 찾기.
+
+//지구본에 혼을 담기 => 확대기능, 축소기능을 통해 인터랙티브한 상호작용이 나오게해야함. 다른페이지로 이동하게하면 안됨.
+//
