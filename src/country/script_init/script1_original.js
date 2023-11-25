@@ -182,20 +182,10 @@ const rw_edge_cases = {
 };
 
 const pool = new Pool({
-<<<<<<< HEAD:src/country/script_init/country_table_init.js
     user: 'worldisaster',
     host: 'worldisaster-database.c1bs1dug29ac.ap-northeast-2.rds.amazonaws.com',
     database: 'worldisaster_db',
     password: 'world123',
-=======
-    host: 'localhost',
-    // user: 'jungle',
-    // database: 'db_test',
-    // password: 'wjdrmf!@#$',
-    user: 'namamu',
-    password: 'wjdrmf12#$',
-    database: 'db_localhost',
->>>>>>> 3c9104c9f357717779d192ffd86d08d367df3a51:src/country/script_init/script1_original.js
     port: 5432,
 });
 

@@ -97,6 +97,17 @@ export class AuthController {
         return { accessToken };
     }
 
+    @UseGuards(AuthGuard('jwt-access'))
+    @Get('info')
+    async getUserInfo(@Req() req: CustomRequest, @Res() res: Response) {
+
+        const { provider, email, name } = req.user;
+
+        console.log(provider, email, name);
+
+        res.json({ name: name, provider: provider, email: email });
+    }
+
     // @Post('/signup')
     // signUp(@Body(ValidationPipe) authcredentialsDto: AuthCredentialsDto): Promise<User> {
     //     return this.authService.signUp(authcredentialsDto);

@@ -106,10 +106,6 @@ export class OldDisastersService {
         if (newEntries.length == 0) {
             console.log('No new entries to update');
             return;
-        } else if (newEntries.length > 10) {
-            console.log('Tons of updates to Disaster Details DB');
-        } else {
-            console.log('Less than 10 new updates:', newEntries);
         }
 
         // 만일 newEntries의 크기가 너무 크다면 네트워크/용량 제어
