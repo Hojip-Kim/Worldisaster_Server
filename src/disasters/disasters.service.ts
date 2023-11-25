@@ -520,9 +520,9 @@ export class DisastersService {
 
         const params = stringify({
             access_key: '5057f1372fdc2004d02af923fdeff472', // 여기에 실제 액세스 키를 입력하세요
-            categories : 'general',
+            category : 'general',
             sort: 'published_desc',
-            keywords: `${dType},${dCountry}`,
+            keywords: `${dType}`,
             date: `${dDate}`,
             limit: 1,
         });
