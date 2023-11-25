@@ -9,19 +9,28 @@ export class CountryEntity {
     objectId: number;
 
     @Column()
-    cCode: string;
-
-    @Column()
-    cCountry: string;
+    cCode: string; // 국가정보 검색에 활용되는 두글자 코드 (CIA 기준)
 
     @Column({ nullable: true })
-    cCountry_rw: string;
-
-    @Column({ nullable: true })
-    cCountry_other: string;
+    cIso3: string; // 글로벌리 통용되는 세글자 국가 코드 (UN, EU 등)
 
     @Column()
-    cContinent: string; // "Map references"
+    cCountry: string; // 기본적으로 통용되는 국가 이름 (CIA 기준)
+
+    @Column({ nullable: true })
+    cCountry_rw: string; // ReliefWeb에서 사용되는 국가 이름
+
+    @Column({ nullable: true })
+    cCountry_other: string; // 기타 자주 불리우는 이름, 또는 일부 식민지 이름일 경우 해당
+
+    @Column({ nullable: true })
+    cCountry_wiki: string; // 위키피디아에서 검색되는 이름
+
+    @Column({ nullable: true })
+    cCountry_official: string; // 법적으로 본인들이 희망하는 공식 이름
+
+    @Column()
+    cContinent: string; // CIA 2글자 코드와 함께 API 호출에 활용되는 값
 
     @Column({ nullable: true })
     cTimeDifference: string; // "Government" - "Capital" - "time difference"

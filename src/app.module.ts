@@ -6,12 +6,8 @@ import { ConfigModule } from '@nestjs/config';
 import { DonateModule } from './donate/donate.module';
 import { ScheduleModule } from '@nestjs/schedule';
 
-import { DisastersModule } from './disasters/disasters.module';
 import { CountryModule } from './country/country.module';
-
-
-
-
+import { OldDisastersModule } from './oldDisasters/oldDisasters.module';
 
 @Module({
   imports: [
@@ -19,7 +15,7 @@ import { CountryModule } from './country/country.module';
       isGlobal: true,
     }),
     TypeOrmModule.forRoot(typeORMConfig), ScheduleModule.forRoot(),
-    AuthModule, DonateModule, DisastersModule,
+    AuthModule, DonateModule, OldDisastersModule,
     CountryModule,],
 })
 

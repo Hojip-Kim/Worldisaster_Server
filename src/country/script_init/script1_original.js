@@ -97,7 +97,7 @@ const name_to_code = {
     "China - Taiwan Province": "tw",
     "Côte d'Ivoire": "iv",
     "Democratic People's Republic of Korea": "kn",
-    "Democratic Republic of the Congo": "cg",
+    "Democratic Republic of the Congo": "cf",
     "French Polynesia (France)": "fp",
     "Gambia": "ga",
     "Iran (Islamic Republic of)": "ir",
@@ -182,10 +182,20 @@ const rw_edge_cases = {
 };
 
 const pool = new Pool({
+<<<<<<< HEAD:src/country/script_init/country_table_init.js
     user: 'worldisaster',
     host: 'worldisaster-database.c1bs1dug29ac.ap-northeast-2.rds.amazonaws.com',
     database: 'worldisaster_db',
     password: 'world123',
+=======
+    host: 'localhost',
+    // user: 'jungle',
+    // database: 'db_test',
+    // password: 'wjdrmf!@#$',
+    user: 'namamu',
+    password: 'wjdrmf12#$',
+    database: 'db_localhost',
+>>>>>>> 3c9104c9f357717779d192ffd86d08d367df3a51:src/country/script_init/script1_original.js
     port: 5432,
 });
 
@@ -195,6 +205,7 @@ const createTable = async () => {
         const queryText = `
         CREATE TABLE IF NOT EXISTS country_mappings (
             code VARCHAR(20) PRIMARY KEY,
+            iso3 VARCHAR(20) NULL,
             continent VARCHAR(255) NULL,
             cia_name VARCHAR(255) NULL,
             rw_name VARCHAR(255) NULL,
