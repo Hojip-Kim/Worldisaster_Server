@@ -534,8 +534,7 @@ export class DisastersService {
         try 
         {
             const response = await axios.get(`http://api.mediastack.com/v1/news?${params}`);
-            console.log(response.data);
-            for (let n = 0; n < response.data.length; n++) 
+            for (let n = 0; n < 3; n++) 
             {
                 const headline = response.data[n].title;
                 const url = response.data[n].url;
