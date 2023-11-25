@@ -527,6 +527,7 @@ export class DisastersService {
             limit: 1,
         });
         console.log(params);
+        console.log(`https://api.mediastack.com/v1/news?${params}`);
         try 
         {
             const response = await axios.get(`http://api.mediastack.com/v1/news?${params}`);
