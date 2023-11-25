@@ -515,11 +515,10 @@ export class DisastersService {
     //!SECTION Mediastack API
     async storeLiveArticle(dID: string, dDate: string, dType: string, dCountry: string) {
         const axios = require('axios');
-        const apiKey = '5057f1372fdc2004d02af923fdeff472'; // 여기에 Bing API 키를 입력하세요.
         const searchQuery = `${dType} ${dCountry}`; // 검색하고 싶은 키워드를 입력하세요.
         const disasterDetail = await this.disasterDetailRepository.findOne({ where: {dID} });
         const params = stringify({
-            access_key: 'ACCESS_KEY', // 여기에 실제 액세스 키를 입력하세요
+            access_key: '5057f1372fdc2004d02af923fdeff472', // 여기에 실제 액세스 키를 입력하세요
             category: '-general',
             sort: 'published_desc',
             keywords: searchQuery,
