@@ -13,7 +13,7 @@ export class LiveArticleEntity {
     url: string;
 
     @ManyToOne(() => DisastersDetailEntity)
-    @JoinColumn({name: 'dID'})
-    disasterDetail: DisastersDetailEntity;
+    @JoinColumn({ name: 'dID' }) // 여기서 dID는 DisastersDetailEntity의 dID 필드를 참조합니다
+    dID: DisastersDetailEntity
 
 }
