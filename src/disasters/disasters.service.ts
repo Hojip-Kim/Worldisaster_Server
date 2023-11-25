@@ -518,14 +518,16 @@ export class DisastersService {
         const searchQuery = `${dType}, ${dCountry}`; // 검색하고 싶은 키워드를 입력하세요.
         const disasterDetail = await this.disasterDetailRepository.findOne({ where: {dID} });
 
-        const params = stringify({
-            access_key: '5057f1372fdc2004d02af923fdeff472', // 여기에 실제 액세스 키를 입력하세요
-            category : 'general',
-            sort: 'published_desc',
-            keywords: `${dType},${dCountry}`,
-            date: `${dDate}`,
-            limit: 1,
-        });
+        // const params = stringify({
+        //     access_key: '5057f1372fdc2004d02af923fdeff472', // 여기에 실제 액세스 키를 입력하세요
+        //     category : 'general',
+        //     sort: 'published_desc',
+        //     keywords: `${dType},${dCountry}`,
+        //     date: `${dDate}`,
+        //     limit: 1,
+        // });
+
+        const params = 'access_key=5057f1372fdc2004d02af923fdeff472&category=general&sort=published_desc&keywords=flood,kenya&date=2023-10-15&limit=1';
         console.log(params);
         console.log(`https://api.mediastack.com/v1/news?${params}`);
         try 
