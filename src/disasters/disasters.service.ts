@@ -399,8 +399,8 @@ export class DisastersService {
         const dCountry = getDisasterDetail.dCountry;
         const dType = getDisasterDetail.dType;
 
-        console.log('In getDisastersTypeBydID');
-        console.log(`year: ${dDate}, country: ${dCountry}, dType: ${dType}`);
+        // console.log('In getDisastersTypeBydID');
+        // console.log(`year: ${dDate}, country: ${dCountry}, dType: ${dType}`);
 
         // const articles = await this.getDisastersByCountryAndYearAndTypeAndID(country, year, dType, dID);
 
@@ -525,6 +525,7 @@ export class DisastersService {
             date: dDate,
             limit: 5,
         });
+        
         try 
         {
             const response = await axios.get(`http://api.mediastack.com/v1/news?${params}`);
@@ -543,7 +544,13 @@ export class DisastersService {
                 console.log(`success save article ${headline}`);
             }
         } catch (error) {
-            console.error('Error fetching news:', error);
+            if (error.response) {
+                // 서버에서 반환된 응답 내용을 로깅
+                console.error('Server response:', error.response.data);
+            } else {
+                // 그 외의 오류 처리
+                console.error('Error fetching news:', error.message);
+            }
         }
     }
     //!SECTION End Mediastack API

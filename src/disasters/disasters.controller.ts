@@ -56,6 +56,7 @@ export class DisastersController {
             await this.disastersService.storeLiveArticle(dID, dDate, dType, dCountry);
         }
     }
+    
     @Get('/archive')
     async getByStatusPast(): Promise<DisastersDetailEntity[]> {
         console.log('API : GET call made to fetch all disasters by status (past)');
