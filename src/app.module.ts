@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { UploadModule } from './upload/upload.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm'; 
-import { typeORMConfig } from './configs/typeorm.config';
+import { typeOrmConfig } from './configs/typeorm.config';
 import { ScheduleModule } from '@nestjs/schedule';
 
 import { DisastersModule } from './disasters/disasters.module';
@@ -15,7 +15,7 @@ import { CountryMappings } from './country/script_init/country-table.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(typeORMConfig),
+    TypeOrmModule.forRoot(typeOrmConfig),
     ScheduleModule.forRoot(),
     UploadModule, CountryModule, DisastersModule, ConfigModule.forRoot({ isGlobal: true })],
 })

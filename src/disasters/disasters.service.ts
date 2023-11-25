@@ -495,7 +495,7 @@ export class DisastersService {
                     const liveArticle = new LiveArticleEntity();
                     liveArticle.headline = headline;
                     liveArticle.url = url;
-                    liveArticle.disasterDetail = disasterDetail; // 할당
+                    liveArticle.dID = disasterDetail; // 할당
 
                     await this.liveArticleRepository.save(liveArticle);
                             console.log(`success save article ${headline}`);
