@@ -458,7 +458,7 @@ export class DisastersService {
         const result = await this.disasterDetailRepository
             .createQueryBuilder('disaster')
             .select('disaster.dID')
-            .where('disaster.dDate >= :date', { date : '2022-12-31' })
+            .where('disaster.dDate >= :date', { date : '2023-10-01' })
             .getMany();
         if(result.length === 0) {
             throw new Error('No disasters found after the specified date.');
@@ -517,9 +517,9 @@ export class DisastersService {
     //다른 사람들 git issue에도 keywords 관련 문제가 올라와있으나, 해결되지 않은것으로 보임. https://github.com/apilayer/mediastack/issues/3
     //하나만 검색하는건 되지만, 두개 검색은 안됨
     //country를 따로 검색할 수 있으나, 해당 기사의 국가이며, 국가의 종류도 턱없이 적다. 13개다. 말도 안된다.
+    //해결했다. 어이없다. 띄어쓰기다. https://github.com/apilayer/mediastack/issues/3 이거 자세히 보니 띄어쓰기를 해야 검색이 된다고 나와있다
     async storeLiveArticle(dID: string, dDate: string, dType: string, dCountry: string) {
         const axios = require('axios');
-        const searchQuery = `${dType}, ${dCountry}`; // 검색하고 싶은 키워드를 입력하세요.
         const disasterDetail = await this.disasterDetailRepository.findOne({ where: {dID} });
 
         const params = stringify({
@@ -528,12 +528,9 @@ export class DisastersService {
             sort: 'published_desc',
             keywords: `${dType} ${dCountry}`,
             date: `${dDate}`,
-            limit: 1,
+            limit: 3,
         });
-
-        // const params = 'access_key=5057f1372fdc2004d02af923fdeff472&category=general&sort=published_desc&keywords=flood,kenya&date=2023-10-15&limit=1';
-        console.log(params);
-        console.log(`https://api.mediastack.com/v1/news?${params}`);
+        
         try 
         {
             const response = await axios.get(`http://api.mediastack.com/v1/news?${params}`);
