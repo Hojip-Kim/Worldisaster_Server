@@ -521,8 +521,8 @@ export class DisastersService {
             access_key: '5057f1372fdc2004d02af923fdeff472', // 여기에 실제 액세스 키를 입력하세요
             category: '-general',
             sort: 'published_desc',
-            keywords: searchQuery,
-            date: dDate,
+            keywords: `${dType}, ${dCountry}`,
+            date: `${dDate}`,
             limit: 5,
         });
         
