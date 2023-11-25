@@ -570,7 +570,7 @@ export class DisastersService {
             from: `${dDate}`,
             to: `${dDate}`,
             keywords: `${dType},${dCountry}`,
-            api_key: 'f18aeeded29546b798f6d02da93b75ba',
+            apikey: 'f18aeeded29546b798f6d02da93b75ba',
         });
 
         // const params = 'access_key=5057f1372fdc2004d02af923fdeff472&category=general&sort=published_desc&keywords=flood,kenya&date=2023-10-15&limit=1';
