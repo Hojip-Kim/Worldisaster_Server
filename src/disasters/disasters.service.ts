@@ -529,10 +529,10 @@ export class DisastersService {
         {
             const response = await axios.get(`http://api.mediastack.com/v1/news?${params}`);
 
-            for (let n = 0; n < response.data.value.length; n++) 
+            for (let n = 0; n < response.data.length; n++) 
             {
-                const headline = response.data.value[n].title;
-                const url = response.data.value[n].url;
+                const headline = response.data[n].title;
+                const url = response.data[n].url;
                 
                 const liveArticle = new LiveArticleEntity();
                 liveArticle.headline = headline;
