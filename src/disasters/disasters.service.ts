@@ -14,6 +14,7 @@ import * as sanitizeHtml from 'sanitize-html'; // HTTP 태그 정리 라이브�
 import { Cron, CronExpression } from '@nestjs/schedule'; // 스케쥴링 라이브러리
 import { firstValueFrom } from 'rxjs'; // 첫 요청을 promise로 돌려줌
 import { parse } from 'path';
+import { stringify } from 'querystring';
 
 // 새로운 재난이 발생하면 Push 해주는 웹소켓 등이 없으니, 주기적으로 리스트 확인이 필요함
 @Injectable()
@@ -464,50 +465,90 @@ export class DisastersService {
         }
         return result;
     }
+    //!SECTION Bing News API
+    // async storeLiveArticle(dID: string, dDate: string, dType: string, dCountry: string) {
+    //     const axios = require('axios');
+    //     const apiKey = '2a25766d28854a45a21da9cd886bb9c9'; // 여기에 Bing API 키를 입력하세요.
+    //     const searchQuery = `${dType} ${dCountry} ${dDate}`; // 검색하고 싶은 키워드를 입력하세요.
+    //     const apiUrl = `https://api.bing.microsoft.com/v7.0/news/search?q=${encodeURIComponent(searchQuery)}&mkt=en-US&safeSearch=Moderate`;
 
+    //     try {
+    //         const response = await axios.get(apiUrl, {
+    //             headers: { 'Ocp-Apim-Subscription-Key': apiKey }
+    //         });
+
+    //         const disasterDate = new Date(`${dDate}`);
+    //         for (let n = 0; n < response.data.value.length; n++) {
+                
+
+    //             const headlineLower = response.data.value[n].name.toLowerCase();
+    //             const description = response.data.value[n].description.toLowerCase();
+
+    //             const isdTypeInName = headlineLower.includes(dType.toLowerCase());
+    //             const isdTypeInDescription = description.includes(dType.toLowerCase());
+    //             const isdCountryInName = headlineLower.includes(dCountry.toLowerCase());
+    //             const isdCountryInDescription = description.includes(dCountry.toLowerCase());
+
+    //             if (isdTypeInName && isdTypeInDescription && isdCountryInName && isdCountryInDescription && disasterDate <= new Date(response.data.value[n].datePublished)) {
+    //                 const disasterDetail = await this.disasterDetailRepository.findOne({ where: {dID} });
+    //                 const headline = response.data.value[n].name;
+    //                 const url = response.data.value[n].url;
+    //                 const liveArticle = new LiveArticleEntity();
+    //                 liveArticle.headline = headline;
+    //                 liveArticle.url = url;
+    //                 liveArticle.disasterDetail = disasterDetail; // 할당
+
+    //                 await this.liveArticleRepository.save(liveArticle);
+    //                         console.log(`success save article ${headline}`);
+    //                     }
+    //             else{
+    //                 console.log('No articles found');
+    //             }
+                
+    //         }
+    //     } catch (error) {
+    //         console.error('Error fetching news:', error);
+    //     }
+    // }
+    //!SECTION End Bing News API
+
+    //!SECTION Mediastack API
     async storeLiveArticle(dID: string, dDate: string, dType: string, dCountry: string) {
         const axios = require('axios');
-        const apiKey = '2a25766d28854a45a21da9cd886bb9c9'; // 여기에 Bing API 키를 입력하세요.
-        const searchQuery = `${dType} ${dCountry} ${dDate}`; // 검색하고 싶은 키워드를 입력하세요.
-        const apiUrl = `https://api.bing.microsoft.com/v7.0/news/search?q=${encodeURIComponent(searchQuery)}&mkt=en-US&safeSearch=Moderate`;
+        const apiKey = '5057f1372fdc2004d02af923fdeff472'; // 여기에 Bing API 키를 입력하세요.
+        const searchQuery = `${dType} ${dCountry}`; // 검색하고 싶은 키워드를 입력하세요.
+        const disasterDetail = await this.disasterDetailRepository.findOne({ where: {dID} });
+        const params = stringify({
+            access_key: 'ACCESS_KEY', // 여기에 실제 액세스 키를 입력하세요
+            category: '-general',
+            sort: 'published_desc',
+            keywords: searchQuery,
+            date: dDate,
+            limit: 5,
+        });
+        try 
+        {
+            const response = await axios.get(`http://api.mediastack.com/v1/news?${params}`);
 
-        try {
-            const response = await axios.get(apiUrl, {
-                headers: { 'Ocp-Apim-Subscription-Key': apiKey }
-            });
-
-            const disasterDate = new Date(`${dDate}`);
-            for (let n = 0; n < response.data.value.length; n++) {
+            for (let n = 0; n < response.data.value.length; n++) 
+            {
+                const headline = response.data.value[n].title;
+                const url = response.data.value[n].url;
                 
+                const liveArticle = new LiveArticleEntity();
+                liveArticle.headline = headline;
+                liveArticle.url = url;
+                liveArticle.disasterDetail = disasterDetail; // 할당
 
-                const headlineLower = response.data.value[n].name.toLowerCase();
-                const description = response.data.value[n].description.toLowerCase();
-
-                const isdTypeInName = headlineLower.includes(dType.toLowerCase());
-                const isdTypeInDescription = description.includes(dType.toLowerCase());
-                const isdCountryInName = headlineLower.includes(dCountry.toLowerCase());
-                const isdCountryInDescription = description.includes(dCountry.toLowerCase());
-
-                if (isdTypeInName && isdTypeInDescription && isdCountryInName && isdCountryInDescription && disasterDate <= new Date(response.data.value[n].datePublished)) {
-                    const disasterDetail = await this.disasterDetailRepository.findOne({ where: {dID} });
-                    const headline = response.data.value[n].name;
-                    const url = response.data.value[n].url;
-                    const liveArticle = new LiveArticleEntity();
-                    liveArticle.headline = headline;
-                    liveArticle.url = url;
-                    liveArticle.disasterDetail = disasterDetail; // 할당
-
-                    await this.liveArticleRepository.save(liveArticle);
-                            console.log(`success save article ${headline}`);
-                        }
-                else{
-                    console.log('No articles found');
-                }
-                
+                await this.liveArticleRepository.save(liveArticle);
+                console.log(`success save article ${headline}`);
             }
         } catch (error) {
             console.error('Error fetching news:', error);
         }
     }
+    //!SECTION End Mediastack API
+
+    
 
 }
