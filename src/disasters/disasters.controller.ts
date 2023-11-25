@@ -45,16 +45,21 @@ export class DisastersController {
     @Get('live/force')
     async storeDisastersLiveArticle() {
         // test용으로 2023년 이후의 재난만 저장
-        const getDisastersIDList = await this.disastersService.getDisastersID();
+        // const getDisastersIDList = await this.disastersService.getDisastersID();
 
-        for (let i = 0; i < getDisastersIDList.length; i++) {
-            const dID = getDisastersIDList[i].dID;
-            const infoDisaster = await this.disastersService.getDisastersTypeBydID(dID);
-            const dCountry = await infoDisaster.dCountry;
-            const dType = await infoDisaster.dType;
-            const dDate = await infoDisaster.dDate;
-            await this.disastersService.storeLiveArticle(dID, dDate, dType, dCountry);
-        }
+        // for (let i = 0; i < getDisastersIDList.length; i++) {
+        //     const dID = getDisastersIDList[i].dID;
+        //     const infoDisaster = await this.disastersService.getDisastersTypeBydID(dID);
+        //     const dCountry = await infoDisaster.dCountry;
+        //     const dType = await infoDisaster.dType;
+        //     const dDate = await infoDisaster.dDate;
+        //     await this.disastersService.storeLiveArticle(dID, dDate, dType, dCountry);
+        // }
+        const dType = 'flood'
+        const dCountry = 'Kenya'
+        const dDate = '2023-10-15'
+        const dID = '51799'
+        await this.disastersService.storeLiveArticle(dID, dDate, dType, dCountry);
     }
     
     @Get('/archive')
