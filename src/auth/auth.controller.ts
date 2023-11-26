@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { GoogleUser } from './dto/googleUser.dto';
+import { JwtService } from '@nestjs/jwt';
 
 
 export interface JwtPayload {
@@ -16,7 +17,8 @@ interface CustomRequest extends Request {
 
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) { }
+    constructor(private authService: AuthService,
+        private jwtService: JwtService) { }
 
     @Get('/google')
     @UseGuards(AuthGuard('google'))
@@ -100,12 +102,15 @@ export class AuthController {
     @UseGuards(AuthGuard('jwt-access'))
     @Get('info')
     async getUserInfo(@Req() req: CustomRequest, @Res() res: Response) {
+        const { email } = req.user;
 
-        const { provider, email, name } = req.user;
+        const user = this.authService.findUserByEmail(email);
 
-        console.log(provider, email, name);
+        const cleanedName = (await user).name.replace('undefined', '');
 
-        res.json({ name: name, provider: provider, email: email });
+
+        return res.json({ name: cleanedName, email: (await user).email, });
+
     }
 
     // @Post('/signup')
