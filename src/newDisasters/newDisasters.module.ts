@@ -5,6 +5,7 @@ import { CountryMappings } from 'src/country/script_init/country-table.entity';
 import { NewDisastersController } from './newDisasters.controller';
 import { NewDisastersService } from './newDisasters.service';
 import { NewDisastersEntity } from './newDisasters.entity';
+import { NewDisastersGateway } from './newDisasters.gateway';
 
 @Module({
   imports: [
@@ -13,6 +14,6 @@ import { NewDisastersEntity } from './newDisasters.entity';
     TypeOrmModule.forFeature([CountryMappings]),
   ],
   controllers: [NewDisastersController],
-  providers: [NewDisastersService]
+  providers: [NewDisastersService, NewDisastersGateway]
 })
 export class NewDisastersModule { }

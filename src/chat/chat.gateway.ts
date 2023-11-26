@@ -17,9 +17,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /* 채팅 서비스에 필요한 함수/기능들 Import */
   constructor(private chatService: ChatService) { }
 
+  /* 현재 연결된 유저 수 관리 */
+  private numberOfConnectedClients = 0;
+  // 웹소켓 전체 연결자 수 외에도 방단위로 추적 가능한데, 방 이름/번호를 먼저 같이 정한 후 처리
+
   /* 새로운 연결이 생성되면 Trigger */
   handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
+    this.numberOfConnectedClients++;
+    console.log(`Chat Websocket Subscribers: ${this.numberOfConnectedClients} (New connection by '${client.id}')`);
 
     // 추후 AUTH를 연결하게 되면 연결 요청에 토큰 정보를 보내게 되며, 
     // 그 정보를 여기서 활용해서 인증 / 거부 등을 처리하면 됨
@@ -54,7 +59,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /* 기존 연결이 끊기면 Trigger */
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
+    this.numberOfConnectedClients--;
+    console.log(`Chat Websocket Subscribers: ${this.numberOfConnectedClients} ('${client.id}' disconnected)`);
 
     // 연결이 끊기는 경우, 예컨대 Live 상태를 Offline으로 바꾸는 등 여기서 처리
   }

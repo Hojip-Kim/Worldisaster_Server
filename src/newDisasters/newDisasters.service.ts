@@ -9,6 +9,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { CountryMappings } from 'src/country/script_init/country-table.entity';
 import { NewDisastersEntity } from './newDisasters.entity';
+import { NewDisastersGateway } from './newDisasters.gateway';
 
 @Injectable()
 export class NewDisastersService {
@@ -18,8 +19,9 @@ export class NewDisastersService {
         private httpService: HttpService, // HTTP 요청 라이브러리를 가져오고
         @InjectRepository(CountryMappings) // CountryMappings 테이블도 불러오고
         private countryMappingRepository: Repository<CountryMappings>,
-        @InjectRepository(NewDisastersEntity)
+        @InjectRepository(NewDisastersEntity) // NewDisastersEntity 테이블도 불러오고
         private disasterDetailRepository: Repository<NewDisastersEntity>,
+        private newDisastersGateway: NewDisastersGateway, // 재난 알림용 웹소켓 게이트웨이도 불러오기
     ) { }
 
     /* 주기적으로 RSS 피드를 확인하는 역할 */
@@ -87,7 +89,8 @@ export class NewDisastersService {
                         await this.disasterDetailRepository.save(disaster);
                         console.log(`New disaster added: ${disaster.dID}`);
 
-                        // (Placeholder) 알림을 보내야 함 여기서 @@@@@@@@@@@@@@@@@@@
+                        // 여기서 알림 전송을 트리거 @@@@@@@@
+                        this.newDisastersGateway.sendDisasterAlertToAllClients(disaster);
 
                     } catch (error) {
                         console.error('Error saving disaster to database:', error);

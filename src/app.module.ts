@@ -11,6 +11,7 @@ import { ChatModule } from './chat/chat.module';
 import { CountryModule } from './country/country.module';
 import { OldDisastersModule } from './oldDisasters/oldDisasters.module';
 import { NewDisastersModule } from './newDisasters/newDisasters.module';
+import { NewDisastersGateway } from './newDisasters/newDisasters.gateway';
 
 @Module({
   imports: [
@@ -23,6 +24,4 @@ import { NewDisastersModule } from './newDisasters/newDisasters.module';
     CountryModule, OldDisastersModule, NewDisastersModule,
   ],
 })
-
-
 export class AppModule { }
