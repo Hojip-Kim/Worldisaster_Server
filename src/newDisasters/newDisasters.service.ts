@@ -48,12 +48,33 @@ export class NewDisastersService {
 
                     // 각 칼럼들을 하나씩 순회하면서 비교해보고, 바꾸는게 있다면 shouldUpdate를 변경
                     let shouldUpdate = false;
-                    for (const key in disaster) {
-                        if (disaster[key] !== existingDisaster[key]) {
-                            existingDisaster[key] = disaster[key];
+                    for (const property in disaster) {
+
+                        // Entity에서 위도 경도는 Floating Point이며, 매번 오차가 조금씩 발생해서 업데이트가 실행되어버림
+                        if (property === 'dLatitude' || property === 'dLongitude') {
+                            const existingValue = existingDisaster[property];
+                            const newValue = disaster[property];
+
+                            // 따라서 값이 재대로 있다는 전제 하에, 두 변수를 모두 강제로 자연수로 만들어서 간단하게 비교 (소수점 아래는 버림)
+                            if (existingValue != null && newValue != null) {
+                                const numExisting = Math.trunc(Number(existingValue));
+                                const numNew = Math.trunc(Number(newValue));
+
+                                if (numExisting !== numNew) {
+                                    console.log(`Field to update: ${property}, Old value: ${numExisting}, New value: ${numNew}`);
+                                    existingDisaster[property] = disaster[property];
+                                    shouldUpdate = true;
+                                }
+                            }
+                        } else if (disaster[property] !== existingDisaster[property]) {
+                            // 위도 경도 아닌 값이 바뀌었을 경우 여기서 처리 (단, dStatus는 검색하지 않으니 조심)
+
+                            console.log(`Field to update: ${property}, Old value: ${existingDisaster[property]}, New value: ${disaster[property]}`);
+                            existingDisaster[property] = disaster[property];
                             shouldUpdate = true;
                         }
                     }
+
                     // shouldUpdate 상태라면 업데이트 (TypeORM은 save시 Entity / PrimaryColumn으로 알아서 업데이트 처리)
                     if (shouldUpdate) {
                         await this.disasterDetailRepository.save(existingDisaster);
@@ -111,20 +132,6 @@ export class NewDisastersService {
         // 처리된 재난들을 담을 배열을 하나 준비한 뒤 각각의 <item>들을 하나씩 처리
         const disasters = [];
         for (const item of items) { // items.map(async item...)로 하면 더 빠르지만, 데이터가 일부 깨지는 현상 발견 (하나씩 처리 필요)
-
-            // // <gdacs:iso3>이 빈 값을 제공하는 경우들이 있어 아래와 같이 처리
-            // let dCountryIso3 = item['gdacs:iso3']?.[0];
-            // if (!dCountryIso3 || dCountryIso3.trim() === '') {
-            //     dCountryIso3 = null;
-            // }
-
-            // // findOne이 iso3이 Null일 경우 첫 entry를 반환하기에 아래와 같이 처리
-            // let countryEntity = null;
-            // if (dCountryIso3) {
-            //     countryEntity = await this.countryMappingRepository.findOne({
-            //         where: { iso3: dCountryIso3 }
-            //     });
-            // }
 
             // iso3가 값이 없는 경우를 대비 (보조함수 활용)
             const mapLat = parseFloat(item['geo:Point']?.[0]['geo:lat']?.[0]);
