@@ -106,6 +106,12 @@ export class DisastersController {
         // return this.disastersService.getDisastersByCountryAndYear(country, year);
     }
 
+    //dID로 news 조회
+    @Get('live/:dID')
+    async getLiveArticleBydID(@Param('dID') dID: string): Promise<LiveArticleEntity[]> {
+        console.log('API get articles by dID');
+        return this.disastersService.getLiveArticleBydID(dID);
+    }
     @Get('/:dID')
     async getDisastersDetailBydID(@Param('dID') dID: string): Promise<DisastersDetailEntity> {
         return this.disastersService.getDisastersDetailBydID(dID);

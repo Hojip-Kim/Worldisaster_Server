@@ -605,5 +605,11 @@ export class DisastersService {
     // }
     //!SECTION End News API
     
+    //!SECTION Get Live News Service
+    async getLiveArticleBydID(dID: string): Promise<LiveArticleEntity[]> {
+        const liveNewsTable = await this.liveArticleRepository.find({ where: { disasterDetail : {dID} }});
+        return liveNewsTable;
+    }
+    //!SECTION End Get Live News Service 
 
 }
