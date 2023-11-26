@@ -11,7 +11,7 @@ import { stringify } from 'querystring';
 export class LiveNewsService {
     constructor(
         @InjectRepository(LiveNewsEntity)
-        private liveArticleRepository: Repository<LiveNewsEntity>
+        private liveArticleRepository: Repository<LiveNewsEntity>,
         @InjectRepository(OldDisastersEntity)
         private oldDisasterRepository: Repository<OldDisastersEntity>,
     ) {}

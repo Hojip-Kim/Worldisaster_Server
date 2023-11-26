@@ -29,7 +29,7 @@ export class LiveNewsController {
     }
     //dID로 news 조회
     @Get('/:dID')
-    async getLiveArticleBydID(@Param('dID') dID: string): Promise<LiveArticleEntity[]> {
+    async getLiveArticleBydID(@Param('dID') dID: string): Promise<LiveNewsEntity[]> {
         console.log('API get articles by dID');
         return this.liveNewsService.getLiveArticleBydID(dID);
     }
