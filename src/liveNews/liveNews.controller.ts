@@ -9,6 +9,7 @@ export class LiveNewsController {
     }
     @Get('force')
         async storeDisastersLiveArticle() {
+        console.log('API storeDisastersLiveArticle');
         // test용으로 2023년 10월 1일 이후의 재난만 저장
         const getDisastersIDList = await this.liveNewsService.getDisastersID();
 
