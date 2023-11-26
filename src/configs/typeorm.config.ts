@@ -13,13 +13,13 @@ export const typeORMConfig: TypeOrmModuleOptions = {
     password: 'world123',
     database: 'worldisaster_db',
     entities: [__dirname + '/../**/*.entity.{js,ts}',
-    OldDisastersEntity,
-    CountryEntity,
-    CountryMappings,
-    ChatEntity,
-]
+        OldDisastersEntity,
+        CountryEntity,
+        CountryMappings,
+        ChatEntity,
+    ]
     ,
-    synchronize: true
+    synchronize: false
     // synchronize: true // true값을주면 애플리케이션을 다시 실행할 때 엔티티안에서 수정된 컬럼의 길이 타입 변경값등을 해당 테이블을 drop한후 다시 생성해줌.
 }
 
