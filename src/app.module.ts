@@ -1,22 +1,27 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from './configs/typeorm.config';
-import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-import { DonateModule } from './donate/donate.module';
 import { ScheduleModule } from '@nestjs/schedule';
+
+import { AuthModule } from './auth/auth.module';
+import { DonateModule } from './donate/donate.module';
+import { ChatModule } from './chat/chat.module';
 
 import { CountryModule } from './country/country.module';
 import { OldDisastersModule } from './oldDisasters/oldDisasters.module';
+import { NewDisastersModule } from './newDisasters/newDisasters.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot(typeORMConfig), ScheduleModule.forRoot(),
-    AuthModule, DonateModule, OldDisastersModule,
-    CountryModule,],
+    TypeOrmModule.forRoot(typeORMConfig),
+    ScheduleModule.forRoot(),
+    AuthModule, DonateModule, ChatModule,
+    CountryModule, OldDisastersModule, NewDisastersModule,
+  ],
 })
 
 

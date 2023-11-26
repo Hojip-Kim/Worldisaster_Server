@@ -43,7 +43,8 @@
     "rxjs": "^7.8.1",
     "sanitize-html": "^2.11.0",
     "socket.io": "^4.7.2",
-    "typeorm": "^0.3.17"
+    "typeorm": "^0.3.17",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
