@@ -12,11 +12,7 @@ export const typeORMConfig: TypeOrmModuleOptions = {
     username: 'worldisaster',
     password: 'world123',
     database: 'worldisaster_db',
-    entities: [__dirname + '/../**/*.entity.{js,ts}',
-    OldDisastersEntity,
-    CountryEntity,
-    CountryMappings,
-    ChatEntity,
+    entities: [__dirname + '/../**/*.entity.{js,ts}'
 ]
     ,
     synchronize: true
