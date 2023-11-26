@@ -7,7 +7,7 @@ export class LiveNewsController {
     constructor(private readonly liveNewsService: LiveNewsService) { 
         
     }
-    @Get('/force')
+    @Get('force')
         async storeDisastersLiveArticle() {
         // test용으로 2023년 10월 1일 이후의 재난만 저장
         const getDisastersIDList = await this.liveNewsService.getDisastersID();
