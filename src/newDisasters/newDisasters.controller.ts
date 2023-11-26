@@ -10,7 +10,7 @@ export class NewDisastersController {
 
     @Get('forceSync')
     async debug_force_refresh(): Promise<{ success: boolean, message: string }> {
-        console.log("\nAPI : GET call made to force refresh newDisasters DB");
+        console.log("API : GET call made to force refresh newDisasters DB...");
         return await this.disastersService.handleDisasterUpdate();
     }
 }

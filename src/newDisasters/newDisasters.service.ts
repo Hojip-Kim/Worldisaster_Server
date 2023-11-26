@@ -11,22 +11,31 @@ import { CountryMappings } from 'src/country/script_init/country-table.entity';
 import { NewDisastersEntity } from './newDisasters.entity';
 import { NewDisastersGateway } from './newDisasters.gateway';
 
+import { UserRepository } from 'src/auth/user.repository';
+import { EmailAlertsService } from 'src/emailAlerts/emailAlerts.service';
+
 @Injectable()
 export class NewDisastersService {
 
     /* 필요한 Reference들을 Import */
     constructor(
         private httpService: HttpService, // HTTP 요청 라이브러리를 가져오고
+        private newDisastersGateway: NewDisastersGateway, // 재난 알림용 웹소켓 게이트웨이도 불러오고
+        private emailAlertsService: EmailAlertsService, // 이메일 전송을 위한 서비스도 불러오고,
+        private userRepository: UserRepository, // 이메일 대상자 필터링을 위해서 User 테이블도 불러오고
+
         @InjectRepository(CountryMappings) // CountryMappings 테이블도 불러오고
         private countryMappingRepository: Repository<CountryMappings>,
+
         @InjectRepository(NewDisastersEntity) // NewDisastersEntity 테이블도 불러오고
         private disasterDetailRepository: Repository<NewDisastersEntity>,
-        private newDisastersGateway: NewDisastersGateway, // 재난 알림용 웹소켓 게이트웨이도 불러오기
     ) { }
 
     /* 주기적으로 RSS 피드를 확인하는 역할 */
-    @Cron(CronExpression.EVERY_5_MINUTES)
+    @Cron(CronExpression.EVERY_MINUTE)
     async handleDisasterUpdate() {
+        console.log('GDACS Disaster Update Initiated...');
+
         try {
             // 보조 함수들을 통해서 실시간 RSS 피드 내역을 처리, Disasters 배열에 담기
             const rssFeedXml = await this.fetchRssFeed();
@@ -63,7 +72,7 @@ export class NewDisastersService {
                                 const numNew = Math.trunc(Number(newValue));
 
                                 if (numExisting !== numNew) {
-                                    console.log(`Field to update: ${property}, Old value: ${numExisting}, New value: ${numNew}`);
+                                    console.log(`Updated ${property} -> Old value: ${numExisting}, New value: ${numNew}...`);
                                     existingDisaster[property] = disaster[property];
                                     shouldUpdate = true;
                                 }
@@ -71,7 +80,7 @@ export class NewDisastersService {
                         } else if (disaster[property] !== existingDisaster[property]) {
                             // 위도 경도 아닌 값이 바뀌었을 경우 여기서 처리 (단, dStatus는 검색하지 않으니 조심)
 
-                            console.log(`Field to update: ${property}, Old value: ${existingDisaster[property]}, New value: ${disaster[property]}`);
+                            console.log(`Field to update: ${property}, Old value: ${existingDisaster[property]}, New value: ${disaster[property]}...`);
                             existingDisaster[property] = disaster[property];
                             shouldUpdate = true;
                         }
@@ -80,20 +89,22 @@ export class NewDisastersService {
                     // shouldUpdate 상태라면 업데이트 (TypeORM은 save시 Entity / PrimaryColumn으로 알아서 업데이트 처리)
                     if (shouldUpdate) {
                         await this.disasterDetailRepository.save(existingDisaster);
-                        console.log(`Updated disaster: ${disaster.dID}`);
+                        console.log(`Updated disaster: ${disaster.dID}...`);
                     }
 
                 } else { // DB에 없다면 새로 저장하고, 알림을 보낸 뒤 로그 남기기
 
                     try {
                         await this.disasterDetailRepository.save(disaster);
-                        console.log(`New disaster added: ${disaster.dID}`);
+                        console.log(`New disaster added to DB: ${disaster.dID}...`);
 
-                        // 여기서 알림 전송을 트리거 @@@@@@@@
-                        this.newDisastersGateway.sendDisasterAlertToAllClients(disaster);
+                        // 웹소켓 알림 및 이메일 전송 (Work in PROGRESS @@@@@@@@@@@@@@@@@@@@@@@@)
+                        this.newDisastersGateway.sendDisasterWebsocketAlert(disaster);
+                        await this.sendEmailAlert(disaster);
+                        console.log(`New disaster broadcasted via Websocket & Email...`);
 
                     } catch (error) {
-                        console.error('Error saving disaster to database:', error);
+                        console.error('Error saving or broadcasting disaster:', error);
                     }
                 }
 
@@ -104,16 +115,50 @@ export class NewDisastersService {
             // 위 과정을 통해 set에 남아있는 재난이 있다면, 더이상 GDACS 7-day RSS에 없으니 past로 상태값 변경
             for (const dID of dbDisasterIdSet) {
                 await this.disasterDetailRepository.update({ dID }, { dStatus: 'past' });
-                console.log(`Marked disaster as past: ${dID}`);
+                console.log(`Marked disaster as past: ${dID}.`);
             }
 
         } catch (error) {
             console.error('Error in handling disaster update:', error);
-            return { success: false, message: 'Update Failed' };
+            return { success: false, message: 'Update Failed.' };
         }
 
-        console.log('Update Completed');
-        return { success: true, message: 'Update Successful' };
+        console.log(`GDACS Update Completed. \n`);
+        return { success: true, message: 'Update Successful.' };
+    }
+
+    private async sendEmailAlert(disaster: NewDisastersEntity) {
+        // 고객 이메일 전송을 전담하는 보조함수
+
+        const emailContent = this.createEmailContent(disaster);
+        const targetUsers = await this.userRepository.find();
+        console.log(targetUsers);
+        for (const user of targetUsers) {
+            try {
+                await this.emailAlertsService.sendMail(
+                    user.email, // 이메일 받는이
+                    `Alert: ${disaster.dTitle}`, // 이메일 제목
+                    disaster.dDescription, // text 내용물 (모든 이메일이 html을 렌더하지 않으니)
+                    emailContent // html 내용물 (cc. createEmailContent)
+                );
+                console.log(`Email sent to: ${user.email}`);
+            } catch (error) {
+                console.error(`Error sending email to ${user.email}: `, error);
+            }
+        }
+    }
+
+    private createEmailContent(disaster: NewDisastersEntity): string {
+        // 고객 알림 이메일을 전송하기 위해 필요한 HTML 생성 함수 (보조 함수)
+
+        const emailHtml = `
+            <h1>New Disaster Alert: ${disaster.dTitle}</h1>
+            <p>${disaster.dDescription}</p>
+            <p>For more details, visit the following link:</p>
+            <a href="${disaster.dUrl}">${disaster.dUrl}</a>
+        `;
+
+        return emailHtml;
     }
 
     /* handleDisasterUpdate()에서 필요한 RSS 피드 data 값을 추출하는 함수 */

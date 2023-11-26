@@ -11,7 +11,7 @@ import { ChatModule } from './chat/chat.module';
 import { CountryModule } from './country/country.module';
 import { OldDisastersModule } from './oldDisasters/oldDisasters.module';
 import { NewDisastersModule } from './newDisasters/newDisasters.module';
-import { NewDisastersGateway } from './newDisasters/newDisasters.gateway';
+import { EmailAlertsModule } from './emailAlerts/emailAlerts.module';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import { NewDisastersGateway } from './newDisasters/newDisasters.gateway';
     }),
     TypeOrmModule.forRoot(typeORMConfig),
     ScheduleModule.forRoot(),
-    AuthModule, DonateModule, ChatModule,
+    AuthModule, DonateModule, ChatModule, EmailAlertsModule,
     CountryModule, OldDisastersModule, NewDisastersModule,
   ],
 })
