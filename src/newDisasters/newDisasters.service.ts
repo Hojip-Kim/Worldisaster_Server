@@ -40,6 +40,7 @@ export class NewDisastersService {
             // 보조 함수들을 통해서 실시간 RSS 피드 내역을 처리, Disasters 배열에 담기
             const rssFeedXml = await this.fetchRssFeed();
             const disasters = await this.parseRssFeed(rssFeedXml);
+            console.log(`${disasters.length} disasters in current GDACS feed...`);
 
             // 비교를 위해서 현재 DB에서 dStatus : realtime/ongoing 상태의 재난들을 배열에 담기
             const dbDisasters = await this.disasterDetailRepository.find({
@@ -51,9 +52,10 @@ export class NewDisastersService {
             // db에 있는 재난들의 dID로 구성된 set를 하나 만들어서 dStatus 업데이트에 활용
             const dbDisasterIdSet = new Set(dbDisasters.map(d => d.dID));
 
-            // 재난 발생 이메일을 보낼 때, 양이 많으면 논외처리
-            const disasterCount = disasters.length;
-            console.log(`${disasterCount} disasters in current GDACS feed...`);
+            // 재난 발생 이메일을 보낼 때, 양이 많으면 논외처리해야 함
+            const newDisastersForBroadcast = [];
+            let disasterUpdateCount = 0;
+            let disasterNewCount = 0;
 
             // 함수가 호출되는 현재 시각을 한번 정의
             const now = new Date();
@@ -104,6 +106,7 @@ export class NewDisastersService {
                     // shouldUpdate 상태라면 업데이트 (TypeORM은 save시 Entity / PrimaryColumn으로 알아서 업데이트 처리)
                     if (shouldUpdate) {
                         await this.disasterDetailRepository.save(existingDisaster);
+                        disasterUpdateCount++;
                         console.log(`Updated disaster: ${disaster.dID}...`);
                     }
 
@@ -111,14 +114,9 @@ export class NewDisastersService {
 
                     try {
                         await this.disasterDetailRepository.save(disaster);
+                        newDisastersForBroadcast.push(disaster);
+                        disasterNewCount++
                         console.log(`New disaster added to DB: ${disaster.dID}...`);
-
-                        // 웹소켓 알림 및 이메일 전송 (Work in PROGRESS @@@@@@@@@@@@@@@@@@@@@@@@)
-                        if (disasterCount < 10) {
-                            this.newDisastersGateway.sendDisasterWebsocketAlert(disaster);
-                            await this.sendEmailAlert(disaster);
-                            console.log(`New disaster broadcasted via Websocket & Email...`);
-                        }
 
                     } catch (error) {
                         console.error('Error saving or broadcasting disaster:', error);
@@ -135,13 +133,23 @@ export class NewDisastersService {
                 console.log(`Marked disaster as past: ${dID}.`);
             }
 
+            // 마지막으로 실제 broadcast 진행 (웹소켓, 이메일)
+            if (newDisastersForBroadcast.length <= 10) {
+                for (const newDisaster of newDisastersForBroadcast) {
+                    this.newDisastersGateway.sendDisasterWebsocketAlert(newDisaster);
+                    await this.sendEmailAlert(newDisaster); // 여기서 이메일 타케팅 고객들 따로 처리
+                    console.log(`New disaster broadcasted via Websocket & Email for ${newDisaster.dID}...`);
+                }
+            }
+
+            // 함수 종료
+            console.log(`GDACS Update Completed (${disasterNewCount} new and ${disasterUpdateCount} updated). \n`);
+            return { success: true, message: 'Update Successful.' };
+
         } catch (error) {
             console.error('Error in handling disaster update:', error);
             return { success: false, message: 'Update Failed.' };
         }
-
-        console.log(`GDACS Update Completed. \n`);
-        return { success: true, message: 'Update Successful.' };
     }
 
     private async sendEmailAlert(disaster: NewDisastersEntity) {
