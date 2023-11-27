@@ -4,7 +4,7 @@
 // <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
 
 const io = require('socket.io-client');
-const socket = io('http://localhost:3001/alerts'); // Replace with your server address
+const socket = io('https://worldisaster.com/api/newDisasters'); // Replace with your server address
 
 socket.on('connect', () => {
     console.log('Connected to server');

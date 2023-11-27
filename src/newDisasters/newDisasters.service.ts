@@ -91,6 +91,8 @@ export class NewDisastersService {
 
                         // 여기서 알림 전송을 트리거 @@@@@@@@
                         this.newDisastersGateway.sendDisasterAlertToAllClients(disaster);
+                        
+                        // 이메일 알림기능 추가하여야 함 @@@@@@@@@@@
 
                     } catch (error) {
                         console.error('Error saving disaster to database:', error);

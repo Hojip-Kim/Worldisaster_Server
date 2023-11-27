@@ -25,11 +25,11 @@ import { ChatEntity } from 'src/chat/chat.entity';
 
 export const typeORMConfig: TypeOrmModuleOptions = {
     type: 'postgres',
-    host: 'localhost',
+    host: 'worldisaster-database.c1bs1dug29ac.ap-northeast-2.rds.amazonaws.com',
     port: 5432,
-    username: 'namamu',
-    password: 'wjdrmf12#$',
-    database: 'db_localhost',
+    username: 'worldisaster',
+    password: 'world123',
+    database: 'worldisaster_db',
     entities: [__dirname + '/../**/*.entity.{js,ts}',
         OldDisastersEntity,
         CountryEntity,

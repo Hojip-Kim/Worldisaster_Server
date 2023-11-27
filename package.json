@@ -33,6 +33,7 @@
     "@nestjs/websockets": "^10.2.10",
     "axios": "^1.6.1",
     "bcryptjs": "^2.4.3",
+    "cesium": "^1.111.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "passport": "^0.6.0",
