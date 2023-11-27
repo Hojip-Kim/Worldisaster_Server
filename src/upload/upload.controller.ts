@@ -27,6 +27,7 @@ export class UploadController {
             console.log('video_url is null');
             return res.status(404).send('Video not found');
         }
+        return video_url;
         // const htmlContent = `
         // <!DOCTYPE html>
         // <html lang="en">
