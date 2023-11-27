@@ -49,8 +49,20 @@ export class NewDisastersService {
             // db에 있는 재난들의 dID로 구성된 set를 하나 만들어서 dStatus 업데이트에 활용
             const dbDisasterIdSet = new Set(dbDisasters.map(d => d.dID));
 
+            // 재난 발생 이메일을 보낼 때, 양이 많으면 논외처리
+            const disasterCount = disasters.length;
+
+            // 함수가 호출되는 현재 시각을 한번 정의
+            const now = new Date();
+            console.log(`Current time is ${now.toString()}`);
+
             // 본격적으로 새로운 disasters 배열의 개별 Element들을 하나씩 처리
             for (const disaster of disasters) {
+
+                // 다른 작업에 앞서서, 24시간 이내의 재난이라면 real-time으로 dStatus 값을 변경해서 처리해야 함 (직전에 정의한 now와 비교)
+                const disasterDate = new Date(disaster.dDate); // DB 시간은 UTC/GMT인데, TypeORM 및 Typescript가 알아서 서버 시간으로 변환
+                const timeDifference = (now.getTime() - disasterDate.getTime()) / (1000 * 60 * 60); // msec을 sec, min, hr로 변환
+                disaster.dStatus = timeDifference <= 24 ? 'real-time' : 'ongoing';
 
                 // 만일 특정 재난이 이미 DB에 있는지 확인
                 const existingDisaster = dbDisasters.find(d => d.dID === disaster.dID);
@@ -99,9 +111,11 @@ export class NewDisastersService {
                         console.log(`New disaster added to DB: ${disaster.dID}...`);
 
                         // 웹소켓 알림 및 이메일 전송 (Work in PROGRESS @@@@@@@@@@@@@@@@@@@@@@@@)
-                        this.newDisastersGateway.sendDisasterWebsocketAlert(disaster);
-                        await this.sendEmailAlert(disaster);
-                        console.log(`New disaster broadcasted via Websocket & Email...`);
+                        if (disasterCount < 10) {
+                            this.newDisastersGateway.sendDisasterWebsocketAlert(disaster);
+                            await this.sendEmailAlert(disaster);
+                            console.log(`New disaster broadcasted via Websocket & Email...`);
+                        }
 
                     } catch (error) {
                         console.error('Error saving or broadcasting disaster:', error);
