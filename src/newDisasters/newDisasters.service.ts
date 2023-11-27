@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 
 import { Cron, CronExpression } from '@nestjs/schedule'; // 주기적인 Ping
 import { HttpService } from '@nestjs/axios'; // Http 요청
@@ -41,9 +41,11 @@ export class NewDisastersService {
             const rssFeedXml = await this.fetchRssFeed();
             const disasters = await this.parseRssFeed(rssFeedXml);
 
-            // 비교를 위해서 현재 DB에서 dStatus : ongoing 상태의 재난들을 배열에 담기
+            // 비교를 위해서 현재 DB에서 dStatus : realtime/ongoing 상태의 재난들을 배열에 담기
             const dbDisasters = await this.disasterDetailRepository.find({
-                where: { dStatus: 'ongoing' }
+                where: {
+                    dStatus: In(['real-time', 'ongoing'])
+                }
             });
 
             // db에 있는 재난들의 dID로 구성된 set를 하나 만들어서 dStatus 업데이트에 활용
@@ -51,10 +53,11 @@ export class NewDisastersService {
 
             // 재난 발생 이메일을 보낼 때, 양이 많으면 논외처리
             const disasterCount = disasters.length;
+            console.log(`${disasterCount} disasters in current GDACS feed...`);
 
             // 함수가 호출되는 현재 시각을 한번 정의
             const now = new Date();
-            console.log(`Current time is ${now.toString()}`);
+            console.log(`Current time is ${now.toString()}...`);
 
             // 본격적으로 새로운 disasters 배열의 개별 Element들을 하나씩 처리
             for (const disaster of disasters) {
