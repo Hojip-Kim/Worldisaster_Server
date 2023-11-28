@@ -25,7 +25,7 @@ export class NewDisastersService {
     ) { }
 
     /* 주기적으로 RSS 피드를 확인하는 역할 */
-    @Cron(CronExpression.EVERY_5_MINUTES)
+    @Cron(CronExpression.EVERY_MINUTE)
     async handleDisasterUpdate() {
         try {
             // 보조 함수들을 통해서 실시간 RSS 피드 내역을 처리, Disasters 배열에 담기
@@ -91,7 +91,7 @@ export class NewDisastersService {
 
                         // 여기서 알림 전송을 트리거 @@@@@@@@
                         this.newDisastersGateway.sendDisasterAlertToAllClients(disaster);
-                        
+
                         // 이메일 알림기능 추가하여야 함 @@@@@@@@@@@
 
                     } catch (error) {
