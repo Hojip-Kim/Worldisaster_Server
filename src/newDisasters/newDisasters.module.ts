@@ -7,9 +7,12 @@ import { NewDisastersService } from './newDisasters.service';
 import { NewDisastersEntity } from './newDisasters.entity';
 import { NewDisastersGateway } from './newDisasters.gateway';
 
+import { AuthModule } from 'src/auth/auth.module';
+import { EmailAlertsModule } from 'src/emailAlerts/emailAlerts.module';
+
 @Module({
   imports: [
-    HttpModule,
+    HttpModule, AuthModule, EmailAlertsModule,
     TypeOrmModule.forFeature([NewDisastersEntity]),
     TypeOrmModule.forFeature([CountryMappings]),
   ],

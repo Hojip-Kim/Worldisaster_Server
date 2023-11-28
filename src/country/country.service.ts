@@ -101,7 +101,7 @@ export class CountryService {
             const response = await firstValueFrom(this.httpService.get(apiUrl));
 
             // Helper 함수를 통해서 데이터 파싱 및 저장
-            await this.processAndSaveCountryData(code, iso3, cia_name, rw_name, other_name, wiki_name, wiki_official, response.data);
+            await this.processAndSaveCountryData(code, iso3, cia_name, rw_name, other_name, continent, wiki_name, wiki_official, response.data);
 
         } catch (error) {
 
@@ -115,7 +115,11 @@ export class CountryService {
     }
 
     // (3) 각 countryTable 엔트리마다 조회 결과를 포맷해서 테이블에 저장
-    private async processAndSaveCountryData(countryCode: string, iso3: string, cia_name: string, rw_name: string, other_name: string, wiki_name: string, wiki_official: string, countryData: any): Promise<void> {
+    private async processAndSaveCountryData(
+        countryCode: string, iso3: string,
+        cia_name: string, rw_name: string, other_name: string,
+        continent: string, wiki_name: string, wiki_official: string, countryData: any
+    ): Promise<void> {
 
         // 인자로 전달받은 국가 이름에 맞는 Entry를 삭제
         const del_result = await this.countryRepository.delete({ cCountry: cia_name });
@@ -132,7 +136,8 @@ export class CountryService {
         profile.cCountry_other = other_name ?? null;
         profile.cCountry_wiki = wiki_name ?? null;
         profile.cCountry_official = wiki_official ?? null;
-        profile.cContinent = countryData.Geography['Map references']?.text ?? null; // "Map references"
+        profile.cContinent = continent.charAt(0).toUpperCase() + continent.slice(1);
+        // profile.cContinent = countryData.Geography['Map references']?.text ?? null; // "Map references"
         profile.cTimeDifference = countryData.Government?.Capital?.['time difference']?.text ?? null; // "Government" - "Capital" - "time difference"
 
         profile.cLocation = countryData.Geography?.Location?.text ?? null; // "Location"
