@@ -103,6 +103,9 @@ export class LiveNewsService {
     //!SECTION Get Live News Service
     async getLiveArticleBydID(dID: string): Promise<LiveNewsEntity[]> {
         const liveNewsTable = await this.liveArticleRepository.find({ where: { disasterDetail : {dID} }});
+        if(!liveNewsTable) {
+            throw new Error('No live news found.');
+        }
         return liveNewsTable;
     }
     //!SECTION End Get Live News Service 
