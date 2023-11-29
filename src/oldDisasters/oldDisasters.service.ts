@@ -59,6 +59,13 @@ export class OldDisastersService {
             .getMany();
     }
 
+    async getDisastersByYear(year: string): Promise<OldDisastersEntity[]> {
+        return this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('SUBSTRING(disaster.dDate, 1, 4) = :year', { year })
+            .getMany();
+    }
+
     /* 여기서부터는 처음에 데이터를 로드해주는 역할 (서버 최초 세팅시 3-4번만 수행하면 충분) */
 
     async fetchAndStoreAllDisasters() {

@@ -22,7 +22,7 @@ export class OldDisastersController {
         return await this.disastersService.getAllDisasters();
     }
 
-    @Get('/:country')
+    @Get('/country/:country')
     async getByCountry(@Param('country') country: string): Promise<OldDisastersEntity[]> {
         console.log("\nAPI : GET call made to fetch all oldDisasters by country");
 
@@ -33,7 +33,7 @@ export class OldDisastersController {
         }
     }
 
-    @Get('/:country/:year')
+    @Get('/country/:country/:year')
     async getByCountryAndYear(@Param('country') country: string, @Param('year') year: string): Promise<OldDisastersEntity[]> {
         console.log("\nAPI : GET call made to fetch all oldDisasters by country and year");
 
@@ -42,6 +42,12 @@ export class OldDisastersController {
         } else {
             return this.disastersService.getDisastersByCountryNameAndYear(country, year);
         }
+    }
+
+    @Get('/year/:year')
+    async getByYear(@Param('year') year: string): Promise<OldDisastersEntity[]> {
+        console.log("\nAPI : GET call made to fetch all oldDisasters by year");
+        return this.disastersService.getDisastersByYear(year);
     }
 
 }

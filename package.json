@@ -31,6 +31,7 @@
     "@nestjs/schedule": "^4.0.0",
     "@nestjs/typeorm": "^10.0.0",
     "@nestjs/websockets": "^10.2.10",
+    "@paypal/checkout-server-sdk": "^1.0.3",
     "axios": "^1.6.1",
     "bcryptjs": "^2.4.3",
     "cesium": "^1.111.0",

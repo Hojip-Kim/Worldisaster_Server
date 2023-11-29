@@ -108,7 +108,6 @@ export class AuthController {
 
         const cleanedName = (await user).name.replace('undefined', '');
 
-
         return res.json({ name: cleanedName, email: (await user).email, });
 
     }

@@ -10,7 +10,27 @@ export class NewDisastersController {
 
     @Get('forceSync')
     async debug_force_refresh(): Promise<{ success: boolean, message: string }> {
-        console.log("API : GET call made to force refresh newDisasters DB...");
+        console.log("\nAPI : GET call made to force refresh newDisasters DB...");
         return await this.disastersService.handleDisasterUpdate();
+    }
+
+    /* Actual APIs */
+
+    @Get('/')
+    async getAllDetails(): Promise<NewDisastersEntity[]> {
+        console.log("\nAPI : GET call made to fetch all oldDisasters detail");
+        return await this.disastersService.getAllDisasters();
+    }
+
+    @Get('/year/:year/')
+    async getByYear(@Param('year') year: string): Promise<NewDisastersEntity[]> {
+        console.log("\nAPI : GET call made to fetch all oldDisasters by year");
+        return this.disastersService.getGdacsDisastesByYear(year);
+    }
+
+    @Get('/year/:year/:status')
+    async getByYearAndStatus(@Param('year') year: string, @Param('status') status: string): Promise<NewDisastersEntity[]> {
+        console.log("\nAPI : GET call made to fetch all oldDisasters by year and status");
+        return this.disastersService.getGdacsDisastesByYearAndStatus(year, status);
     }
 }

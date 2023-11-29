@@ -31,10 +31,38 @@ export class NewDisastersService {
         private disasterDetailRepository: Repository<NewDisastersEntity>,
     ) { }
 
+    /* API */
+
+    async getAllDisasters(): Promise<NewDisastersEntity[]> {
+        return this.disasterDetailRepository.createQueryBuilder('disaster').getMany();
+    }
+
+    async getGdacsDisastesByYear(year: string): Promise<NewDisastersEntity[]> {
+        const allPastDisasters = await this.disasterDetailRepository
+            .createQueryBuilder('disaster').getMany();
+
+        return allPastDisasters.filter(disaster => {
+            const date = new Date(disaster.dDate);
+            return date.getFullYear().toString() === year;
+        });
+    }
+
+    async getGdacsDisastesByYearAndStatus(year: string, status: string): Promise<NewDisastersEntity[]> {
+        const allPastDisasters = await this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('disaster.dStatus = :status', { status })
+            .getMany();
+
+        return allPastDisasters.filter(disaster => {
+            const date = new Date(disaster.dDate);
+            return date.getFullYear().toString() === year;
+        });
+    }
+
     /* 주기적으로 RSS 피드를 확인하는 역할 */
     @Cron(CronExpression.EVERY_MINUTE)
     async handleDisasterUpdate() {
-        console.log('GDACS Disaster Update Initiated...');
+        console.log('\nGDACS Disaster Update Initiated...');
 
         try {
             // 보조 함수들을 통해서 실시간 RSS 피드 내역을 처리, Disasters 배열에 담기
