@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 
 import { LiveNewsEntity } from './liveNews.entity';
 import { OldDisastersEntity } from '../oldDisasters/oldDisasters.entity';
@@ -67,7 +67,7 @@ export class LiveNewsService {
             sort: 'published_desc',
             keywords: `${dType} ${dCountry}`,
             date: `${dDate}`,
-            limit: 3,
+            limit: 10,
         });
         
         try 
@@ -109,4 +109,58 @@ export class LiveNewsService {
         return liveNewsTable;
     }
     //!SECTION End Get Live News Service 
+
+    //oldDisaster에서 dStatus가 ongoing이고, dDate가 현재 날짜로부터 한달 전 ~ 현재까지인 재난 가져오기
+    async getOngoingDisasters() {
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const day = currentDate.getDate();
+        const oneMonthAgo = new Date(year, month - 1, day);
+        const formattedCurrentDate = currentDate.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 변환
+        const formattedOneMonthAgo = oneMonthAgo.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 변환
+
+        console.log(formattedOneMonthAgo);
+
+        const ongoingDisasters = await this.oldDisasterRepository.find({
+        
+            where: {
+                dStatus: 'ongoing',
+                dDate: Between(formattedOneMonthAgo, formattedCurrentDate)
+                }
+            });
+        
+        if (ongoingDisasters.length === 0) {
+            throw new Error('No ongoing disasters found.');
+        }
+        return ongoingDisasters;
+    }
+
+    //ongoing인 재난의 dID로 연결된 기사들의 개수 확인
+    async getLiveNewsCountForDisaster(dID: string) {
+        const liveNewsCount = await this.liveArticleRepository.count({ where: { disasterDetail: { dID }  } });
+        return liveNewsCount;
+    }
+
+    async fetchAndStoreRealtimeDisasterNews() {
+        // 진행 중인 재난 조회
+        const ongoingDisasters = await this.getOngoingDisasters();
+    
+        for (const disaster of ongoingDisasters) {
+            // 재난의 dID로 연결된 기사들의 개수 확인
+            const articlesCount = await this.getLiveNewsCountForDisaster(disaster.dID);
+    
+            // 기사 수가 10개 미만인 경우 API 호출
+            if (articlesCount < 10) {
+                const underTenArticlesDisaster = await this.getDisastersTypeBydID(disaster.dID);
+
+                // 가져온 기사를 데이터베이스에 저장
+                await this.storeLiveArticle(disaster.dID, underTenArticlesDisaster.dDate, underTenArticlesDisaster.dType, underTenArticlesDisaster.dCountry);
+                console.log(`Stored live news for disaster ID ${disaster.dID}.`);
+            } else {
+                // 기사 수가 10개 이상인 경우 pass
+                console.log(`Skipping disaster ID ${disaster.dID}, already has sufficient articles.`);
+            }
+        }
+    }
 }

@@ -1,6 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { LiveNewsEntity } from './liveNews.entity';
 import { LiveNewsService } from './liveNews.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Controller('live')
 export class LiveNewsController {
@@ -34,4 +35,10 @@ export class LiveNewsController {
         console.log('API get articles by dID');
         return this.liveNewsService.getLiveArticleBydID(dID);
     }
+
+    @Cron(CronExpression.EVERY_MINUTE)
+    async handleCron() {
+        console.log("\n@ Get Live News Every 3 Hours @\n");
+        await this.liveNewsService.fetchAndStoreRealtimeDisasterNews();
     }
+}
