@@ -21,4 +21,4 @@ import { Type } from 'class-transformer';
   providers: [LiveNewsService],
   controllers: [LiveNewsController]
 })
-export class DisastersModule { }
+export class LiveNewsModule { }

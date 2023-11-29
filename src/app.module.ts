@@ -5,7 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { DonateModule } from './donate/donate.module';
 import { ScheduleModule } from '@nestjs/schedule';
-
+import { LiveNewsModule } from './liveNews/liveNews.module';
 import { CountryModule } from './country/country.module';
 import { OldDisastersModule } from './oldDisasters/oldDisasters.module';
 
@@ -16,7 +16,7 @@ import { OldDisastersModule } from './oldDisasters/oldDisasters.module';
     }),
     TypeOrmModule.forRoot(typeORMConfig), ScheduleModule.forRoot(),
     AuthModule, DonateModule, OldDisastersModule,
-    CountryModule,],
+    CountryModule, LiveNewsModule,],
 })
 
 

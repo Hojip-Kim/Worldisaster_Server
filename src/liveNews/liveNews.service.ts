@@ -52,7 +52,7 @@ export class LiveNewsService {
     }
 
     //!SECTION Mediastack API
-    //NOTE - 하루 1000번 제한, 기간 가늠 안됨
+    //NOTE - 한달 1000번 제한, 기간 가늠 안됨
     //다른 사람들 git issue에도 keywords 관련 문제가 올라와있으나, 해결되지 않은것으로 보임. https://github.com/apilayer/mediastack/issues/3
     //하나만 검색하는건 되지만, 두개 검색은 안됨
     //country를 따로 검색할 수 있으나, 해당 기사의 국가이며, 국가의 종류도 턱없이 적다. 13개다. 말도 안된다.
