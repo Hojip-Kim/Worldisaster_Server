@@ -528,7 +528,7 @@ export class DisastersService {
             sort: 'published_desc',
             keywords: `${dType} ${dCountry}`,
             date: `${dDate}`,
-            limit: 3,
+            limit: 1,
         });
         
         try 
