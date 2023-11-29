@@ -77,9 +77,6 @@ export class NewDisastersService {
                 }
             });
 
-            // db에 있는 재난들의 dID로 구성된 set를 하나 만들어서 dStatus 업데이트에 활용
-            const dbDisasterIdSet = new Set(dbDisasters.map(d => d.dID));
-
             // 재난 발생 이메일을 보낼 때, 양이 많으면 논외처리해야 함
             const newDisastersForBroadcast = [];
             let disasterUpdateCount = 0;
@@ -153,14 +150,23 @@ export class NewDisastersService {
                     }
                 }
 
-                // 하나의 재난을 처리했으면, 해당 재난을 set에서 제거
-                dbDisasterIdSet.delete(disaster.dID);
             }
 
-            // 위 과정을 통해 set에 남아있는 재난이 있다면, 더이상 GDACS 7-day RSS에 없으니 past로 상태값 변경
-            for (const dID of dbDisasterIdSet) {
-                await this.disasterDetailRepository.update({ dID }, { dStatus: 'past' });
-                console.log(`Marked disaster as past: ${dID}.`);
+            // 현재 ongoing인 재난들을 다 불러와서, 7일 이상 지났으면 past로 변경
+            const ongoingDbDisasters = await this.disasterDetailRepository.find({
+                where: {
+                    dStatus: 'ongoing'
+                }
+            });
+            for (const dbDisaster of ongoingDbDisasters) {
+                const disasterDate = new Date(dbDisaster.dDate);
+                const timeDifference = (now.getTime() - disasterDate.getTime()) / (1000 * 60 * 60 * 24);
+
+                if (timeDifference > 7) {
+                    dbDisaster.dStatus = 'past';
+                    await this.disasterDetailRepository.save(dbDisaster);
+                    console.log(`Marked disaster as past: ${dbDisaster.dID}.`);
+                }
             }
 
             // 마지막으로 실제 broadcast 진행 (웹소켓, 이메일)
@@ -210,7 +216,7 @@ export class NewDisastersService {
             <h1>New Disaster Alert: ${disaster.dTitle}</h1>
             <p>${disaster.dDescription}</p>
             <p>For more details, visit the following link:</p>
-            <a href="${disaster.dUrl}">${disaster.dUrl}</a>
+            <a href="https://worldisaster.com/earth?lon=${disaster.dLongitude}&lat=${disaster.dLatitude}"> Worldisaster Website (Recommended) </a>
         `;
 
         return emailHtml;
