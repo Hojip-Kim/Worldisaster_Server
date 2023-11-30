@@ -4,7 +4,7 @@ import { Between, In, Repository } from 'typeorm';
 
 import { LiveNewsEntity } from './liveNews.entity';
 import { OldDisastersEntity } from '../oldDisasters/oldDisasters.entity';
-
+import { NewDisastersEntity } from '../newDisasters/newDisasters.entity';
 import { stringify } from 'querystring';
 
 @Injectable()
@@ -12,13 +12,13 @@ export class LiveNewsService {
     constructor(
         @InjectRepository(LiveNewsEntity)
         private liveArticleRepository: Repository<LiveNewsEntity>,
-        @InjectRepository(OldDisastersEntity)
-        private oldDisasterRepository: Repository<OldDisastersEntity>,
+        @InjectRepository(NewDisastersEntity)
+        private newDisasterRepository: Repository<NewDisastersEntity>,
     ) {}
 
     /* dID를 통해 재난 타입 가져오는 코드*/
     async getDisastersTypeBydID(dID: string): Promise<{ dType: string, dCountry: string, dDate: string }> {
-        const getDisasterDetail =  await this.oldDisasterRepository
+        const getDisasterDetail =  await this.newDisasterRepository
         .createQueryBuilder('disaster')
         .where('disaster.dID = :dID', { dID })
         .getOne();
@@ -40,7 +40,7 @@ export class LiveNewsService {
     }
 
     async getDisastersID() {
-        const result = await this.oldDisasterRepository
+        const result = await this.newDisasterRepository
             .createQueryBuilder('disaster')
             .select('disaster.dID')
             .where('disaster.dDate >= :date', { date : '2023-10-01' })
@@ -59,7 +59,7 @@ export class LiveNewsService {
     //해결했다. 어이없다. 띄어쓰기다. https://github.com/apilayer/mediastack/issues/3 이거 자세히 보니 띄어쓰기를 해야 검색이 된다고 나와있다
     async storeLiveArticle(dID: string, dDate: string, dType: string, dCountry: string) {
         const axios = require('axios');
-        const disasterDetail = await this.oldDisasterRepository.findOne({ where: {dID} });
+        const disasterDetail = await this.newDisasterRepository.findOne({ where: {dID} });
 
         const params = stringify({
             access_key: '5057f1372fdc2004d02af923fdeff472', // 여기에 실제 액세스 키를 입력하세요
@@ -141,7 +141,7 @@ export class LiveNewsService {
 
         // console.log(formattedOneMonthAgo);
 
-        const ongoingDisasters = await this.oldDisasterRepository.find({
+        const ongoingDisasters = await this.newDisasterRepository.find({
         
             where: {
                 dStatus: 'ongoing',
