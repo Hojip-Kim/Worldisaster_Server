@@ -48,9 +48,11 @@ export class UploadService {
         console.log('HLS files uploaded to S3');
         //db에 url 저장
         const { video_url, video_name } = uploadVideoDto;
-
+        
+        //NOTE - 유정 cloudfront url
+        // video_url: `https://d2v41mvu3zgnz0.cloudfront.net/${baseName}/${baseName}.m3u8`,
         const video = this.videoRepository.create({
-            video_url: `https://d2v41mvu3zgnz0.cloudfront.net/${baseName}/${baseName}.m3u8`,
+            video_url: `https://doim6x5685p82.cloudfront.net/${baseName}/${baseName}.m3u8`,
             video_name: baseName
         })
 
@@ -105,8 +107,11 @@ export class UploadService {
             const filePath = path.join(folderPath, file);
             const fileStream = fs.createReadStream(filePath);
 
+
+            //NOTE - 유정 S3 버킷 
+            //Bucket: 'worldisaster-test-bucket',
             await this.s3client.send(new PutObjectCommand({
-                    Bucket: 'worldisaster-test-bucket',
+                    Bucket: 'worldisaster-s3',
                     Key: `${baseName}/${file}`,
                     Body: fileStream,
                     ContentDisposition: 'inline',
@@ -114,7 +119,7 @@ export class UploadService {
             }));
         }
     }
-    
+
     //db objID 로 url 가져오기
     async getVideoUrl(id: number) {
         const video = await this.videoRepository.findOneBy({id});
