@@ -140,7 +140,7 @@ export class LiveNewsService {
             .createQueryBuilder()
             .delete()
             .from(LiveNewsEntity) // 'Article'은 가정된 엔티티 클래스명입니다. 실제 데이터베이스에 맞게 조정하세요.
-            .where('id NOT IN (:...ids)', { ids: latestIds })
+            .where('objectId NOT IN (:...ids)', { ids: latestIds })
             .execute();
     
         console.log(`Deleted duplicate articles, keeping the latest ones.`);

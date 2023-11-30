@@ -14,7 +14,7 @@ export class LiveNewsEntity {
     @Column({ nullable: true })
     image: string;
 
-    @Column()
+    @Column({ nullable: true })
     author: string;
 
 
