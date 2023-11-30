@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { OldDisastersEntity } from '../oldDisasters/oldDisasters.entity';
-
+import { NewDisastersEntity } from '../newDisasters/newDisasters.entity';
 @Entity()
 export class LiveNewsEntity {
     @PrimaryGeneratedColumn()
@@ -19,8 +19,8 @@ export class LiveNewsEntity {
     author: string;
 
 
-    @ManyToOne(() => OldDisastersEntity)
-    @JoinColumn({ name: 'dID' , referencedColumnName: 'dID'}) // 여기서 dID는 DisastersDetailEntity의 dID 필드를 참조합니다
-    disasterDetail: OldDisastersEntity;
+    @ManyToOne(() => NewDisastersEntity)
+    @JoinColumn({ name: 'dID' , referencedColumnName: 'dID'}) // 여기서 dID는 NewDisastersEntity dID 필드를 참조합니다
+    disasterDetail: NewDisastersEntity;
 
 }
