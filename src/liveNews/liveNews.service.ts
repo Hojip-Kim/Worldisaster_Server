@@ -97,6 +97,7 @@ export class LiveNewsService {
                 console.error('Error fetching news:', error.message);
             }
         }
+        await this.removeDuplicateArticles();
     }
     //!SECTION End Mediastack API
 
@@ -110,6 +111,24 @@ export class LiveNewsService {
     }
     //!SECTION End Get Live News Service 
 
+    async removeDuplicateArticles() {
+        // 중복된 URL을 가진 기사 찾기
+        const duplicates = await this.liveArticleRepository
+        .createQueryBuilder('article')
+        .groupBy('article.url')
+        .having('COUNT(article.url) > 1')
+        .getMany();
+
+        if(duplicates.length === 0) {
+            throw new Error('No duplicate articles found.');
+        }
+        // 중복된 기사 삭제
+        for (const duplicate of duplicates) {
+            await this.liveArticleRepository.delete({ url: duplicate.url });
+
+        }
+        console.log(`Deleted ${duplicates.length} duplicate articles.`);
+    }
     //oldDisaster에서 dStatus가 ongoing이고, dDate가 현재 날짜로부터 한달 전 ~ 현재까지인 재난 가져오기
     async getOngoingDisasters() {
         const currentDate = new Date();
@@ -120,7 +139,7 @@ export class LiveNewsService {
         const formattedCurrentDate = currentDate.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 변환
         const formattedOneMonthAgo = oneMonthAgo.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 변환
 
-        console.log(formattedOneMonthAgo);
+        // console.log(formattedOneMonthAgo);
 
         const ongoingDisasters = await this.oldDisasterRepository.find({
         
@@ -163,4 +182,5 @@ export class LiveNewsService {
             }
         }
     }
+
 }
