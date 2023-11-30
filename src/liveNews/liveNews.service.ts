@@ -108,7 +108,7 @@ export class LiveNewsService {
                 console.error('Error fetching news:', error.message);
             }
         }
-        // await this.removeDuplicateArticles();
+        await this.removeDuplicateArticles();
     }
     //!SECTION End Mediastack API
 
@@ -123,22 +123,27 @@ export class LiveNewsService {
     //!SECTION End Get Live News Service 
 
     async removeDuplicateArticles() {
-        // 중복된 URL을 가진 기사 찾기
-        const duplicates = await this.liveArticleRepository
-        .createQueryBuilder('article')
-        .groupBy('article.url')
-        .having('COUNT(article.url) > 1')
-        .getMany();
+        // 각 URL별로 가장 최신 기사의 ID 찾기
+        const latestArticleIds = await this.liveArticleRepository
+            .createQueryBuilder('article')
+            .select('MAX(article.objectId)', 'objectId') // 'id'는 가정된 컬럼명입니다. 실제 데이터베이스에 맞게 조정하세요.
+            .groupBy('article.url')
+            .getRawMany();
 
-        if(duplicates.length === 0) {
-            throw new Error('No duplicate articles found.');
+        if(latestArticleIds.length === 0) {
+            throw new Error('No latest articles found.');
         }
-        // 중복된 기사 삭제
-        for (const duplicate of duplicates) {
-            await this.liveArticleRepository.delete({ url: duplicate.url });
+        const latestIds = latestArticleIds.map(item => item.objectId);
 
-        }
-        console.log(`Deleted ${duplicates.length} duplicate articles.`);
+        // 가장 최신 기사를 제외한 모든 중복 기사 삭제
+        await this.liveArticleRepository
+            .createQueryBuilder()
+            .delete()
+            .from(LiveNewsEntity) // 'Article'은 가정된 엔티티 클래스명입니다. 실제 데이터베이스에 맞게 조정하세요.
+            .where('id NOT IN (:...ids)', { ids: latestIds })
+            .execute();
+    
+        console.log(`Deleted duplicate articles, keeping the latest ones.`);
     }
     //newDisaster에서 dStatus가 real-time인 재난 가져오기
     async getRealtimeDisasters() {
