@@ -40,22 +40,13 @@ export class LiveNewsService {
     }
 
     async getDisastersID() {
-        const currentDate = new Date();
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        const day = currentDate.getDate();
-
-        const oneDayAgo = new Date(year, month, day - 1);
-
-        const formattedOneDayAgo = oneDayAgo.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 변환
-
         const result = await this.newDisasterRepository
             .createQueryBuilder('disaster')
             .select('disaster.dID')
-            .where('disaster.dDate >= :date', { date : formattedOneDayAgo })
+            .where('disaster.dStatus = :status', { status : 'real-time' })
             .getMany();
         if(result.length === 0) {
-            throw new Error('No disasters found after the specified date.');
+            throw new Error('No disasters found with real-time status.');
         }
         return result;
     }
@@ -138,30 +129,10 @@ export class LiveNewsService {
         }
         console.log(`Deleted ${duplicates.length} duplicate articles.`);
     }
-    //oldDisaster에서 dStatus가 ongoing이고, dDate가 현재 날짜로부터 한달 전 ~ 현재까지인 재난 가져오기
+    //newDisaster에서 dStatus가 real-time인 재난 가져오기
     async getRealtimeDisasters() {
-
-        const currentDate = new Date();
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        const day = currentDate.getDate();
-
-        const oneMonthAgo = new Date(year, month - 1, day);
-        const oneDayAgo = new Date(year, month, day - 1);
-
-        const formattedCurrentDate = currentDate.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 변환
-        const formattedOneMonthAgo = oneMonthAgo.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 변환
-        const formattedOneDayAgo = oneDayAgo.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 변환
-
-        // console.log(formattedOneMonthAgo);
-
-        const realtimeDisasters = await this.newDisasterRepository.find({
         
-            where: {
-                dStatus: 'real-time',
-                dDate: Between(formattedOneDayAgo, formattedCurrentDate)
-                }
-            });
+        const realtimeDisasters = await this.newDisasterRepository.find({ where: { dStatus: 'real-time'} });
         
         if (realtimeDisasters.length === 0) {
             throw new Error('No real-time disasters found.');
