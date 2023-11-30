@@ -70,12 +70,15 @@ export class NewDisastersService {
             const disasters = await this.parseRssFeed(rssFeedXml);
             console.log(`${disasters.length} disasters in current GDACS feed...`);
 
-            // 비교를 위해서 현재 DB에서 dStatus : realtime/ongoing 상태의 재난들을 배열에 담기
+            // 비교를 위해서 현재 DB에서 dStatus : realtime/ongoing/past 상태의 재난들을 배열에 담기
             const dbDisasters = await this.disasterDetailRepository.find({
                 where: {
-                    dStatus: In(['real-time', 'ongoing'])
+                    dStatus: In(['real-time', 'ongoing', 'past'])
                 }
             });
+
+            // db에 있는 재난들의 dID로 구성된 set를 하나 만들어서 dStatus 업데이트에 활용
+            // const dbDisasterIdSet = new Set(dbDisasters.map(d => d.dID));
 
             // 재난 발생 이메일을 보낼 때, 양이 많으면 논외처리해야 함
             const newDisastersForBroadcast = [];
@@ -98,6 +101,10 @@ export class NewDisastersService {
                 const existingDisaster = dbDisasters.find(d => d.dID === disaster.dID);
 
                 if (existingDisaster) { // DB에 있다면,
+
+                    if (existingDisaster.dStatus === 'past') {
+                        break;
+                    }
 
                     // 각 칼럼들을 하나씩 순회하면서 비교해보고, 바꾸는게 있다면 shouldUpdate를 변경
                     let shouldUpdate = false;
@@ -150,7 +157,15 @@ export class NewDisastersService {
                     }
                 }
 
+                // 하나의 재난을 처리했으면, 해당 재난을 set에서 제거
+                // dbDisasterIdSet.delete(disaster.dID);
             }
+
+            // 위 과정을 통해 set에 남아있는 재난이 있다면, 더이상 GDACS 7-day RSS에 없으니 past로 상태값 변경
+            // for (const dID of dbDisasterIdSet) {
+            //     await this.disasterDetailRepository.update({ dID }, { dStatus: 'past' });
+            //     console.log(`Marked disaster as past: ${dID}.`);
+            // }
 
             // 현재 ongoing인 재난들을 다 불러와서, 7일 이상 지났으면 past로 변경
             const ongoingDbDisasters = await this.disasterDetailRepository.find({
@@ -170,7 +185,7 @@ export class NewDisastersService {
             }
 
             // 마지막으로 실제 broadcast 진행 (웹소켓, 이메일)
-            if (newDisastersForBroadcast.length <= 10) {
+            if (newDisastersForBroadcast.length <= 5) {
                 for (const newDisaster of newDisastersForBroadcast) {
                     this.newDisastersGateway.sendDisasterWebsocketAlert(newDisaster);
                     await this.sendEmailAlert(newDisaster); // 여기서 이메일 타케팅 고객들 따로 처리
