@@ -10,10 +10,20 @@ import { UploadVideoDto } from './dto/upload-video.dto';
 
 @Injectable()
 export class UploadService {
-    private readonly s3client = new S3Client({
-        region: 'ap-northeast-2',
-    });
-    constructor(private videoRepository: VideoRepository) {}
+    private readonly s3client = new S3Client;
+
+    constructor(
+        private readonly configService: ConfigService,
+        private videoRepository: VideoRepository
+    ) {
+        this.s3client = new S3Client({
+            region: this.configService.getOrThrow('AWS_S3_REGION'),
+            credentials: {
+                accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID'),
+                secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY'),
+            },
+        });
+    }
 
     async upload(uploadVideoDto: UploadVideoDto, fileName: string, file: Buffer) {
         //서버 공간에 동영상 임시 저장
@@ -104,6 +114,7 @@ export class UploadService {
             }));
         }
     }
+    
     //db objID 로 url 가져오기
     async getVideoUrl(id: number) {
         const video = await this.videoRepository.findOneBy({id});
