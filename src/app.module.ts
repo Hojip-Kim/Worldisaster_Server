@@ -1,22 +1,29 @@
 import { Module } from '@nestjs/common';
-import { UploadModule } from './upload/upload.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { typeORMConfig } from './configs/typeorm.config';
 import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm'; 
-import { typeOrmConfig } from './configs/typeorm.config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { UploadModule } from './upload/upload.module';
+import { AuthModule } from './auth/auth.module';
+import { DonateModule } from './donate/donate.module';
+import { ChatModule } from './chat/chat.module';
 
-import { DisastersModule } from './disasters/disasters.module';
-import { DisastersList } from './disasters/disasters-list.entity';
-import { DisastersDetailEntity } from './disasters/disasters-detail.entity';
-
+import { LiveNewsModule } from './liveNews/liveNews.module';
 import { CountryModule } from './country/country.module';
-import { CountryEntity } from './country/country.entity';
-import { CountryMappings } from './country/script_init/country-table.entity';
+import { OldDisastersModule } from './oldDisasters/oldDisasters.module';
+import { NewDisastersModule } from './newDisasters/newDisasters.module';
+import { EmailAlertsModule } from './emailAlerts/emailAlerts.module';
+import { PaypalModule } from './paypal/paypal.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(typeOrmConfig),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRoot(typeORMConfig),
     ScheduleModule.forRoot(),
-    UploadModule, CountryModule, DisastersModule, ConfigModule.forRoot({ isGlobal: true })],
+    AuthModule, DonateModule, ChatModule, EmailAlertsModule,
+    CountryModule, LiveNewsModule, OldDisastersModule, NewDisastersModule, UploadModule
+  ],
 })
-export class AppModule {}
+export class AppModule { }
