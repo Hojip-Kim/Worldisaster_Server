@@ -51,6 +51,16 @@ export class LiveNewsService {
         return result;
     }
 
+    formatDate(dDate: string): string {
+        const date = new Date(dDate);
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+
+        return `${year}-${month}-${day}`
+
+    }
+
     //!SECTION Mediastack API
     //NOTE - 한달 1000번 제한, 기간 가늠 안됨
     //다른 사람들 git issue에도 keywords 관련 문제가 올라와있으나, 해결되지 않은것으로 보임. https://github.com/apilayer/mediastack/issues/3
@@ -58,15 +68,16 @@ export class LiveNewsService {
     //country를 따로 검색할 수 있으나, 해당 기사의 국가이며, 국가의 종류도 턱없이 적다. 13개다. 말도 안된다.
     //해결했다. 어이없다. 띄어쓰기다. https://github.com/apilayer/mediastack/issues/3 이거 자세히 보니 띄어쓰기를 해야 검색이 된다고 나와있다
     async storeLiveArticle(dID: string, dDate: string, dType: string, dCountry: string) {
+        
         const axios = require('axios');
         const disasterDetail = await this.newDisasterRepository.findOne({ where: {dID} });
-
+        const formmatDate = this.formatDate(dDate);
         const params = stringify({
             access_key: '5057f1372fdc2004d02af923fdeff472', // 여기에 실제 액세스 키를 입력하세요
             category : 'general',
             sort: 'published_desc',
             keywords: `${dType} ${dCountry}`,
-            date: `${dDate}`,
+            date: `${formmatDate}`,
             limit: 10,
         });
         
@@ -131,7 +142,7 @@ export class LiveNewsService {
     }
     //newDisaster에서 dStatus가 real-time인 재난 가져오기
     async getRealtimeDisasters() {
-        
+
         const realtimeDisasters = await this.newDisasterRepository.find({ where: { dStatus: 'real-time'} });
         
         if (realtimeDisasters.length === 0) {
