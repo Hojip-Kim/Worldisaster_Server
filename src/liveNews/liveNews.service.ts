@@ -40,10 +40,19 @@ export class LiveNewsService {
     }
 
     async getDisastersID() {
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const day = currentDate.getDate();
+
+        const oneDayAgo = new Date(year, month, day - 1);
+
+        const formattedOneDayAgo = oneDayAgo.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 변환
+
         const result = await this.newDisasterRepository
             .createQueryBuilder('disaster')
             .select('disaster.dID')
-            .where('disaster.dDate >= :date', { date : '2023-10-01' })
+            .where('disaster.dDate >= :date', { date : formattedOneDayAgo })
             .getMany();
         if(result.length === 0) {
             throw new Error('No disasters found after the specified date.');
@@ -130,32 +139,37 @@ export class LiveNewsService {
         console.log(`Deleted ${duplicates.length} duplicate articles.`);
     }
     //oldDisaster에서 dStatus가 ongoing이고, dDate가 현재 날짜로부터 한달 전 ~ 현재까지인 재난 가져오기
-    async getOngoingDisasters() {
+    async getRealtimeDisasters() {
+
         const currentDate = new Date();
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
         const day = currentDate.getDate();
+
         const oneMonthAgo = new Date(year, month - 1, day);
+        const oneDayAgo = new Date(year, month, day - 1);
+
         const formattedCurrentDate = currentDate.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 변환
         const formattedOneMonthAgo = oneMonthAgo.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 변환
+        const formattedOneDayAgo = oneDayAgo.toISOString().split('T')[0]; // 'YYYY-MM-DD' 형식으로 변환
 
         // console.log(formattedOneMonthAgo);
 
-        const ongoingDisasters = await this.newDisasterRepository.find({
+        const realtimeDisasters = await this.newDisasterRepository.find({
         
             where: {
-                dStatus: 'ongoing',
-                dDate: Between(formattedOneMonthAgo, formattedCurrentDate)
+                dStatus: 'real-time',
+                dDate: Between(formattedOneDayAgo, formattedCurrentDate)
                 }
             });
         
-        if (ongoingDisasters.length === 0) {
-            throw new Error('No ongoing disasters found.');
+        if (realtimeDisasters.length === 0) {
+            throw new Error('No real-time disasters found.');
         }
-        return ongoingDisasters;
+        return realtimeDisasters;
     }
 
-    //ongoing인 재난의 dID로 연결된 기사들의 개수 확인
+    //realtime인 재난의 dID로 연결된 기사들의 개수 확인
     async getLiveNewsCountForDisaster(dID: string) {
         const liveNewsCount = await this.liveArticleRepository.count({ where: { disasterDetail: { dID }  } });
         return liveNewsCount;
@@ -163,9 +177,9 @@ export class LiveNewsService {
 
     async fetchAndStoreRealtimeDisasterNews() {
         // 진행 중인 재난 조회
-        const ongoingDisasters = await this.getOngoingDisasters();
+        const realtimeDisasters = await this.getRealtimeDisasters();
     
-        for (const disaster of ongoingDisasters) {
+        for (const disaster of realtimeDisasters) {
             // 재난의 dID로 연결된 기사들의 개수 확인
             const articlesCount = await this.getLiveNewsCountForDisaster(disaster.dID);
     
