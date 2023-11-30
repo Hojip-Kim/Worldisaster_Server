@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { OldDisastersEntity } from '../oldDisasters/oldDisasters.entity';
 import { NewDisastersEntity } from '../newDisasters/newDisasters.entity';
 @Entity()
 export class LiveNewsEntity {

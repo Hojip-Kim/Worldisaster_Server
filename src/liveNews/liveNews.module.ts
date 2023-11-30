@@ -6,15 +6,14 @@ import { LiveNewsService } from './liveNews.service';
 import { LiveNewsController } from './liveNews.controller';
 import { LiveNewsEntity } from './liveNews.entity';
 
-import { OldDisastersEntity } from 'src/oldDisasters/oldDisasters.entity';
-
+import { NewDisastersEntity } from '../newDisasters/newDisasters.entity';
 import { Type } from 'class-transformer';
 
 @Module({
   imports: [
     HttpModule,
     TypeOrmModule.forFeature([
-      OldDisastersEntity, 
+      NewDisastersEntity, 
       LiveNewsEntity
     ]),
   ],
