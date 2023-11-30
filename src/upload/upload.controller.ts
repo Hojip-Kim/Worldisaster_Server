@@ -23,6 +23,7 @@ export class UploadController {
     @Get('/:id')
     async getVideoPage(@Param('id') id: number, @Res() res: Response) {
         const video_url = await this.uploadService.getVideoUrl(id);
+        console.log(video_url);
         if(!video_url) {
             console.log('video_url is null');
             return res.status(404).send('Video not found');
