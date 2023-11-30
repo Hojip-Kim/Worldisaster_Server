@@ -10,7 +10,7 @@ export class OldDisastersController {
 
     @Get('forceSync')
     async debug_force_refresh(): Promise<{ success: boolean, message: string }> {
-        console.log("\nAPI : GET call made to force refresh disasters DB (Debug)");
+        console.log("\nAPI : GET call made to force load oldDisasters DB (server setup)");
         return await this.disastersService.fetchAndStoreAllDisasters();
     }
 
@@ -18,13 +18,13 @@ export class OldDisastersController {
 
     @Get('/')
     async getAllDetails(): Promise<OldDisastersEntity[]> {
-        console.log("\nAPI : GET call made to fetch all disasters detail");
+        console.log("\nAPI : GET call made to fetch all oldDisasters detail");
         return await this.disastersService.getAllDisasters();
     }
 
-    @Get('/:country')
+    @Get('/country/:country')
     async getByCountry(@Param('country') country: string): Promise<OldDisastersEntity[]> {
-        console.log("\nAPI : GET call made to fetch all disasters by country");
+        console.log("\nAPI : GET call made to fetch all oldDisasters by country");
 
         if (country.length == 2) {
             return this.disastersService.getDisastersByCountryCode(country);
@@ -33,9 +33,9 @@ export class OldDisastersController {
         }
     }
 
-    @Get('/:country/:year')
+    @Get('/country/:country/:year')
     async getByCountryAndYear(@Param('country') country: string, @Param('year') year: string): Promise<OldDisastersEntity[]> {
-        console.log("\nAPI : GET call made to fetch all disasters by country and year");
+        console.log("\nAPI : GET call made to fetch all oldDisasters by country and year");
 
         if (country.length == 2) {
             return this.disastersService.getDisastersByCountryCodeAndYear(country, year);
@@ -44,13 +44,10 @@ export class OldDisastersController {
         }
     }
 
-    // @Get('/:country/:type/:year') // type/year를 햇갈리니 조심해서 적용
-    // async getByCountryTypeYear(@Param('country') country: string, @Param('type') type: string, @Param('year') year: string): Promise<DisastersDetailEntity[]> {
-    //     console.log('API : GET call made to fetch disasters by country, type, and year');
-    //     if (country.length == 2) {
-    //         return this.disastersService.getDisastersByCountryCodeTypeAndYear(country, type, year);
-    //     } else {
-    //         console.log('아직 안만들었다');
-    //     }
-    // }
+    @Get('/year/:year')
+    async getByYear(@Param('year') year: string): Promise<OldDisastersEntity[]> {
+        console.log("\nAPI : GET call made to fetch all oldDisasters by year");
+        return this.disastersService.getDisastersByYear(year);
+    }
+
 }

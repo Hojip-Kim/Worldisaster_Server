@@ -4,17 +4,13 @@
 // <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous"></script>
 
 const io = require('socket.io-client');
-const socket = io('http://localhost:3000/chat');
+const socket = io('http://localhost:3001/chat');
 
 socket.on('connect', () => {
     console.log('Connected to the server.');
-    socket.emit('joinRoom', '101');
-    socket.emit('message', {
-        chatSenderID: "3",
-        chatRoomID: "101",
-        chatMessage: "Hello You Two!"
-    });
 });
+
+socket.emit('joinRoom', '101');
 
 socket.on('newMessage', (data) => {
     console.log('Message from server:', data);
