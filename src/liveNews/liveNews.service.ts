@@ -106,7 +106,7 @@ export class LiveNewsService {
                 console.error('Error fetching news:', error.message);
             }
         }
-        await this.removeDuplicateArticles();
+        // await this.removeDuplicateArticles();
     }
     //!SECTION End Mediastack API
 
