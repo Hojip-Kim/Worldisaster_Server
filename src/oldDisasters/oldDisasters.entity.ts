@@ -98,7 +98,5 @@ export class OldDisastersEntity {
     @Column({ nullable: true })
     news5url: string;
 
-    //NOTE - LiveNewsEntity와의 관계 설정
-    @OneToMany(() => LiveNewsEntity, liveArticle => liveArticle.disasterDetail)
-    liveArticles: LiveNewsEntity[];
+    
 }

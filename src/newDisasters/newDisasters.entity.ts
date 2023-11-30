@@ -1,12 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { LiveNewsEntity } from '../liveNews/liveNews.entity';
 @Entity()
 export class NewDisastersEntity {
 
     @PrimaryGeneratedColumn()
     objectId: number;
 
-    @Column()
+    @Column({ unique: true })
     dID: string;
 
     @Column()
@@ -57,4 +57,8 @@ export class NewDisastersEntity {
 
     @Column()
     dUrl: string;
+
+    //NOTE - LiveNewsEntity와의 관계 설정
+    @OneToMany(() => LiveNewsEntity, liveArticle => liveArticle.disasterDetail)
+    liveArticles: LiveNewsEntity[];
 }
