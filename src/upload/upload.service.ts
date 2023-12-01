@@ -36,9 +36,9 @@ export class UploadService {
         const fileExtension = path.extname(fileName).toLowerCase().substring(1);
         const maxFileSize = 10 * 1024 * 1024; // 예: 10MB 제한
         const encodedfileName = encodeURIComponent(fileName);
-        
+
         // 파일 이름 길이 검증
-        if (fileName.length > this.MAX_FILENAME_LENGTH) {
+        if (encodedfileName.length > this.MAX_FILENAME_LENGTH) {
             throw new BadRequestException(`File name too long. Maximum length allowed is ${this.MAX_FILENAME_LENGTH} characters.`);
         }
         // 파일 형식 검증
