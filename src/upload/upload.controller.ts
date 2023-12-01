@@ -17,15 +17,8 @@ export class UploadController {
         @Body() uploadVideoDto: UploadVideoDto,@Res() res: Response
     ) {
 
-        const savedVideoId = await this.uploadService.upload(uploadVideoDto, file.originalname, file.buffer);
-        const video_url = await this.uploadService.getVideoUrl(savedVideoId);
-
-        if(!video_url) {
-            console.log('video_url is null');
-            return res.status(404).send('Video not found');
-        }
-        return res.json({ url: video_url });
-
+        await this.uploadService.upload(uploadVideoDto, file.originalname, file.buffer);
+        
     }
     @Get('/:id')
     async getVideoPage(@Param('id') id: number, @Res() res: Response) {
