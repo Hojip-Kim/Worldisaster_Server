@@ -15,7 +15,7 @@ import { NewDisastersEntity } from '../newDisasters/newDisasters.entity';
 export class UploadService {
     private readonly s3client = new S3Client;
     // 지원하는 파일 형식 목록
-    private readonly supportedFormats = ['mp4'];
+    private readonly MAX_FILENAME_LENGTH = 255; // 파일 이름 길이 제한
     constructor(
         private readonly configService: ConfigService,
         private videoRepository: VideoRepository,
@@ -36,6 +36,11 @@ export class UploadService {
         const fileExtension = path.extname(fileName).toLowerCase().substring(1);
         const maxFileSize = 10 * 1024 * 1024; // 예: 10MB 제한
         const encodedfileName = encodeURIComponent(fileName);
+        
+        // 파일 이름 길이 검증
+        if (fileName.length > this.MAX_FILENAME_LENGTH) {
+            throw new BadRequestException(`File name too long. Maximum length allowed is ${this.MAX_FILENAME_LENGTH} characters.`);
+        }
         // 파일 형식 검증
         if (!supportedFormats.includes(fileExtension)) {
             throw new BadRequestException('Only MP4 files are supported.');
