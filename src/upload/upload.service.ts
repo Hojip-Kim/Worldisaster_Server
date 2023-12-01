@@ -15,7 +15,7 @@ import { NewDisastersEntity } from '../newDisasters/newDisasters.entity';
 export class UploadService {
     private readonly s3client = new S3Client;
     // 지원하는 파일 형식 목록
-    private readonly supportedFormats = ['mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv', 'webm', 'mpg', 'mpeg'];
+    private readonly supportedFormats = ['mp4'];
     constructor(
         private readonly configService: ConfigService,
         private videoRepository: VideoRepository,
@@ -34,7 +34,7 @@ export class UploadService {
     async upload(fileName: string, file: Buffer, dID: string) {
         const supportedFormats = ['mp4'];
         const fileExtension = path.extname(fileName).toLowerCase().substring(1);
-        const maxFileSize = 5 * 1024 * 1024; // 예: 5MB 제한
+        const maxFileSize = 10 * 1024 * 1024; // 예: 5MB 제한
 
         // 파일 형식 검증
         if (!supportedFormats.includes(fileExtension)) {
@@ -73,8 +73,7 @@ export class UploadService {
             video.video_url = `https://doim6x5685p82.cloudfront.net/${baseName}/${baseName}.m3u8`;
             video.video_name = baseName;
             video.disasterDetail = disasterDetail;
-            console.log(video);
-            console.log('@@@@@@@@@@@@');
+
             await this.videoRepository.save(video);
             // console.log('Video information saved to database');
         } catch (error) {
