@@ -68,14 +68,6 @@ export class UploadService {
         console.log('HLS files uploaded to S3');
         //db에 url 저장
         const { video_url, video_name } = uploadVideoDto;
-        
-        //NOTE - 유정 cloudfront url
-        // video_url: `https://d2v41mvu3zgnz0.cloudfront.net/${baseName}/${baseName}.m3u8`,
-        // const video = this.videoRepository.create({
-        //     video_url: `https://doim6x5685p82.cloudfront.net/${baseName}/${baseName}.m3u8`,
-        //     video_name: baseName
-            
-        // })
 
         const video = new Video();
         video.video_url = `https://doim6x5685p82.cloudfront.net/${baseName}/${baseName}.m3u8`;
@@ -83,16 +75,6 @@ export class UploadService {
         video.disasterDetail = disasterDetail;
 
         await this.videoRepository.save(video);
-        //cloudfront로 배포한 url 제공
-        // return `https://d2v41mvu3zgnz0.cloudfront.net/${baseName}/${baseName}.m3u8`;
-        // await this.s3client.send(
-        //     //인코딩된 파일을 S3에 업로드
-        //     new PutObjectCommand({
-        //         Bucket: 'worldisaster-test-bucket',
-        //         Key: fileName,
-        //         Body: file 
-        //     })
-        // )
     }
 
     private async encodeToHLS(file: Buffer, fileName: string, tempFilePath: string): Promise<void> {
