@@ -9,10 +9,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { VideoRepository } from './video.repository';
 import { NewDisastersEntity } from '../newDisasters/newDisasters.entity';
 @Module({
-  imports: [TypeOrmModule.forFeature([Video])],
+  imports: [TypeOrmModule.forFeature([Video, NewDisastersEntity])],
   controllers: [UploadController],
   providers: [
-    UploadService, VideoRepository, NewDisastersEntity
+    UploadService, VideoRepository
   ],
   exports: [VideoRepository]
 })
