@@ -7,11 +7,12 @@ import { ConfigService } from '@nestjs/config';
 import { Video } from './video.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { VideoRepository } from './video.repository';
+import { NewDisastersEntity } from '../newDisasters/newDisasters.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([Video])],
   controllers: [UploadController],
   providers: [
-    UploadService, VideoRepository
+    UploadService, VideoRepository, NewDisastersEntity
   ],
   exports: [VideoRepository]
 })
