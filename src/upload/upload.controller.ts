@@ -14,10 +14,17 @@ export class UploadController {
     @UseInterceptors(FileInterceptor('file'))
     async uploadFile(
         @UploadedFile() file: Express.Multer.File,
-        @Body() uploadVideoDto: UploadVideoDto
+        @Body() uploadVideoDto: UploadVideoDto,@Res() res: Response
     ) {
 
-        await this.uploadService.upload(uploadVideoDto, file.originalname, file.buffer);
+        const savedVideoId = await this.uploadService.upload(uploadVideoDto, file.originalname, file.buffer);
+        const video_url = await this.uploadService.getVideoUrl(savedVideoId);
+
+        if(!video_url) {
+            console.log('video_url is null');
+            return res.status(404).send('Video not found');
+        }
+        return res.json({ url: video_url });
 
     }
     @Get('/:id')

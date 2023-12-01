@@ -56,7 +56,10 @@ export class UploadService {
             video_name: baseName
         })
 
-        await this.videoRepository.save(video);
+        const savedVideo = await this.videoRepository.save(video);
+        const savedVideoId = savedVideo.id;
+        
+        return savedVideoId;
         //cloudfront로 배포한 url 제공
         // return `https://d2v41mvu3zgnz0.cloudfront.net/${baseName}/${baseName}.m3u8`;
         // await this.s3client.send(
