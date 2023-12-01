@@ -34,8 +34,8 @@ export class UploadService {
     async upload(fileName: string, file: Buffer, dID: string) {
         const supportedFormats = ['mp4'];
         const fileExtension = path.extname(fileName).toLowerCase().substring(1);
-        const maxFileSize = 10 * 1024 * 1024; // 예: 5MB 제한
-
+        const maxFileSize = 10 * 1024 * 1024; // 예: 10MB 제한
+        const encodedfileName = encodeURIComponent(fileName);
         // 파일 형식 검증
         if (!supportedFormats.includes(fileExtension)) {
             throw new BadRequestException('Only MP4 files are supported.');
@@ -46,20 +46,20 @@ export class UploadService {
         }
 
         //서버 공간에 동영상 임시 저장
-        const tempFilePath = path.join("/home/ubuntu/temp", fileName);
+        const tempFilePath = path.join("/home/ubuntu/temp", encodedfileName);
         const disasterDetail = await this.newDisasterRepository.findOne({ where: {dID} });
         //tempFilePath에 file을 저장
         fs.writeFileSync(tempFilePath, file);
         console.log(`File saved to ${tempFilePath}`);
         //HLS 인코딩
-        await this.encodeToHLS(file, fileName, tempFilePath);
+        await this.encodeToHLS(file, encodedfileName, tempFilePath);
         //인코딩이 끝나면, 임시 저장해둔 파일 삭제
         if (fs.existsSync(tempFilePath)) {
             fs.unlinkSync(tempFilePath);
             console.log(`File deleted from ${tempFilePath}`);
         }
         //HLS 파일 디렉토리
-        const baseName = path.basename(fileName, path.extname(fileName));
+        const baseName = path.basename(encodedfileName, path.extname(encodedfileName));
         const hlsFolderPath = path.join("/home/ubuntu/video", baseName);
 
         //S3에 HLS 파일 업로드
