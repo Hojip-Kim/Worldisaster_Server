@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,7 +14,8 @@ import { NewDisastersEntity } from '../newDisasters/newDisasters.entity';
 @Injectable()
 export class UploadService {
     private readonly s3client = new S3Client;
-
+    // 지원하는 파일 형식 목록
+    private readonly supportedFormats = ['mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv', 'webm', 'mpg', 'mpeg'];
     constructor(
         private readonly configService: ConfigService,
         private videoRepository: VideoRepository,
@@ -31,6 +32,14 @@ export class UploadService {
     }
 
     async upload(uploadVideoDto: UploadVideoDto, fileName: string, file: Buffer, dID: string) {
+        const supportedFormats = ['mp4'];
+        const fileExtension = path.extname(fileName).toLowerCase().substring(1);
+
+        // 파일 형식 검증
+        if (!supportedFormats.includes(fileExtension)) {
+            throw new BadRequestException('Only MP4 files are supported.');
+        }
+
         //서버 공간에 동영상 임시 저장
         const tempFilePath = path.join("/home/ubuntu/temp", fileName);
         const disasterDetail = await this.newDisasterRepository.findOne({ where: {dID} });
