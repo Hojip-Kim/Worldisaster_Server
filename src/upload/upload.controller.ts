@@ -14,11 +14,10 @@ export class UploadController {
     @UseInterceptors(FileInterceptor('file'))
     async uploadFile(
         @Param('dID') dID: string,
-        @UploadedFile() file: Express.Multer.File,
-        @Body() uploadVideoDto: UploadVideoDto,
+        @UploadedFile() file: Express.Multer.File
     ) {
 
-        return await this.uploadService.upload(uploadVideoDto, file.originalname, file.buffer, dID);
+        return await this.uploadService.upload(file.originalname, file.buffer, dID);
         
     }
     @Get('/:dID')

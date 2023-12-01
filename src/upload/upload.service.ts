@@ -31,7 +31,7 @@ export class UploadService {
         });
     }
 
-    async upload(uploadVideoDto: UploadVideoDto, fileName: string, file: Buffer, dID: string) {
+    async upload(fileName: string, file: Buffer, dID: string) {
         const supportedFormats = ['mp4'];
         const fileExtension = path.extname(fileName).toLowerCase().substring(1);
         const maxFileSize = 5 * 1024 * 1024; // 예: 5MB 제한
