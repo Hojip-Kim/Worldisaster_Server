@@ -34,10 +34,15 @@ export class UploadService {
     async upload(uploadVideoDto: UploadVideoDto, fileName: string, file: Buffer, dID: string) {
         const supportedFormats = ['mp4'];
         const fileExtension = path.extname(fileName).toLowerCase().substring(1);
+        const maxFileSize = 5 * 1024 * 1024; // 예: 5MB 제한
 
         // 파일 형식 검증
         if (!supportedFormats.includes(fileExtension)) {
             throw new BadRequestException('Only MP4 files are supported.');
+        }
+        // 파일 크기 검증
+        if (file.byteLength > maxFileSize) {
+            throw new BadRequestException(`File size exceeds the limit of ${maxFileSize / 1024 / 1024} MB.`);
         }
 
         //서버 공간에 동영상 임시 저장
