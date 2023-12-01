@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -67,14 +67,19 @@ export class UploadService {
 
         console.log('HLS files uploaded to S3');
         //db에 url 저장
-        const { video_url, video_name } = uploadVideoDto;
+        // db에 url 저장
+        try {
+            const video = new Video();
+            video.video_url = `https://doim6x5685p82.cloudfront.net/${baseName}/${baseName}.m3u8`;
+            video.video_name = baseName;
+            video.disasterDetail = disasterDetail;
 
-        const video = new Video();
-        video.video_url = `https://doim6x5685p82.cloudfront.net/${baseName}/${baseName}.m3u8`;
-        video.video_name = baseName;
-        video.disasterDetail = disasterDetail;
-
-        await this.videoRepository.save(video);
+            await this.videoRepository.save(video);
+            console.log('Video information saved to database');
+        } catch (error) {
+            console.error('Error during saving video information to database:', error);
+            throw new InternalServerErrorException('Error during database operation');
+        }
     }
 
     private async encodeToHLS(file: Buffer, fileName: string, tempFilePath: string): Promise<void> {
