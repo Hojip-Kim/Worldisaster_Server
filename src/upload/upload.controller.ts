@@ -16,7 +16,6 @@ export class UploadController {
         @Param('dID') dID: string,
         @UploadedFile() file: Express.Multer.File,
         @Body() uploadVideoDto: UploadVideoDto,
-        @Res() res: Response
     ) {
 
         return await this.uploadService.upload(uploadVideoDto, file.originalname, file.buffer, dID);

@@ -74,8 +74,8 @@ export class UploadService {
             video.video_name = baseName;
             video.disasterDetail = disasterDetail;
 
-            await this.videoRepository.save(video);
-            console.log('Video information saved to database');
+            return await this.videoRepository.save(video);
+            // console.log('Video information saved to database');
         } catch (error) {
             console.error('Error during saving video information to database:', error);
             throw new InternalServerErrorException('Error during database operation');
