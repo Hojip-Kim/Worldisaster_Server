@@ -7,6 +7,7 @@ import * as path from 'path';
 import { Video } from './video.entity';
 import { VideoRepository } from './video.repository';
 import { UploadVideoDto } from './dto/upload-video.dto';
+import { NewDisastersEntity } from '../newDisasters/newDisasters.entity';
 
 @Injectable()
 export class UploadService {
@@ -14,7 +15,8 @@ export class UploadService {
 
     constructor(
         private readonly configService: ConfigService,
-        private videoRepository: VideoRepository
+        private videoRepository: VideoRepository,
+        private newDisasterRepository: NewDisastersEntity,
     ) {
         this.s3client = new S3Client({
             region: this.configService.getOrThrow('AWS_S3_REGION'),
@@ -25,9 +27,10 @@ export class UploadService {
         });
     }
 
-    async upload(uploadVideoDto: UploadVideoDto, fileName: string, file: Buffer) {
+    async upload(uploadVideoDto: UploadVideoDto, fileName: string, file: Buffer, dID: string) {
         //서버 공간에 동영상 임시 저장
         const tempFilePath = path.join("/home/ubuntu/temp", fileName);
+        const disasterDetail = await this.newDisasterRepository.findOne({ where: {dID} });
         //tempFilePath에 file을 저장
         fs.writeFileSync(tempFilePath, file);
         console.log(`File saved to ${tempFilePath}`);
@@ -51,10 +54,16 @@ export class UploadService {
         
         //NOTE - 유정 cloudfront url
         // video_url: `https://d2v41mvu3zgnz0.cloudfront.net/${baseName}/${baseName}.m3u8`,
-        const video = this.videoRepository.create({
-            video_url: `https://doim6x5685p82.cloudfront.net/${baseName}/${baseName}.m3u8`,
-            video_name: baseName
-        })
+        // const video = this.videoRepository.create({
+        //     video_url: `https://doim6x5685p82.cloudfront.net/${baseName}/${baseName}.m3u8`,
+        //     video_name: baseName
+            
+        // })
+
+        const video = new Video();
+        video.video_url = `https://doim6x5685p82.cloudfront.net/${baseName}/${baseName}.m3u8`;
+        video.video_name = baseName;
+        video.disasterDetail = disasterDetail;
 
         await this.videoRepository.save(video);
         //cloudfront로 배포한 url 제공

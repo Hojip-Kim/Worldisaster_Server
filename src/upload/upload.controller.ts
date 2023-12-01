@@ -10,7 +10,7 @@ export class UploadController {
     constructor(private readonly uploadService: UploadService) {}
 
 
-    @Post()
+    @Post('/:dID')
     @UseInterceptors(FileInterceptor('file'))
     async uploadFile(
         @UploadedFile() file: Express.Multer.File,
