@@ -73,6 +73,7 @@ export class UploadService {
             video.video_url = `https://doim6x5685p82.cloudfront.net/${baseName}/${baseName}.m3u8`;
             video.video_name = baseName;
             video.disasterDetail = disasterDetail;
+            console.log(video);
             console.log('@@@@@@@@@@@@');
             await this.videoRepository.save(video);
             // console.log('Video information saved to database');
