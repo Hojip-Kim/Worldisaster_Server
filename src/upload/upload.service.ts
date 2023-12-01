@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import * as ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -16,7 +18,8 @@ export class UploadService {
     constructor(
         private readonly configService: ConfigService,
         private videoRepository: VideoRepository,
-        private newDisasterRepository: NewDisastersEntity,
+        @InjectRepository(NewDisastersEntity)
+        private newDisasterRepository: Repository<NewDisastersEntity>,
     ) {
         this.s3client = new S3Client({
             region: this.configService.getOrThrow('AWS_S3_REGION'),
