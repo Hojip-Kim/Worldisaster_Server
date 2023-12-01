@@ -22,15 +22,18 @@ export class UploadController {
         await this.uploadService.upload(uploadVideoDto, file.originalname, file.buffer, dID);
         
     }
-    @Get('/:id')
-    async getVideoPage(@Param('id') id: number, @Res() res: Response) {
-        const video_url = await this.uploadService.getVideoUrl(id);
+    @Get('/:dID')
+    async getVideoPage(@Param('dID') dID: string, @Res() res: Response) {
+        const videos = await this.uploadService.getVideoUrl(dID);
         // console.log(video_url);
-        if(!video_url) {
-            console.log('video_url is null');
+        if(videos.length === 0) {
+            console.log('Video not found');
             return res.status(404).send('Video not found');
         }
-        return res.json({ url: video_url });
+        // video 배열에서 각 video의 url만 추출하여 새 배열 생성
+        const videoUrls = videos.map(video => video.video_url);
+
+        return res.json({ urls: videoUrls });
         // const htmlContent = `
         // <!DOCTYPE html>
         // <html lang="en">

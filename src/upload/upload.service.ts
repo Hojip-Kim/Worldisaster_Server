@@ -133,13 +133,13 @@ export class UploadService {
     }
 
     //db objID 로 url 가져오기
-    async getVideoUrl(id: number) {
-        const video = await this.videoRepository.findOneBy({id});
-        const video_url = video.video_url;
+    async getVideoUrl(dID: string): Promise<Video[]> {
+        const video = await this.videoRepository.find({ where : { disasterDetail : {dID} }});
+
         // if(!video) {
         //     throw new NotfoundException(`Video with ID "${id}" not found`);
         // }
 
-        return video_url;
+        return video;
     }
 }
