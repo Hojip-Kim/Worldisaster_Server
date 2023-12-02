@@ -11,7 +11,6 @@ export class Video extends BaseEntity {
     @Column()
     video_name: string;
 
-    @ManyToOne(() => NewDisastersEntity)
-    @JoinColumn({ name: 'dID' , referencedColumnName: 'dID'}) // 여기서 dID는 NewDisastersEntity dID 필드를 참조합니다
-    disasterDetail: NewDisastersEntity;
+    @Column()
+    dID: string;
 }

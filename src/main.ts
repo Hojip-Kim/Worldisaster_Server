@@ -9,8 +9,8 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS', // 이 방법들만 가능하며
     credentials: true, // Header에 쿠키나 인증 관련 값을 넣어서 소통 가능
   })
-  // await app.listen(3001, "0.0.0.0");
-  await app.listen(3000);
+  await app.listen(3001, "0.0.0.0");
+  // await app.listen(3000);
 
   
 }

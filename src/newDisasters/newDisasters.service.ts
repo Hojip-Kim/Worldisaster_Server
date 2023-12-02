@@ -80,7 +80,7 @@ export class NewDisastersService {
             // 비교를 위해서 현재 DB에서 dStatus : real-time/ongoing/past 상태의 재난들을 배열에 담기
             const dbDisasters = await this.disasterDetailRepository.find({
                 where: {
-                    dStatus: In(['real-time', 'ongoing', 'past'])
+                    dStatus: In(['real-time', 'ongoing'])
                 }
             });
 
@@ -108,10 +108,6 @@ export class NewDisastersService {
                 const existingDisaster = dbDisasters.find(d => d.dID === disaster.dID);
 
                 if (existingDisaster) { // DB에 있다면,
-
-                    if (existingDisaster.dStatus === 'past') {
-                        break;
-                    }
 
                     // 각 칼럼들을 하나씩 순회하면서 비교해보고, 바꾸는게 있다면 shouldUpdate를 변경
                     let shouldUpdate = false;
@@ -209,6 +205,7 @@ export class NewDisastersService {
             return { success: false, message: 'Update Failed.' };
         }
     }
+
     // @Cron(CronExpression.EVERY_MINUTE)
     // async handleDisasterUpdate() {
     //     console.log('\nGDACS Disaster Update Initiated...');

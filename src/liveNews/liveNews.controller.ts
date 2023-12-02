@@ -6,11 +6,11 @@ import { get } from 'http';
 
 @Controller('live')
 export class LiveNewsController {
-    constructor(private readonly liveNewsService: LiveNewsService) { 
-        
+    constructor(private readonly liveNewsService: LiveNewsService) {
+
     }
     @Get('force')
-        async storeDisastersLiveArticle() {
+    async storeDisastersLiveArticle() {
         console.log('API storeDisastersLiveArticle');
         // real-time인 재난만 저장
         const getDisastersIDList = await this.liveNewsService.getDisastersID();
@@ -28,7 +28,7 @@ export class LiveNewsController {
         // const dDate = '2023-10-15'
         // const dID = '51799'
         // await this.disastersService.storeLiveArticle(dID, dDate, dType, dCountry);
-    
+
     }
     //dID로 news 조회
     @Get('/:dID')
@@ -37,9 +37,10 @@ export class LiveNewsController {
         return this.liveNewsService.getLiveArticleBydID(dID);
     }
 
-    @Cron(CronExpression.EVERY_MINUTE)
+    @Cron(CronExpression.EVERY_5_MINUTES)
     async handleCron() {
-        console.log("\n@ Get Live News Every MINUTE @\n");
+        // console.log("\n@ Get Live News Every MINUTE @\n");
+        console.log("\n Live news call Successful\n")
         await this.liveNewsService.fetchAndStoreRealtimeDisasterNews();
     }
 }

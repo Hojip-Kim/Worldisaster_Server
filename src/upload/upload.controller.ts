@@ -16,12 +16,13 @@ export class UploadController {
         @Param('dID') dID: string,
         @UploadedFile() file: Express.Multer.File
     ) {
-
+        console.log("@@@@@@upload video start@@@@@@");
         return await this.uploadService.upload(file.originalname, file.buffer, dID);
         
     }
     @Get('/:dID')
     async getVideoPage(@Param('dID') dID: string, @Res() res: Response) {
+        
         const videos = await this.uploadService.getVideoUrl(dID);
         if(videos.length === 0) {
             console.log('Video not found');

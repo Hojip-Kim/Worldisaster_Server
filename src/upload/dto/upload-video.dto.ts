@@ -6,4 +6,7 @@ export class UploadVideoDto {
 
     @IsNotEmpty()
     video_name: string;
+
+    @IsNotEmpty()
+    dID: string;
 }

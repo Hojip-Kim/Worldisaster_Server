@@ -92,12 +92,12 @@ export class LiveNewsService {
                 const liveArticle = new LiveNewsEntity();
                 liveArticle.headline = headline;
                 liveArticle.url = url;
-                liveArticle.disasterDetail = disasterDetail; // 할당
+                liveArticle.dID = dID; // 할당
                 liveArticle.author = article.author;
                 liveArticle.image = article.image;
 
                 await this.liveArticleRepository.save(liveArticle);
-                console.log(`success save article ${headline}`);
+                // console.log(`success save article ${headline}`);
             }
         } catch (error) {
             if (error.response) {
@@ -114,7 +114,7 @@ export class LiveNewsService {
 
     //!SECTION Get Live News Service
     async getLiveArticleBydID(dID: string): Promise<LiveNewsEntity[]> {
-        const liveNewsTable = await this.liveArticleRepository.find({ where: { disasterDetail : {dID} }});
+        const liveNewsTable = await this.liveArticleRepository.find({ where: { dID }});
         if(!liveNewsTable) {
             throw new Error('No live news found.');
         }
@@ -143,7 +143,7 @@ export class LiveNewsService {
             .where('objectId NOT IN (:...ids)', { ids: latestIds })
             .execute();
     
-        console.log(`Deleted duplicate articles, keeping the latest ones.`);
+        // console.log(`Deleted duplicate articles, keeping the latest ones.`);
     }
     //newDisaster에서 dStatus가 real-time인 재난 가져오기
     async getRealtimeDisasters() {
@@ -158,7 +158,7 @@ export class LiveNewsService {
 
     //realtime인 재난의 dID로 연결된 기사들의 개수 확인
     async getLiveNewsCountForDisaster(dID: string) {
-        const liveNewsCount = await this.liveArticleRepository.count({ where: { disasterDetail: { dID }  } });
+        const liveNewsCount = await this.liveArticleRepository.count({ where: { dID } });
         return liveNewsCount;
     }
 
@@ -176,10 +176,10 @@ export class LiveNewsService {
 
                 // 가져온 기사를 데이터베이스에 저장
                 await this.storeLiveArticle(disaster.dID, underTenArticlesDisaster.dDate, underTenArticlesDisaster.dType, underTenArticlesDisaster.dCountry);
-                console.log(`Stored live news for disaster ID ${disaster.dID}.`);
+                // console.log(`Stored live news for disaster ID ${disaster.dID}.`);
             } else {
                 // 기사 수가 10개 이상인 경우 pass
-                console.log(`Skipping disaster ID ${disaster.dID}, already has sufficient articles.`);
+                // console.log(`Skipping disaster ID ${disaster.dID}, already has sufficient articles.`);
             }
         }
     }

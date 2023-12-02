@@ -25,8 +25,8 @@ export class UploadService {
         this.s3client = new S3Client({
             region: this.configService.getOrThrow('AWS_S3_REGION'),
             credentials: {
-                accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY'),
-                secretAccessKey: this.configService.get<string>('AWS_ACCESS_SECRET_KEY'),
+                accessKeyId: this.configService.get<string>('AWS_S3_ACCESS_KEY'),
+                secretAccessKey: this.configService.get<string>('AWS_S3_ACCESS_SECRET_KEY'),
             },
         });
     }
@@ -77,7 +77,7 @@ export class UploadService {
             const video = new Video();
             video.video_url = `https://doim6x5685p82.cloudfront.net/${baseName}/${baseName}.m3u8`;
             video.video_name = baseName;
-            video.disasterDetail = disasterDetail;
+            video.dID = dID;
 
             await this.videoRepository.save(video);
             // console.log('Video information saved to database');
@@ -140,7 +140,7 @@ export class UploadService {
 
     //db objID 로 url 가져오기
     async getVideoUrl(dID: string): Promise<Video[]> {
-        const video = await this.videoRepository.find({ where : { disasterDetail : {dID} }});
+        const video = await this.videoRepository.find({ where : { dID }});
 
         // if(!video) {
         //     throw new NotfoundException(`Video with ID "${id}" not found`);
