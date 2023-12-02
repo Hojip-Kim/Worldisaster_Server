@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { LiveNewsEntity } from '../liveNews/liveNews.entity';
 
 @Entity()
 export class OldDisastersEntity {
@@ -6,7 +7,7 @@ export class OldDisastersEntity {
     @PrimaryGeneratedColumn()
     objectId: number;
 
-    @Column()
+    @Column({unique: true})
     dID: string;
 
     @Column()
@@ -97,4 +98,5 @@ export class OldDisastersEntity {
     @Column({ nullable: true })
     news5url: string;
 
+    
 }

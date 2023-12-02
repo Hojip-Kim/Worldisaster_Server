@@ -1257,17 +1257,6 @@ const pool = new Pool({
     port: 5432,
 });
 
-//!SECTION uuuuj
-// const pool = new Pool({
-//     user: 'postgres',
-//     host: 'worldisaster-rds.c8vecnz23gk6.ap-northeast-2.rds.amazonaws.com',
-//     port: 5432,
-//     password: 'postdbwjd',
-//     database: 'worldisaster-test-db',
-//     ssl: {
-//         rejectUnauthorized: false
-//     }
-// });
 
 const createTable = async () => {
     const client = await pool.connect();
