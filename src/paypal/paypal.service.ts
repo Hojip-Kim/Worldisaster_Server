@@ -1,40 +1,37 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import {
-    PayPalEnvironment,
-    PayPalHttpClient,
-    OrdersCreateRequest,
-    OrderRequest
-} from '@paypal/checkout-server-sdk';
+import * as paypal from 'paypal-rest-sdk';
 
 @Injectable()
-export class PaypalService {
-    private client: PayPalHttpClient;
+export class PayPalService {
+  constructor() {
+    paypal.configure({
+      'mode': 'sandbox', // sandbox or live
+      'client_id': process.env.PAYPAL_CLIENT_ID,
+      'client_secret': process.env.PAYPAL_CLIENT_SECRET,
+    });
+  }
 
-    constructor(private configService: ConfigService) {
-        const clientId = this.configService.get('PAYPAL_CLIENT_ID');
-        const clientSecret = this.configService.get('PAYPAL_SECRET');
-        const environment = new PayPalEnvironment.Sandbox(clientId, clientSecret);
-        this.client = new PayPalHttpClient(environment);
-    }
-
-    async createOrder(amount: string): Promise<string> {
-        const request = new OrdersCreateRequest();
-        request.requestBody({
-            intent: 'CAPTURE',
-            purchase_units: [{
-                amount: {
-                    currency_code: 'USD',
-                    value: amount
-                }
-            }]
-        });
-
-        try {
-            const response = await this.client.execute(request);
-            return response.result.links.find(link => link.rel === 'approve').href;
-        } catch (error) {
-            throw new Error(`Error creating PayPal order: ${error.message}`);
+  createPayment(create_payment_json: any): Promise<any> {
+    return new Promise((resolve, reject) => {
+      paypal.payment.create(create_payment_json, function (error, payment) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(payment);
         }
-    }
+      });
+    });
+  }
+
+  executePayment(paymentId: string, execute_payment_json: any): Promise<any> {
+    return new Promise((resolve, reject) => {
+      paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(payment);
+        }
+      });
+    });
+  }
 }

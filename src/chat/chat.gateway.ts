@@ -8,7 +8,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 
-@WebSocketGateway({ namespace: 'chat' })
+@WebSocketGateway({ namespace: 'chats' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /* 웹소켓 서버 인스턴스 생성 */

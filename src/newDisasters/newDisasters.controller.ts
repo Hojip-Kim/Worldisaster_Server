@@ -33,4 +33,9 @@ export class NewDisastersController {
         console.log("\nAPI : GET call made to fetch all oldDisasters by year and status");
         return this.disastersService.getGdacsDisastesByYearAndStatus(year, status);
     }
+
+    @Get('/status/:status')
+    async getDisastersByStatus(@Param('status') status: string): Promise<NewDisastersEntity[]> {
+        return this.disastersService.getDisastersByStatusService(status);
+    }
 }

@@ -17,6 +17,7 @@ import { EmailAlertsModule } from 'src/emailAlerts/emailAlerts.module';
     TypeOrmModule.forFeature([CountryMappings]),
   ],
   controllers: [NewDisastersController],
-  providers: [NewDisastersService, NewDisastersGateway]
+  providers: [NewDisastersService, NewDisastersGateway],
+  exports: [NewDisastersService]
 })
 export class NewDisastersModule { }

@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { PaypalService } from './paypal.service';
-import { PaypalController } from './paypal.controller';
+import { PayPalService } from './paypal.service';
+import { PayPalController } from './paypal.controller';
+import { NewDisastersService } from 'src/newDisasters/newDisasters.service';
+import { NewDisastersModule } from 'src/newDisasters/newDisasters.module';
 
 @Module({
-    controllers: [PaypalController],
-    providers: [PaypalService],
-    exports: [PaypalService]
+    imports: [NewDisastersModule],
+    controllers: [PayPalController],
+    providers: [PayPalService],
 })
-export class PaypalModule { }
+export class PayPalModule {}

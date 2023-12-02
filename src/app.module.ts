@@ -12,7 +12,8 @@ import { CountryModule } from './country/country.module';
 import { OldDisastersModule } from './oldDisasters/oldDisasters.module';
 import { NewDisastersModule } from './newDisasters/newDisasters.module';
 import { EmailAlertsModule } from './emailAlerts/emailAlerts.module';
-import { PaypalModule } from './paypal/paypal.module';
+import { PayPalModule } from './paypal/paypal.module';
+
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { PaypalModule } from './paypal/paypal.module';
     TypeOrmModule.forRoot(typeORMConfig),
     ScheduleModule.forRoot(),
     AuthModule, DonateModule, ChatModule, EmailAlertsModule,
-    CountryModule, OldDisastersModule, NewDisastersModule, 
+    CountryModule, OldDisastersModule, NewDisastersModule,PayPalModule
   ],
 })
 export class AppModule { }

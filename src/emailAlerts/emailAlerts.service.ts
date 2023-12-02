@@ -18,11 +18,11 @@ export class EmailAlertsService {
         });
     }
 
-    async sendMail(to: string, subject: string, text: string, html: string): Promise<void> {
+    async sendMail(bcc: string[], subject: string, text: string, html: string): Promise<void> {
 
         const mailOptions = {
             from: `"Worldisaster Alert System" <${process.env.EMAIL_ALERT_ID}>`,
-            to: to,
+            to: bcc.join(', '),
             subject: subject,
             text: text,
             html: html,
