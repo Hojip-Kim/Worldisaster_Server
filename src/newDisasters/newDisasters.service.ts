@@ -31,7 +31,7 @@ export class NewDisastersService {
         private disasterDetailRepository: Repository<NewDisastersEntity>,
     ) { }
 
-    /* API */
+    /* API 대응용 함수들 (cc. newDisasters.service) */
 
     async getAllDisasters(): Promise<NewDisastersEntity[]> {
         return this.disasterDetailRepository.createQueryBuilder('disaster').getMany();
@@ -59,7 +59,25 @@ export class NewDisastersService {
         });
     }
 
-    /* 주기적으로 RSS 피드를 확인하는 역할 */
+    async getDisastersByStatusService(status: string): Promise<NewDisastersEntity[]> {
+        return this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('disaster.dStatus = :status', { status })
+            .getMany();
+    }
+
+    // async getUrgentDisasters(): Promise<NewDisastersEntity[]> {
+    //     const disasters = await this.disasterDetailRepository
+    //         .createQueryBuilder('disaster')
+    //         .where('disaster.dStatus IN (:...statuses)', { statuses: ['real-time', 'ongoing', 'past'] })
+    //         .andWhere('disaster.dAlertLevel IN (:...alertLevels)', { alertLevels: ['Orange', 'Red'] })
+    //         .getMany();
+    //     console.log(disasters); // 로그 출력
+    //     return disasters;
+    // }
+
+    /* 여기서부터는 주기적으로 RSS 피드를 확인하고 처리하는 역할 */
+
     @Cron(CronExpression.EVERY_MINUTE)
     async handleDisasterUpdate() {
         console.log('\nGDACS Disaster Update Initiated...');
@@ -70,12 +88,15 @@ export class NewDisastersService {
             const disasters = await this.parseRssFeed(rssFeedXml);
             console.log(`${disasters.length} disasters in current GDACS feed...`);
 
-            // 비교를 위해서 현재 DB에서 dStatus : realtime/ongoing 상태의 재난들을 배열에 담기
+            // 비교를 위해서 현재 DB에서 dStatus : real-time/ongoing/past 상태의 재난들을 배열에 담기
             const dbDisasters = await this.disasterDetailRepository.find({
                 where: {
                     dStatus: In(['real-time', 'ongoing'])
                 }
             });
+
+            // db에 있는 재난들의 dID로 구성된 set를 하나 만들어서 dStatus 업데이트에 활용 (rss에 없다면 past)
+            const dbDisasterIdSet = new Set(dbDisasters.map(d => d.dID));
 
             // 재난 발생 이메일을 보낼 때, 양이 많으면 논외처리해야 함
             const newDisastersForBroadcast = [];
@@ -143,38 +164,46 @@ export class NewDisastersService {
                         disasterNewCount++
                         console.log(`New disaster added to DB: ${disaster.dID}...`);
 
-                        // 이메일 알림기능 추가하여야 함 @@@@@@@@@@@
-
                     } catch (error) {
                         console.error('Error saving or broadcasting disaster:', error);
                     }
                 }
 
+                // 하나의 재난을 처리했으면, 해당 재난을 set에서 제거
+                dbDisasterIdSet.delete(disaster.dID);
+            }
+
+            // 위 과정을 통해 set에 남아있는 재난이 있다면, 더이상 GDACS 7-day RSS에 없으니 past로 상태값 변경
+            for (const dID of dbDisasterIdSet) {
+                await this.disasterDetailRepository.update({ dID }, { dStatus: 'past' });
+                console.log(`Marked disaster as past: ${dID}.`);
             }
 
             // 현재 ongoing인 재난들을 다 불러와서, 7일 이상 지났으면 past로 변경
-            const ongoingDbDisasters = await this.disasterDetailRepository.find({
-                where: {
-                    dStatus: 'ongoing'
-                }
-            });
-            for (const dbDisaster of ongoingDbDisasters) {
-                const disasterDate = new Date(dbDisaster.dDate);
-                const timeDifference = (now.getTime() - disasterDate.getTime()) / (1000 * 60 * 60 * 24);
+            // const ongoingDbDisasters = await this.disasterDetailRepository.find({
+            //     where: {
+            //         dStatus: 'ongoing'
+            //     }
+            // });
+            // for (const dbDisaster of ongoingDbDisasters) {
+            //     const disasterDate = new Date(dbDisaster.dDate);
+            //     const timeDifference = (now.getTime() - disasterDate.getTime()) / (1000 * 60 * 60 * 24);
 
-                if (timeDifference > 7) {
-                    dbDisaster.dStatus = 'past';
-                    await this.disasterDetailRepository.save(dbDisaster);
-                    console.log(`Marked disaster as past: ${dbDisaster.dID}.`);
-                }
-            }
+            //     if (timeDifference > 7) {
+            //         dbDisaster.dStatus = 'past';
+            //         await this.disasterDetailRepository.save(dbDisaster);
+            //         console.log(`Marked disaster as past: ${dbDisaster.dID}.`);
+            //     }
+            // }
 
             // 마지막으로 실제 broadcast 진행 (웹소켓, 이메일)
-            if (newDisastersForBroadcast.length <= 10) {
+            if (newDisastersForBroadcast.length <= 5) {
                 for (const newDisaster of newDisastersForBroadcast) {
-                    this.newDisastersGateway.sendDisasterWebsocketAlert(newDisaster);
-                    await this.sendEmailAlert(newDisaster); // 여기서 이메일 타케팅 고객들 따로 처리
-                    console.log(`New disaster broadcasted via Websocket & Email for ${newDisaster.dID}...`);
+                    if (newDisaster.dStatus === 'real-time') {
+                        this.newDisastersGateway.sendDisasterWebsocketAlert(newDisaster);
+                        await this.sendEmailAlert(newDisaster); // 여기서 이메일 타케팅 고객들 따로 처리
+                        console.log(`New disaster broadcasted via Websocket & Email for ${newDisaster.dID}...`);
+                    }
                 }
             }
 
@@ -192,7 +221,7 @@ export class NewDisastersService {
         // 고객 이메일 전송을 전담하는 보조함수
 
         const emailContent = this.createEmailContent(disaster);
-        const targetUsers = await this.userRepository.find();
+        const targetUsers = await this.userRepository.find(); // 타겟유저 구독여부에따라 보내기
         console.log(targetUsers);
         for (const user of targetUsers) {
             try {
@@ -211,7 +240,7 @@ export class NewDisastersService {
 
     private createEmailContent(disaster: NewDisastersEntity): string {
         // 고객 알림 이메일을 전송하기 위해 필요한 HTML 생성 함수 (보조 함수)
-
+        // design적으로 손봐야함 ()
         const emailHtml = `
             <h1>New Disaster Alert: ${disaster.dTitle}</h1>
             <p>${disaster.dDescription}</p>
@@ -357,5 +386,4 @@ export class NewDisastersService {
         return { dCountry: null, dCountryCode: null, dCountryIso3: null };
     }
 
-    /* 다른 추가 함수들은 여기부터 추가 */
 }

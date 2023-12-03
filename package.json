@@ -33,6 +33,7 @@
     "@nestjs/websockets": "^10.2.10",
     "@paypal/checkout-server-sdk": "^1.0.3",
     "axios": "^1.6.1",
+    "bad-words": "^3.0.4",
     "bcryptjs": "^2.4.3",
     "cesium": "^1.111.0",
     "class-transformer": "^0.5.1",

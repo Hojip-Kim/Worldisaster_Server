@@ -8,7 +8,19 @@ import {
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 
-@WebSocketGateway({ namespace: 'chat' })
+/* 기본적인 욕설 필터 (단, 영어만 지원..) */
+// import * as BadWordsFilter from 'bad-words';
+// const filter = new BadWordsFilter();
+
+/* 웹소켓 게이트웨이 */
+@WebSocketGateway({
+  namespace: 'chats',
+  cors: {
+    origin: '*', // main.ts에서 해줬지만, 웹소켓은 별도 인터페이스라서 다시 허용해줘야 함
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+})
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /* 웹소켓 서버 인스턴스 생성 */
@@ -19,26 +31,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /* 현재 연결된 유저 수 관리 */
   private numberOfConnectedClients = 0;
-  // 웹소켓 전체 연결자 수 외에도 방단위로 추적 가능한데, 방 이름/번호를 먼저 같이 정한 후 처리
 
   /* 새로운 연결이 생성되면 Trigger */
   handleConnection(client: Socket) {
     this.numberOfConnectedClients++;
-    console.log(`Chat Websocket Subscribers: ${this.numberOfConnectedClients} (New connection by '${client.id}')`);
-
-    // 추후 AUTH를 연결하게 되면 연결 요청에 토큰 정보를 보내게 되며, 
-    // 그 정보를 여기서 활용해서 인증 / 거부 등을 처리하면 됨
-    // 최초 연결 시에만 인증하는게 맞으니 여기서 처리
+    console.log(`\nChat Websocket Subscribers: ${this.numberOfConnectedClients} (New connection by '${client.id}')`);
   }
 
   /* Client가 특정 Room을 조인하는 경우를 처리 */
   @SubscribeMessage('joinRoom')
   async handleJoinRoom(client: Socket, room: string): Promise<void> {
     client.join(room);
-    console.log(`Client ${client.id} joined room ${room}`);
   }
-
-  /* Client가 Online될 경우 */
 
   /* 서버가 Client들에 의한 "Message"를 구독 (메시지 발생 시 Trigger) */
   @SubscribeMessage('message')
@@ -46,10 +50,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(payload);
 
     try {
-      // DB에 해당 내용을 저장하고,
-      const chat = await this.chatService.createMessage(payload);
 
-      // 특정 chatroom에 있는 Client들은 'newMessage' 이벤트 발생 시 해당 내용을 받아가도록 구성
+      // 필터링 된 내용을 서버에 저장 (bad-words filter 전용 코드)
+      // const filteredMessage = filter.clean(payload.chatMessage);
+      // const chat = await this.chatService.createMessage({ ...payload, chatMessage: filteredMessage });
+
+      // 저장 후, 특정 chatroom에 있는 Client들은 'newMessage' 이벤트 발생 시 해당 내용을 받아가도록 구성
+      const chat = await this.chatService.createMessage(payload)
       this.chatServer.to(payload.chatRoomID).emit('newMessage', chat);
 
     } catch (error) {
@@ -60,8 +67,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /* 기존 연결이 끊기면 Trigger */
   handleDisconnect(client: Socket) {
     this.numberOfConnectedClients--;
-    console.log(`Chat Websocket Subscribers: ${this.numberOfConnectedClients} ('${client.id}' disconnected)`);
-
-    // 연결이 끊기는 경우, 예컨대 Live 상태를 Offline으로 바꾸는 등 여기서 처리
+    console.log(`\nChat Websocket Subscribers: ${this.numberOfConnectedClients} ('${client.id}' disconnected)`);
   }
 }
