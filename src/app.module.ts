@@ -14,6 +14,7 @@ import { OldDisastersModule } from './oldDisasters/oldDisasters.module';
 import { NewDisastersModule } from './newDisasters/newDisasters.module';
 import { EmailAlertsModule } from './emailAlerts/emailAlerts.module';
 import { PayPalModule } from './paypal/paypal.module';
+import { ArchiveNewsModule } from './archiveNews/archiveNews.module';
 
 
 @Module({
@@ -24,7 +25,7 @@ import { PayPalModule } from './paypal/paypal.module';
     TypeOrmModule.forRoot(typeORMConfig),
     ScheduleModule.forRoot(),
     AuthModule, DonateModule, ChatModule, EmailAlertsModule,
-    CountryModule, LiveNewsModule, OldDisastersModule, NewDisastersModule,PayPalModule, UploadModule
+    CountryModule, LiveNewsModule, OldDisastersModule, NewDisastersModule,PayPalModule, UploadModule, ArchiveNewsModule
   ],
 })
 export class AppModule { }

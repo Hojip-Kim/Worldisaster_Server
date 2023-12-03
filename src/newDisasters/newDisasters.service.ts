@@ -206,6 +206,8 @@ export class NewDisastersService {
         }
     }
 
+
+
     // @Cron(CronExpression.EVERY_MINUTE)
     // async handleDisasterUpdate() {
     //     console.log('\nGDACS Disaster Update Initiated...');
@@ -349,23 +351,77 @@ export class NewDisastersService {
     //     }
     // }
 
+    // private async sendEmailAlert(disaster: NewDisastersEntity) {
+    //     // 고객 이메일 전송을 전담하는 보조함수
+
+    //     const emailContent = this.createEmailContent(disaster);
+    //     const targetUsers = await this.userRepository.find();
+    //     const userEmails = targetUsers.map(user => user.email);
+
+    //     try {
+    //         await this.emailAlertsService.sendMail(
+    //             userEmails,
+    //             `Alert: ${disaster.dTitle}`, // 이메일 제목
+    //             disaster.dDescription, // text 내용물
+    //             emailContent // html 내용물
+    //         );
+    //         console.log('Email sent to: ${userEmails.join(', ')}');
+    //     } catch (error) {
+    //         console.error('Error sending email: ', error);
+    //     }
+    // }
+    private isUserEligibleForAlert(user, dAlertLevel, country) {
+        const isLevelMatched = this.isAlertLevelMatched(user, dAlertLevel);
+        const isCountryMatched = this.isCountryMatched(user, country);
+
+        return isLevelMatched && isCountryMatched;
+    }
+
+    private isAlertLevelMatched(user, dAlertLevel) {
+        const levels = ["Green", "Orange", "Red"];
+        const userLevelIndex = levels.findIndex(level => user[`subscriptionLevel_${level}`] === "on");
+        const alertLevelIndex = levels.indexOf(dAlertLevel);
+
+        return userLevelIndex >= alertLevelIndex;
+    }
+
+    private isCountryMatched(user, country) {
+        const subscribedCountries = [user.subscriptionCountry1, user.subscriptionCountry2, user.subscriptionCountry3];
+        const isAllCountriesSubscribed = subscribedCountries.every(sub => sub === "all");
+
+        // 모든 구독 국가가 'all'이면 모든 국가의 재난에 대해 이메일을 보냄
+        if (isAllCountriesSubscribed) {
+            return true;
+        }
+
+        // 특정 국가가 포함되어 있는지 확인
+        const isSpecificCountrySubscribed = subscribedCountries.includes(country);
+        return isSpecificCountrySubscribed;
+    }
+
     private async sendEmailAlert(disaster: NewDisastersEntity) {
         // 고객 이메일 전송을 전담하는 보조함수
 
         const emailContent = this.createEmailContent(disaster);
         const targetUsers = await this.userRepository.find();
-        const userEmails = targetUsers.map(user => user.email);
+        const country = disaster.dCountry;
+        const dAlertLevel = disaster.dAlertLevel;
+        // console.log(targetUsers);
 
-        try {
-            await this.emailAlertsService.sendMail(
-                userEmails,
-                `Alert: ${disaster.dTitle}`, // 이메일 제목
-                disaster.dDescription, // text 내용물
-                emailContent // html 내용물
-            );
-            console.log('Email sent to: ${userEmails.join(', ')}');
-        } catch (error) {
-            console.error('Error sending email: ', error);
+        for (const user of targetUsers) {
+            try {
+                if (user.subscription === "on" && this.isUserEligibleForAlert(user, dAlertLevel, country)) {
+                    await this.emailAlertsService.sendMail(
+                        user.email, // 이메일 받는이
+                        `Alert: ${disaster.dTitle}`, // 이메일 제목
+                        disaster.dDescription, // text 내용물 (모든 이메일이 html을 렌더하지 않으니)
+                        emailContent // html 내용물 (cc. createEmailContent)
+                    );
+                    console.log(`Email sent to: ${user.email}`);
+                }
+            } catch (error) {
+                console.error(`Error sending email to ${user.email}: `, error);
+            }
         }
     }
 
@@ -376,7 +432,7 @@ export class NewDisastersService {
             <h1>New Disaster Alert: ${disaster.dTitle}</h1>
             <p>${disaster.dDescription}</p>
             <p>For more details, visit the following link:</p>
-            <a href="https://worldisaster.com/earth?lon=${disaster.dLongitude}&lat=${disaster.dLatitude}"> Worldisaster Website (Recommended) </a>
+            <a href="https://worldisaster.com/earth?lon=${disaster.dLongitude}&lat=${disaster.dLatitude}&height=500000&did=${disaster.dID}"> Worldisaster Website (Recommended) </a>
         `;
 
         return emailHtml;
@@ -519,13 +575,15 @@ export class NewDisastersService {
 
     /* 다른 추가 함수들은 여기부터 추가 */
     async getUrgentDisasters(): Promise<NewDisastersEntity[]> {
-        const disasters = await this.disasterDetailRepository
+        return this.disasterDetailRepository
             .createQueryBuilder('disaster')
-            .where('disaster.dStatus IN (:...statuses)', { statuses: ['real-time', 'ongoing', 'past'] })
-            .andWhere('disaster.dAlertLevel IN (:...alertLevels)', { alertLevels: ['Orange', 'Red'] })
+            .where('disaster.dStatus IN (:...statuses)', { statuses: ['real-time', 'ongoing'] })
+            .andWhere('disaster.dAlertLevel IN (:...alertLevels)', { alertLevels: ['Red', 'Orange'] })
+            .orderBy('CASE WHEN disaster.dStatus = \'real-time\' THEN 1 WHEN disaster.dStatus = \'ongoing\' THEN 2 END', 'ASC')
+            .addOrderBy('CASE WHEN disaster.dAlertLevel = \'Red\' THEN 1 WHEN disaster.dAlertLevel = \'Orange\' THEN 2 END', 'ASC')
             .getMany();
-
-        console.log(disasters); // 로그 출력
-        return disasters;
+    }
+    async findDisasterByID(dID: string): Promise<NewDisastersEntity | undefined> {
+        return this.disasterDetailRepository.findOneBy({ dID });
     }
 }

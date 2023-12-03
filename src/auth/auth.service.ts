@@ -85,43 +85,14 @@ export class AuthService {
         await this.userRepository.update(id, { hashedRefreshToken: null })
     }
 
-    async findUserByEmail(email: string){
+    async findUserByEmail(email: string) {
         const user = await this.userRepository.findOneBy({ email });
         console.log(user);
         return user;
     }
 
-    // async signUp(authCredentialsDto: AuthCredentialsDto): Promise<User> {
-    //     return this.userRepository.createUser(authCredentialsDto);
-    // }
-
-    // async deleteUser(user: User): Promise<any> {
-    //     console.log('user', user);
-    //     const result = await this.userRepository.delete(user.id);
-
-    //     if(result.affected === 0){
-    //         throw new NotFoundException(`Cant find Board with id ${user.id}`);
-    //     }
-
-    //     return {
-    //         statusCode: HttpStatus.OK,
-    //         message: `User with id ${user.id} successfully deleted.`
-    //     };
-    // }
-
-    // async signIn(authCredentialsDto: AuthCredentialsDto): Promise<{accessToken: string}> {
-    //     const { username, password } = authCredentialsDto;
-    //     const user = await this.userRepository.findOneBy({username});
-
-    //     if(user && (await bcrypt.compare(password, user.password))){
-    //         //유저 토큰 생성 (Secret + Payload)
-    //         const payload = { username };
-    //         const accessToken = await this.jwtService.sign(payload);
-
-    //         return { accessToken: accessToken };
-    //     }else {
-    //         throw new UnauthorizedException('Login failed')
-    //     }
-    // }
+    async updateUser(user: User): Promise<User> {
+        return this.userRepository.save(user);
+    }
 
 }
