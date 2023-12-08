@@ -88,11 +88,10 @@ export class AuthController {
             redirectUrl = decodeURIComponent(req.query.preLoginUrl);
         }
 
-
-        res.redirect(redirectUrl);
-
-
+        // res.redirect(redirectUrl);
+        res.redirect('https://worldisaster.com');
     }
+
     @UseGuards(AuthGuard('jwt-access'))
     @Get('/logout')
     async logout(@Req() req: CustomRequest, @Res() res: Response) {

@@ -20,6 +20,7 @@ export class EmailAlertsController {
         if (!user) {
             throw new UnauthorizedException('User not found');
         }
+        console.log(`\nAPI : GET call made to fetch all alert values for ${email}`);
 
         return this.emailAlertsService.getEmailAlerts(email);
     }
@@ -34,6 +35,7 @@ export class EmailAlertsController {
         if (!user) {
             throw new UnauthorizedException('User not found');
         }
+        console.log(`\nAPI : POST call made to create new alert for ${email}`);
 
         return this.emailAlertsService.createEmailAlert(email, createEmailAlertDto);
     }
@@ -47,6 +49,7 @@ export class EmailAlertsController {
         if (!user) {
             throw new UnauthorizedException('User not found');
         }
+        console.log(`\nAPI : DELETE call made to delete one alert for ${email}`);
 
         await this.emailAlertsService.deleteEmailAlerts(objectId, email);
     }
@@ -60,6 +63,7 @@ export class EmailAlertsController {
         if (!user) {
             throw new UnauthorizedException('User not found');
         }
+        console.log(`\nAPI : DELETE call made to delete all alerts for ${email}`);
 
         return this.emailAlertsService.deleteAllAlerts(email);
     }
