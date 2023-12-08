@@ -1,6 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { LiveNewsEntity } from '../liveNews/liveNews.entity';
-import { Video } from 'src/upload/video.entity';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+
 @Entity()
 export class NewDisastersEntity {
 

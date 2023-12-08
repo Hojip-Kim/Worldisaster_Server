@@ -10,10 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import { CountryMappings } from 'src/country/script_init/country-table.entity';
 import { NewDisastersEntity } from './newDisasters.entity';
 import { NewDisastersGateway } from './newDisasters.gateway';
-
-import { UserRepository } from 'src/auth/user.repository';
 import { EmailAlertsService } from 'src/emailAlerts/emailAlerts.service';
-import { request } from 'http';
 
 @Injectable()
 export class NewDisastersService {
@@ -23,7 +20,6 @@ export class NewDisastersService {
         private httpService: HttpService, // HTTP 요청 라이브러리를 가져오고
         private newDisastersGateway: NewDisastersGateway, // 재난 알림용 웹소켓 게이트웨이도 불러오고
         private emailAlertsService: EmailAlertsService, // 이메일 전송을 위한 서비스도 불러오고,
-        private userRepository: UserRepository, // 이메일 대상자 필터링을 위해서 User 테이블도 불러오고
 
         @InjectRepository(CountryMappings) // CountryMappings 테이블도 불러오고
         private countryMappingRepository: Repository<CountryMappings>,
@@ -36,6 +32,11 @@ export class NewDisastersService {
 
     async getAllDisasters(): Promise<NewDisastersEntity[]> {
         return this.disasterDetailRepository.createQueryBuilder('disaster').getMany();
+    }
+
+
+    async getGdacsDisasterByID(dID: string): Promise<NewDisastersEntity | undefined> {
+        return this.disasterDetailRepository.findOneBy({ dID });
     }
 
     async getGdacsDisastesByYear(year: string): Promise<NewDisastersEntity[]> {
@@ -60,7 +61,6 @@ export class NewDisastersService {
         });
     }
 
-
     async getDisastersByStatusService(status: string): Promise<NewDisastersEntity[]> {
         return this.disasterDetailRepository
             .createQueryBuilder('disaster')
@@ -68,15 +68,15 @@ export class NewDisastersService {
             .getMany();
     }
 
-    // async getUrgentDisasters(): Promise<NewDisastersEntity[]> {
-    //     const disasters = await this.disasterDetailRepository
-    //         .createQueryBuilder('disaster')
-    //         .where('disaster.dStatus IN (:...statuses)', { statuses: ['real-time', 'ongoing', 'past'] })
-    //         .andWhere('disaster.dAlertLevel IN (:...alertLevels)', { alertLevels: ['Orange', 'Red'] })
-    //         .getMany();
-    //     console.log(disasters); // 로그 출력
-    //     return disasters;
-    // }
+    async getUrgentGdacsDisasters(): Promise<NewDisastersEntity[]> {
+        return this.disasterDetailRepository
+            .createQueryBuilder('disaster')
+            .where('disaster.dStatus IN (:...statuses)', { statuses: ['real-time', 'ongoing'] })
+            .andWhere('disaster.dAlertLevel IN (:...alertLevels)', { alertLevels: ['Red', 'Orange'] })
+            .orderBy('CASE WHEN disaster.dStatus = \'real-time\' THEN 1 WHEN disaster.dStatus = \'ongoing\' THEN 2 END', 'ASC')
+            .addOrderBy('CASE WHEN disaster.dAlertLevel = \'Red\' THEN 1 WHEN disaster.dAlertLevel = \'Orange\' THEN 2 END', 'ASC')
+            .getMany();
+    }
 
     /* 여기서부터는 주기적으로 RSS 피드를 확인하고 처리하는 역할 */
 
@@ -101,7 +101,7 @@ export class NewDisastersService {
             const dbDisasterIdSet = new Set(dbDisasters.map(d => d.dID));
 
             // 재난 발생 이메일을 보낼 때, 양이 많으면 논외처리해야 함
-            const newDisastersForBroadcast = [];
+            const newDisastersForBroadcast: NewDisastersEntity[] = [];
             let disasterUpdateCount = 0;
             let disasterNewCount = 0;
 
@@ -181,23 +181,6 @@ export class NewDisastersService {
                 console.log(`Marked disaster as past: ${dID}.`);
             }
 
-            // 현재 ongoing인 재난들을 다 불러와서, 7일 이상 지났으면 past로 변경
-            // const ongoingDbDisasters = await this.disasterDetailRepository.find({
-            //     where: {
-            //         dStatus: 'ongoing'
-            //     }
-            // });
-            // for (const dbDisaster of ongoingDbDisasters) {
-            //     const disasterDate = new Date(dbDisaster.dDate);
-            //     const timeDifference = (now.getTime() - disasterDate.getTime()) / (1000 * 60 * 60 * 24);
-
-            //     if (timeDifference > 7) {
-            //         dbDisaster.dStatus = 'past';
-            //         await this.disasterDetailRepository.save(dbDisaster);
-            //         console.log(`Marked disaster as past: ${dbDisaster.dID}.`);
-            //     }
-            // }
-
             // 마지막으로 실제 broadcast 진행 (웹소켓, 이메일)
             if (newDisastersForBroadcast.length <= 5) {
                 for (const newDisaster of newDisastersForBroadcast) {
@@ -206,7 +189,7 @@ export class NewDisastersService {
                         // Timeout 5초 (다른 작업들 처리될 시간 주기))
                         setTimeout(async () => {
                             this.newDisastersGateway.sendDisasterWebsocketAlert(newDisaster);
-                            await this.sendEmailAlert(newDisaster);
+                            await this.emailAlertsService.sendEmailAlert(newDisaster);
                             console.log(`New disaster broadcasted via Websocket & Email for ${newDisaster.dID}...`);
                         }, 5000); // Delay in milliseconds, here it's set to 5 seconds
                     }
@@ -221,58 +204,6 @@ export class NewDisastersService {
             console.error('Error in handling disaster update:', error);
             return { success: false, message: 'Update Failed.' };
         }
-    }
-
-
-
-    private async sendEmailAlert(disaster: NewDisastersEntity) {
-        // 고객 이메일 전송을 전담하는 보조함수
-
-        const emailContent = this.createEmailContent(disaster);
-        const targetUsers = await this.userRepository.find();
-
-        for (const user of targetUsers) {
-            try {
-                // 구독 국가가 'all' 이거나, 재난 발생 국가 중 하나에 포함되어 있는지 확인
-                const isCountrySubscribed = user.subscriptionCountry1 === 'all' ||
-                    user.subscriptionCountry2 === 'all' ||
-                    user.subscriptionCountry3 === 'all' ||
-                    user.subscriptionCountry1 === disaster.dCountry ||
-                    user.subscriptionCountry2 === disaster.dCountry ||
-                    user.subscriptionCountry3 === disaster.dCountry;
-
-                // 구독 레벨이 문자열 'true'인지 확인하고 재난 경보 레벨과 일치하는지 확인
-                const isAlertLevelMatched = (disaster.dAlertLevel === 'Green' && user.subscriptionLevel_Green === 'true') ||
-                    (disaster.dAlertLevel === 'Orange' && user.subscriptionLevel_Orange === 'true') ||
-                    (disaster.dAlertLevel === 'Red' && user.subscriptionLevel_Red === 'true');
-
-                // 조건을 만족하는 경우에만 이메일 전송
-                if (isCountrySubscribed && isAlertLevelMatched) {
-                    await this.emailAlertsService.sendMail(
-                        user.email, // 이메일 받는이
-                        `Alert: ${disaster.dTitle}`, // 이메일 제목
-                        disaster.dDescription, // text 내용물 (모든 이메일이 html을 렌더하지 않으니)
-                        emailContent // html 내용물 (cc. createEmailContent)
-                    );
-                    console.log(`Email sent to: ${user.email}`);
-                }
-            } catch (error) {
-                console.error(`Error sending email to ${user.email}: `, error);
-            }
-        }
-    }
-
-    private createEmailContent(disaster: NewDisastersEntity): string {
-        // 고객 알림 이메일을 전송하기 위해 필요한 HTML 생성 함수 (보조 함수)
-
-        const emailHtml = `
-            <h1>New Disaster Alert: ${disaster.dTitle}</h1>
-            <p>${disaster.dDescription}</p>
-            <p>For more details, visit the following link:</p>
-            <a href="https://worldisaster.com/earth?lon=${disaster.dLongitude}&lat=${disaster.dLatitude}&height=500000&did=${disaster.dID}"> Worldisaster Website (Recommended) </a>
-        `;
-
-        return emailHtml;
     }
 
     /* handleDisasterUpdate()에서 필요한 RSS 피드 data 값을 추출하는 함수 */
@@ -292,7 +223,7 @@ export class NewDisastersService {
         const items = parsedData.rss.channel[0].item;
 
         // 처리된 재난들을 담을 배열을 하나 준비한 뒤 각각의 <item>들을 하나씩 처리
-        const disasters = [];
+        const disasters: NewDisastersEntity[] = [];
         for (const item of items) { // items.map(async item...)로 하면 더 빠르지만, 데이터가 일부 깨지는 현상 발견 (하나씩 처리 필요)
 
             // iso3가 값이 없는 경우를 대비 (보조함수 활용)
@@ -307,7 +238,8 @@ export class NewDisastersService {
             const dType = this.mapDisasterType(dTypeCode);
 
             // 개별 Entry 생성
-            const disaster = {
+            const disaster = new NewDisastersEntity();
+            Object.assign(disaster, {
                 dID: item.guid?.[0]._ ?? null,
                 dSource: 'GDACS',
                 dStatus: 'ongoing',
@@ -327,7 +259,7 @@ export class NewDisastersService {
                 dTitle: item.title?.[0],
                 dDescription: item.description?.[0],
                 dUrl: item.link?.[0]
-            };
+            });
 
             disasters.push(disaster);
         }
@@ -410,16 +342,4 @@ export class NewDisastersService {
         return { dCountry: null, dCountryCode: null, dCountryIso3: null };
     }
 
-    async getUrgentDisasters(): Promise<NewDisastersEntity[]> {
-        return this.disasterDetailRepository
-            .createQueryBuilder('disaster')
-            .where('disaster.dStatus IN (:...statuses)', { statuses: ['real-time', 'ongoing'] })
-            .andWhere('disaster.dAlertLevel IN (:...alertLevels)', { alertLevels: ['Red', 'Orange'] })
-            .orderBy('CASE WHEN disaster.dStatus = \'real-time\' THEN 1 WHEN disaster.dStatus = \'ongoing\' THEN 2 END', 'ASC')
-            .addOrderBy('CASE WHEN disaster.dAlertLevel = \'Red\' THEN 1 WHEN disaster.dAlertLevel = \'Orange\' THEN 2 END', 'ASC')
-            .getMany();
-    }
-    async findDisasterByID(dID: string): Promise<NewDisastersEntity | undefined> {
-        return this.disasterDetailRepository.findOneBy({ dID });
-    }
 }

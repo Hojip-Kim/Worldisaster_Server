@@ -11,7 +11,7 @@ import { Type } from 'class-transformer';
 @Module({
   imports: [
     HttpModule,
-    TypeOrmModule.forFeature([OldDisastersEntity, LiveNewsEntity, CountryMappings]),
+    TypeOrmModule.forFeature([OldDisastersEntity, CountryMappings]),
   ],
   providers: [OldDisastersService],
   controllers: [OldDisastersController]
