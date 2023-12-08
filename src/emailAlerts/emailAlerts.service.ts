@@ -31,6 +31,7 @@ export class EmailAlertsService {
 
         const emailContent = this.createEmailContent(disaster);
         const targetUsers = await this.userRepository.find();
+        const bccEmailAddresses = [];
 
         for (const user of targetUsers) {
             try {
@@ -49,18 +50,19 @@ export class EmailAlertsService {
 
                 // 조건을 만족하는 경우에만 이메일 전송
                 if (isCountrySubscribed && isAlertLevelMatched) {
-                    await this.sendMail(
-                        user.email, // 이메일 받는이
-                        `Alert: ${disaster.dTitle}`, // 이메일 제목
-                        disaster.dDescription, // text 내용물 (모든 이메일이 html을 렌더하지 않으니)
-                        emailContent // html 내용물 (cc. createEmailContent)
-                    );
-                    console.log(`Email sent to: ${user.email}`);
+                    bccEmailAddresses.push(user.email);
                 }
+
             } catch (error) {
                 console.error(`Error sending email to ${user.email}: `, error);
             }
         }
+
+        if (bccEmailAddresses.length > 0) {
+            await this.sendBatchMail(bccEmailAddresses, `Alert: ${disaster.dTitle}`, disaster.dDescription, emailContent);
+            console.log(`Email sent to ${bccEmailAddresses.length} users`);
+        }
+
     }
 
     private createEmailContent(disaster: NewDisastersEntity): string {
@@ -77,11 +79,10 @@ export class EmailAlertsService {
     }
 
     /* 실제 transporter를 통해서 이메일을 보내는 함수 */
-    private async sendMail(to: string, subject: string, text: string, html: string): Promise<void> {
-
+    private async sendBatchMail(bcc: string[], subject: string, text: string, html: string): Promise<void> {
         const mailOptions = {
             from: `"Worldisaster Alert System" <${process.env.EMAIL_ALERT_ID}>`,
-            to: to,
+            bcc: bcc,
             subject: subject,
             text: text,
             html: html,
