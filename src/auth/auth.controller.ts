@@ -12,7 +12,7 @@ export interface JwtPayload {
     email: string;
 }
 
-interface CustomRequest extends Request {
+export interface CustomRequest extends Request {
     user?: GoogleUser;
 
 }
