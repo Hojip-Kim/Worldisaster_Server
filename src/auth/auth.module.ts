@@ -14,7 +14,7 @@ import { AtStrategy } from './ac.strategy';
 
 @Module({
     imports: [
-        PassportModule.register({ defaultStrategy: 'jwt'}),
+        PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.registerAsync({
             useFactory: (configService: ConfigService) => ({
                 secret: configService.get('JWT_SECRET'),
@@ -26,20 +26,9 @@ import { AtStrategy } from './ac.strategy';
         }),
         TypeOrmModule.forFeature([User])
     ],
-  controllers: [AuthController],
-  providers: [AuthService, UserRepository, RtStrategy, AtStrategy, GoogleStrategy],
-  exports: [UserRepository, RtStrategy, AtStrategy, PassportModule]
+    controllers: [AuthController],
+    providers: [AuthService, UserRepository, RtStrategy, AtStrategy, GoogleStrategy],
+    exports: [UserRepository, RtStrategy, AtStrategy, PassportModule, AuthService]
 })
-export class AuthModule {}
+export class AuthModule { }
 
-
-// @Module({
-//     imports: [
-//       TypeOrmModule.forFeature([Board])
-//     ],
-//     controllers: [BoardsController],
-//     providers: [BoardsService, BoardRepository],
-//     exports: [BoardRepository]
-//   })
-//   export class BoardsModule {}
-  

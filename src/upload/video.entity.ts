@@ -12,5 +12,8 @@ export class Video extends BaseEntity {
     video_name: string;
 
     @Column()
+    approve: boolean;
+
+    @Column()
     dID: string;
 }

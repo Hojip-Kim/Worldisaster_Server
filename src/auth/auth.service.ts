@@ -85,43 +85,31 @@ export class AuthService {
         await this.userRepository.update(id, { hashedRefreshToken: null })
     }
 
-    async findUserByEmail(email: string){
+    async findUserByEmail(email: string) {
         const user = await this.userRepository.findOneBy({ email });
         console.log(user);
         return user;
     }
 
-    // async signUp(authCredentialsDto: AuthCredentialsDto): Promise<User> {
-    //     return this.userRepository.createUser(authCredentialsDto);
-    // }
+    async updateUser(user: User): Promise<User> {
+        return this.userRepository.save(user);
+    }
 
-    // async deleteUser(user: User): Promise<any> {
-    //     console.log('user', user);
-    //     const result = await this.userRepository.delete(user.id);
+    async deleteUserByEmail(email: string): Promise<void> {
+        // 데이터베이스나 ORM을 사용하여 해당 이메일의 사용자를 삭제
+        // 예를 들어 TypeORM을 사용한다면 다음과 같이 작성할 수 있습니다.
+        await this.userRepository.delete({ email });
+    }
 
-    //     if(result.affected === 0){
-    //         throw new NotFoundException(`Cant find Board with id ${user.id}`);
-    //     }
+    createGoogleOAuthURL(preLoginUrl: string): string {
+        const clientID = process.env.GOOGLE_CLIENT_ID;
+        const redirectURI = process.env.GOOGLE_CALLBACK_URL;
+        const scope = 'email profile'; // 필요한 스코프 지정
 
-    //     return {
-    //         statusCode: HttpStatus.OK,
-    //         message: `User with id ${user.id} successfully deleted.`
-    //     };
-    // }
+        // state 파라미터에 preLoginUrl 저장
+        const state = encodeURIComponent(preLoginUrl);
 
-    // async signIn(authCredentialsDto: AuthCredentialsDto): Promise<{accessToken: string}> {
-    //     const { username, password } = authCredentialsDto;
-    //     const user = await this.userRepository.findOneBy({username});
-
-    //     if(user && (await bcrypt.compare(password, user.password))){
-    //         //유저 토큰 생성 (Secret + Payload)
-    //         const payload = { username };
-    //         const accessToken = await this.jwtService.sign(payload);
-
-    //         return { accessToken: accessToken };
-    //     }else {
-    //         throw new UnauthorizedException('Login failed')
-    //     }
-    // }
+        return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientID}&redirect_uri=${redirectURI}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent&state=${state}`;
+    }
 
 }

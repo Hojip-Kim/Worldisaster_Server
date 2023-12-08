@@ -14,18 +14,18 @@ export class NewDisastersGateway implements OnGatewayConnection, OnGatewayDiscon
   /* 새로운 연결이 생성되면 Trigger */
   handleConnection(client: Socket, ...args: any[]) {
     this.numberOfConnectedClients++;
-    console.log(`Alert Websocket Subscribers: ${this.numberOfConnectedClients} (New connection by '${client.id}')\n`);
+    console.log(`\nAlert Subscribers: ${this.numberOfConnectedClients} (New connection by '${client.id}')`);
   }
 
   /* 고객들에게 알림을 보내는 역할 */
   sendDisasterWebsocketAlert(disaster: NewDisastersEntity) {
     const disasterString = JSON.stringify(disaster);
-    this.server.emit('disaster-alert', `New disaster: ${disasterString}`);
+    this.server.emit('disaster-alert', disasterString);
   }
 
   /* 연결이 끊기면 Trigger */
   handleDisconnect(client: Socket) {
     this.numberOfConnectedClients--;
-    console.log(`Alert Websocket Subscribers: ${this.numberOfConnectedClients} ('${client.id}' disconnected)\n`);
+    console.log(`\nAlert Subscribers: ${this.numberOfConnectedClients}('${client.id}' disconnected)`);
   }
 }

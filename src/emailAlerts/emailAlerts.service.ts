@@ -18,11 +18,24 @@ export class EmailAlertsService {
         });
     }
 
-    async sendMail(bcc: string[], subject: string, text: string, html: string): Promise<void> {
+    // async sendMail(bcc: string[], subject: string, text: string, html: string): Promise<void> {
+
+    //     const mailOptions = {
+    //         from: `"Worldisaster Alert System" <${process.env.EMAIL_ALERT_ID}>`,
+    //         to: bcc.join(', '),
+    //         subject: subject,
+    //         text: text,
+    //         html: html,
+    //     };
+
+    //     await this.transporter.sendMail(mailOptions);
+    // }
+
+    async sendMail(to: string, subject: string, text: string, html: string): Promise<void> {
 
         const mailOptions = {
             from: `"Worldisaster Alert System" <${process.env.EMAIL_ALERT_ID}>`,
-            to: bcc.join(', '),
+            to: to,
             subject: subject,
             text: text,
             html: html,

@@ -78,6 +78,7 @@ export class UploadService {
             video.video_url = `https://doim6x5685p82.cloudfront.net/${baseName}/${baseName}.m3u8`;
             video.video_name = baseName;
             video.dID = dID;
+            video.approve = false;
 
             await this.videoRepository.save(video);
             // console.log('Video information saved to database');
@@ -139,13 +140,17 @@ export class UploadService {
     }
 
     //db objID 로 url 가져오기
-    async getVideoUrl(dID: string): Promise<Video[]> {
-        const video = await this.videoRepository.find({ where : { dID }});
+async getVideoUrl(dID: string): Promise<Video[]> {
+    const video = await this.videoRepository.find({ 
+        where: { 
+            dID
+        }
+    });
 
-        // if(!video) {
-        //     throw new NotfoundException(`Video with ID "${id}" not found`);
-        // }
+    // if(!video) {
+    //     throw new NotfoundException(`Video with ID "${id}" not found`);
+    // }
 
-        return video;
-    }
+    return video;
+}
 }

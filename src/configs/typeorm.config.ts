@@ -1,4 +1,4 @@
-//SECTION - 유정 RDS config
+
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 import { CountryEntity } from '../country/country.entity';
@@ -9,26 +9,7 @@ import { ChatEntity } from 'src/chat/chat.entity';
 import { LiveNewsEntity } from 'src/liveNews/liveNews.entity';
 import { Video } from 'src/upload/video.entity';
 
-// export const typeORMConfig: TypeOrmModuleOptions = {
-//     type: 'postgres',
-//     host: 'worldisaster-rds.c8vecnz23gk6.ap-northeast-2.rds.amazonaws.com',
-//     port: 5432,
-//     username: 'postgres',
-//     password: 'postdbwjd',
-//     database: 'worldisaster-test-db',
-//     entities: [__dirname + '/../**/*.entity.{js,ts}'],
-//     synchronize: true,
-//     ssl:{
-//         rejectUnauthorized: false, // 이 부분을 추가하세요.
-//     },
-//     extra: {
-//         trustServerCertificate: true,
-//         Encrypt: true,
-//         IntegratedSecurity: false,
-//     }
-// }
 
-// SECTION - Hozip's RDS config
 export const typeORMConfig: TypeOrmModuleOptions = {
     type: 'postgres',
     host: 'worldisaster-database.c1bs1dug29ac.ap-northeast-2.rds.amazonaws.com',

@@ -46,6 +46,12 @@ export class UserRepository extends Repository<User> {
                 email,
                 name,
                 // 여기서 추가적인 필드 설정이 필요할 수 있습니다.
+                subscriptionLevel_Green: 'false',
+                subscriptionLevel_Orange: 'false',
+                subscriptionLevel_Red: 'false',
+                subscriptionCountry1: 'all',
+                subscriptionCountry2: 'all',
+                subscriptionCountry3: 'all',
             });
 
             try {

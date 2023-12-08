@@ -183,10 +183,10 @@ const rw_edge_cases = {
 
 const pool = new Pool({
     user: 'postgres',
-    host: 'worldisaster-rds.c8vecnz23gk6.ap-northeast-2.rds.amazonaws.com',
+    host: '',
     port: 5432,
-    password: 'postdbwjd',
-    database: 'worldisaster-test-db',
+    password: '',
+    database: '',
     ssl: {
         rejectUnauthorized: false
     }

@@ -24,14 +24,14 @@ export class UploadController {
     async getVideoPage(@Param('dID') dID: string, @Res() res: Response) {
         
         const videos = await this.uploadService.getVideoUrl(dID);
-        if(videos.length === 0) {
-            console.log('Video not found');
-            return res.status(404).send('Video not found');
-        }
+        // if(videos.length === 0) {
+        //     console.log('Video not found');
+        //     return res.status(404).send('Video not found');
+        // }
         // video 배열에서 각 video의 url만 추출하여 새 배열 생성
-        const videoUrls = videos.map(video => video.video_url);
+        // const videoUrls = videos.map(video => video.video_url);
 
-        return res.json({ urls: videoUrls });
+        return res.json(videos);
     }
     
 }

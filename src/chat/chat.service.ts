@@ -21,4 +21,21 @@ export class ChatService {
     async getMessagesByRoom(chatRoomID: string): Promise<ChatEntity[]> {
         return this.chatRepository.find({ where: { chatRoomID } });
     }
+
+    async get12hMessagesByRoom(chatRoomID: string): Promise<ChatEntity[]> {
+
+        // 현재 시간을 기준으로 12시간 전을 확인하고 (UTC),
+        const now = new Date(new Date().toUTCString());
+        const twelveHoursAgo = new Date(now.getTime() - (12 * 60 * 60 * 1000));
+
+        // 지정된 채팅방에서 12H를 불러와서 리턴
+        const result = await this.chatRepository
+            .createQueryBuilder('chatHistory')
+            .where('chatHistory.chatRoomID = :chatRoomID', { chatRoomID })
+            .andWhere('chatHistory.createdAt >= :twelveHoursAgo', { twelveHoursAgo: twelveHoursAgo.toISOString() })
+            .getMany();
+
+        return result;
+    }
+
 }
