@@ -95,4 +95,21 @@ export class AuthService {
         return this.userRepository.save(user);
     }
 
+    async deleteUserByEmail(email: string): Promise<void> {
+        // 데이터베이스나 ORM을 사용하여 해당 이메일의 사용자를 삭제
+        // 예를 들어 TypeORM을 사용한다면 다음과 같이 작성할 수 있습니다.
+        await this.userRepository.delete({ email });
+    }
+
+    createGoogleOAuthURL(preLoginUrl: string): string {
+        const clientID = process.env.GOOGLE_CLIENT_ID;
+        const redirectURI = process.env.GOOGLE_CALLBACK_URL;
+        const scope = 'email profile'; // 필요한 스코프 지정
+
+        // state 파라미터에 preLoginUrl 저장
+        const state = encodeURIComponent(preLoginUrl);
+
+        return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientID}&redirect_uri=${redirectURI}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=consent&state=${state}`;
+    }
+
 }

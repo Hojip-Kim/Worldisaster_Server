@@ -40,6 +40,8 @@ export class PayPalController {
     const { amount, dID, currency } = body;
     const { email } = req.user;
 
+    console.log(dID);
+
     try {
       const user = await this.authService.findUserByEmail(email);
       const disaster = await this.disastersService.findDisasterByID(dID);
@@ -144,18 +146,16 @@ export class PayPalController {
   async getHistory(@Req() req: CustomRequest, @Res() res: Response) {
     const { email } = req.user;
     const history = await this.paymentRepository.find({ where: { useremail: email, status: 'completed' } });
-
-    const historyWithDisasterDetails = await Promise.all(history.map(async (payment) => {
+      const historyWithDisasterDetails = await Promise.all(history.map(async (payment) => {
       const disaster = await this.disastersService.findDisasterByID(payment.dId);
       return {
-        useremail: payment.useremail,
-        username: payment.username,
+        email: payment.useremail,
+        name: payment.username,
         amount: payment.amount,
         currency: payment.currency,
         targetCountry: payment.country,
-        dLatitude: disaster.dLatitude,
-        dLongitude: disaster.dLongitude,
         dTitle: disaster.dTitle,
+        dID: disaster.dID,
         dType: disaster.dType,
         dAlertLevel: disaster.dAlertLevel,
       };

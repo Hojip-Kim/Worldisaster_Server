@@ -9,8 +9,14 @@ import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 
 /* 기본적인 욕설 필터 (단, 영어만 지원..) */
-// import * as BadWordsFilter from 'bad-words';
-// const filter = new BadWordsFilter();
+import * as BadWordsFilter from "badwords-ko";
+import { koreanProfanities } from './profanities/korean.profanities';
+
+const filter = new BadWordsFilter({
+  regex: /\*|\.|$/gi, // 특수기호로 욕설 우회를 방지 (감지)
+  replaceRegex: /[A-Za-z0-9가-힣_]/g // 한국어도 허용
+});
+filter.addWords(...koreanProfanities); // 한국어 비속어 array 추가
 
 /* 웹소켓 게이트웨이 */
 @WebSocketGateway({
@@ -47,16 +53,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /* 서버가 Client들에 의한 "Message"를 구독 (메시지 발생 시 Trigger) */
   @SubscribeMessage('message')
   async handleMessage(client: Socket, payload: { chatSenderID: string; chatRoomID: string; chatMessage: string }): Promise<void> {
-    console.log(payload);
+    console.log(payload); // debug
 
     try {
 
-      // 필터링 된 내용을 서버에 저장 (bad-words filter 전용 코드)
-      // const filteredMessage = filter.clean(payload.chatMessage);
-      // const chat = await this.chatService.createMessage({ ...payload, chatMessage: filteredMessage });
+      // 필터링 된 내용을 서버에 저장
+      const filteredMessage = filter.clean(payload.chatMessage);
+      const chat = await this.chatService.createMessage({ ...payload, chatMessage: filteredMessage });
 
       // 저장 후, 특정 chatroom에 있는 Client들은 'newMessage' 이벤트 발생 시 해당 내용을 받아가도록 구성
-      const chat = await this.chatService.createMessage(payload)
       this.chatServer.to(payload.chatRoomID).emit('newMessage', chat);
 
     } catch (error) {

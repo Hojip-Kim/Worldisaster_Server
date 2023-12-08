@@ -12,7 +12,7 @@ export class ArchiveNewsEntity {
     headline: string;
 
     @Column({ type: 'text'})
-    link: string;
+    url: string;
 
     @Column()
     dID: string;

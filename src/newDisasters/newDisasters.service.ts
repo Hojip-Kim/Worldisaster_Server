@@ -13,6 +13,7 @@ import { NewDisastersGateway } from './newDisasters.gateway';
 
 import { UserRepository } from 'src/auth/user.repository';
 import { EmailAlertsService } from 'src/emailAlerts/emailAlerts.service';
+import { request } from 'http';
 
 @Injectable()
 export class NewDisastersService {
@@ -201,9 +202,13 @@ export class NewDisastersService {
             if (newDisastersForBroadcast.length <= 5) {
                 for (const newDisaster of newDisastersForBroadcast) {
                     if (newDisaster.dStatus === 'real-time') {
-                        this.newDisastersGateway.sendDisasterWebsocketAlert(newDisaster);
-                        await this.sendEmailAlert(newDisaster); // 여기서 이메일 타케팅 고객들 따로 처리
-                        console.log(`New disaster broadcasted via Websocket & Email for ${newDisaster.dID}...`);
+
+                        // Timeout 5초 (다른 작업들 처리될 시간 주기))
+                        setTimeout(async () => {
+                            this.newDisastersGateway.sendDisasterWebsocketAlert(newDisaster);
+                            await this.sendEmailAlert(newDisaster);
+                            console.log(`New disaster broadcasted via Websocket & Email for ${newDisaster.dID}...`);
+                        }, 5000); // Delay in milliseconds, here it's set to 5 seconds
                     }
                 }
             }
@@ -219,44 +224,30 @@ export class NewDisastersService {
     }
 
 
-    private isUserEligibleForAlert(user, dAlertLevel, country) {
-        const isLevelMatched = this.isAlertLevelMatched(user, dAlertLevel);
-        const isCountryMatched = this.isCountryMatched(user, country);
-
-        return isLevelMatched && isCountryMatched;
-    }
-
-    private isAlertLevelMatched(user, dAlertLevel) {
-        const levels = ["Green", "Orange", "Red"];
-        const userLevelIndex = levels.findIndex(level => user[`subscriptionLevel_${level}`] === "on");
-        const alertLevelIndex = levels.indexOf(dAlertLevel);
-
-        return userLevelIndex >= alertLevelIndex;
-    }
-
-    private isCountryMatched(user, country) {
-        const subscribedCountries = [user.subscriptionCountry1, user.subscriptionCountry2, user.subscriptionCountry3];
-        const isAllCountriesSubscribed = subscribedCountries.every(sub => sub === "all");
-
-        // 모든 구독 국가가 'all'이면 모든 국가의 재난에 대해 이메일을 보냄
-        if (isAllCountriesSubscribed) {
-            return true;
-        }
-
-        // 특정 국가가 포함되어 있는지 확인
-        const isSpecificCountrySubscribed = subscribedCountries.includes(country);
-        return isSpecificCountrySubscribed;
-    }
 
     private async sendEmailAlert(disaster: NewDisastersEntity) {
         // 고객 이메일 전송을 전담하는 보조함수
 
         const emailContent = this.createEmailContent(disaster);
         const targetUsers = await this.userRepository.find();
-        console.log(targetUsers);
+
         for (const user of targetUsers) {
             try {
-                if (user.subscription === "on" && this.isUserEligibleForAlert(user, disaster.dAlertLevel, disaster.dCountry)) {
+                // 구독 국가가 'all' 이거나, 재난 발생 국가 중 하나에 포함되어 있는지 확인
+                const isCountrySubscribed = user.subscriptionCountry1 === 'all' ||
+                    user.subscriptionCountry2 === 'all' ||
+                    user.subscriptionCountry3 === 'all' ||
+                    user.subscriptionCountry1 === disaster.dCountry ||
+                    user.subscriptionCountry2 === disaster.dCountry ||
+                    user.subscriptionCountry3 === disaster.dCountry;
+
+                // 구독 레벨이 문자열 'true'인지 확인하고 재난 경보 레벨과 일치하는지 확인
+                const isAlertLevelMatched = (disaster.dAlertLevel === 'Green' && user.subscriptionLevel_Green === 'true') ||
+                    (disaster.dAlertLevel === 'Orange' && user.subscriptionLevel_Orange === 'true') ||
+                    (disaster.dAlertLevel === 'Red' && user.subscriptionLevel_Red === 'true');
+
+                // 조건을 만족하는 경우에만 이메일 전송
+                if (isCountrySubscribed && isAlertLevelMatched) {
                     await this.emailAlertsService.sendMail(
                         user.email, // 이메일 받는이
                         `Alert: ${disaster.dTitle}`, // 이메일 제목

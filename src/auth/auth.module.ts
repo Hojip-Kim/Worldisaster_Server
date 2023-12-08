@@ -32,13 +32,3 @@ import { AtStrategy } from './ac.strategy';
 })
 export class AuthModule { }
 
-
-// @Module({
-//     imports: [
-//       TypeOrmModule.forFeature([Board])
-//     ],
-//     controllers: [BoardsController],
-//     providers: [BoardsService, BoardRepository],
-//     exports: [BoardRepository]
-//   })
-//   export class BoardsModule {}

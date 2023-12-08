@@ -28,24 +28,21 @@ export class User extends BaseEntity {
     @Column({ nullable: true })
     hashedRefreshToken: string;
 
-    @Column({ nullable: true, default: 'off' })
-    subscription: string; // 구독 여부
-
-    @Column({ nullable: true, default: 'off' })
+    @Column({ nullable: true, default: 'false' })
     subscriptionLevel_Green: string; // 구독 레벨
 
-    @Column({ nullable: true, default: 'off' })
+    @Column({ nullable: true, default: 'false' })
     subscriptionLevel_Orange: string; // 구독 레벨
 
-    @Column({ nullable: true, default: 'off' })
+    @Column({ nullable: true, default: 'false' })
     subscriptionLevel_Red: string; // 구독 레벨
 
-    @Column({ nullable: true, default: '' })
+    @Column({ nullable: true, default: 'all' })
     subscriptionCountry1: string; // 구독 국가
 
-    @Column({ nullable: true, default: '' })
+    @Column({ nullable: true, default: 'all' })
     subscriptionCountry2: string; // 구독 국가
 
-    @Column({ nullable: true, default: '' })
+    @Column({ nullable: true, default: 'all' })
     subscriptionCountry3: string; // 구독 국가
 }

@@ -37,10 +37,10 @@ export class LiveNewsController {
         return this.liveNewsService.getLiveArticleBydID(dID);
     }
 
-    @Cron(CronExpression.EVERY_5_MINUTES)
-    async handleCron() {
-        // console.log("\n@ Get Live News Every MINUTE @\n");
-        console.log("\n Live news call Successful\n")
-        await this.liveNewsService.fetchAndStoreRealtimeDisasterNews();
-    }
+    // @Cron(CronExpression.EVERY_MINUTE)
+    // async handleCron() {
+    //     // console.log("\n@ Get Live News Every MINUTE @\n");
+    //     console.log("\n Live news call Successful\n")
+    //     await this.liveNewsService.fetchAndStoreRealtimeDisasterNews();
+    // }
 }

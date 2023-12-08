@@ -5,7 +5,6 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { UploadModule } from './upload/upload.module';
 import { AuthModule } from './auth/auth.module';
-import { DonateModule } from './donate/donate.module';
 import { ChatModule } from './chat/chat.module';
 
 import { LiveNewsModule } from './liveNews/liveNews.module';
@@ -24,8 +23,8 @@ import { ArchiveNewsModule } from './archiveNews/archiveNews.module';
     }),
     TypeOrmModule.forRoot(typeORMConfig),
     ScheduleModule.forRoot(),
-    AuthModule, DonateModule, ChatModule, EmailAlertsModule,
-    CountryModule, LiveNewsModule, OldDisastersModule, NewDisastersModule,PayPalModule, UploadModule, ArchiveNewsModule
+    AuthModule, ChatModule, EmailAlertsModule,
+    CountryModule, LiveNewsModule, OldDisastersModule, NewDisastersModule, PayPalModule, UploadModule, ArchiveNewsModule
   ],
 })
 export class AppModule { }
