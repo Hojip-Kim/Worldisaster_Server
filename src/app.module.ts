@@ -24,7 +24,8 @@ import { ArchiveNewsModule } from './archiveNews/archiveNews.module';
     TypeOrmModule.forRoot(typeORMConfig),
     ScheduleModule.forRoot(),
     AuthModule, ChatModule, EmailAlertsModule,
-    CountryModule, LiveNewsModule, OldDisastersModule, NewDisastersModule, PayPalModule, UploadModule, ArchiveNewsModule
+    CountryModule, OldDisastersModule, NewDisastersModule,
+    LiveNewsModule, ArchiveNewsModule, UploadModule, PayPalModule
   ],
 })
 export class AppModule { }

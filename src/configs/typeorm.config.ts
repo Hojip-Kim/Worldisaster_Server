@@ -9,7 +9,6 @@ import { ChatEntity } from 'src/chat/chat.entity';
 import { LiveNewsEntity } from 'src/liveNews/liveNews.entity';
 import { Video } from 'src/upload/video.entity';
 
-
 export const typeORMConfig: TypeOrmModuleOptions = {
     type: 'postgres',
     host: 'worldisaster-database.c1bs1dug29ac.ap-northeast-2.rds.amazonaws.com',
