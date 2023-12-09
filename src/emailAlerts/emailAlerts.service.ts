@@ -150,8 +150,10 @@ export class EmailAlertsService {
 
         // 한번에 단체로 BCC 이메일 보내기 (To는 비어있음))
         if (bccEmailAddresses.length > 0) {
-            await this.sendBatchMail(bccEmailAddresses, `Alert: ${disaster.dTitle}`, disaster.dDescription, emailContent);
-            console.log(`Email sent to ${bccEmailAddresses.length} users`);
+            console.log(`Email attempt at ${bccEmailAddresses.length} users`)
+            const uniqueEmailAddresses = new Set(bccEmailAddresses);
+            await this.sendBatchMail(Array.from(uniqueEmailAddresses), `Alert: ${disaster.dTitle}`, disaster.dDescription, emailContent);
+            console.log(`Email sent to ${uniqueEmailAddresses.size} users (remove duplicates)`);
         }
     }
 

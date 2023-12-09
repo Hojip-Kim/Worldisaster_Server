@@ -20,23 +20,26 @@ export class EmailAlertsController {
         if (!user) {
             throw new UnauthorizedException('User not found');
         }
-        console.log(`\nAPI : GET call made to fetch all alert values for ${email}`);
 
+        console.log(`\nAPI : GET call made to fetch all alert values for ${email}`);
         return this.emailAlertsService.getEmailAlerts(email);
     }
 
     /* 특정 유저의 이메일 알림을 새로 생성하는 POST API */
-    @Post()
+    @Post('/')
     @UseGuards(AuthGuard('jwt-access'))
     @UsePipes(new ValidationPipe({ transform: true }))
     async createEmailAlert(@Req() req: CustomRequest, @Body() createEmailAlertDto: CreateEmailAlertDto) {
         const { email } = req.user;
+        console.log('Raw Body:', req.body); // Log the raw body
+        console.log('DTO:', createEmailAlertDto); // Log the DTO
+
         const user = await this.authService.findUserByEmail(email);
         if (!user) {
             throw new UnauthorizedException('User not found');
         }
-        console.log(`\nAPI : POST call made to create new alert for ${email}`);
 
+        console.log(`\nAPI : POST call made to create new alert for ${email}`);
         return this.emailAlertsService.createEmailAlert(email, createEmailAlertDto);
     }
 
@@ -49,8 +52,8 @@ export class EmailAlertsController {
         if (!user) {
             throw new UnauthorizedException('User not found');
         }
-        console.log(`\nAPI : DELETE call made to delete one alert for ${email}`);
 
+        console.log(`\nAPI : DELETE call made to delete one alert for ${email}`);
         await this.emailAlertsService.deleteEmailAlerts(objectId, email);
     }
 
@@ -63,8 +66,8 @@ export class EmailAlertsController {
         if (!user) {
             throw new UnauthorizedException('User not found');
         }
-        console.log(`\nAPI : DELETE call made to delete all alerts for ${email}`);
 
+        console.log(`\nAPI : DELETE call made to delete all alerts for ${email}`);
         return this.emailAlertsService.deleteAllAlerts(email);
     }
 }
