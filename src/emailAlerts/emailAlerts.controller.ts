@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Req, Param, Delete, UsePipes, ValidationPipe, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Req, Param, Delete, UsePipes, ValidationPipe, UseGuards, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from 'src/auth/auth.service';
 import { CustomRequest } from 'src/auth/auth.controller';
@@ -37,6 +37,12 @@ export class EmailAlertsController {
         const user = await this.authService.findUserByEmail(email);
         if (!user) {
             throw new UnauthorizedException('User not found');
+        }
+
+        if (createEmailAlertDto.alertLevelGreen === false
+            && createEmailAlertDto.alertLevelOrange === false
+            && createEmailAlertDto.alertLevelRed === false) {
+            throw new BadRequestException('At least one alert level must be true');
         }
 
         console.log(`\nAPI : POST call made to create new alert for ${email}`);
