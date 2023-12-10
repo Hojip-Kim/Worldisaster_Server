@@ -11,6 +11,7 @@ import { ChatService } from './chat.service';
 /* 기본적인 욕설 필터 (단, 영어만 지원..) */
 import * as BadWordsFilter from "badwords-ko";
 import { koreanProfanities } from './profanities/korean.profanities';
+import { Redis } from 'ioredis';
 
 const filter = new BadWordsFilter({
   regex: /\*|\.|$/gi, // 특수기호로 욕설 우회를 방지 (감지)
@@ -28,12 +29,19 @@ filter.addWords(...koreanProfanities); // 한국어 비속어 array 추가
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-
   /* 웹소켓 서버 인스턴스 생성 */
   @WebSocketServer() chatServer: Server;
+  private redisPublisher: Redis;
+  private redisSubscriber: Redis;
 
   /* 채팅 서비스에 필요한 함수/기능들 Import */
-  constructor(private chatService: ChatService) { }
+  constructor(private chatService: ChatService) {
+    this.redisPublisher = new Redis({ host: '13.209.68.244', port: 6379 })
+    this.redisSubscriber = new Redis({ host: '13.209.68.244', port: 6379 })
+
+    this.redisSubscriber.subscribe('chat');
+    this.redisSubscriber.on('message', this.handleRedisMessage.bind(this));
+  }
 
   /* 현재 연결된 유저 수 관리 */
   private numberOfConnectedClients = 0;
@@ -50,6 +58,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.join(room);
   }
 
+  private handleRedisMessage(channel: string, message: string) {
+    if (channel === 'chat') {
+      const chatMessage = JSON.parse(message);
+      this.chatServer.to(chatMessage.chatRoomID).emit('newMessage', chatMessage);
+    }
+  }
+
   /* 서버가 Client들에 의한 "Message"를 구독 (메시지 발생 시 Trigger) */
   @SubscribeMessage('message')
   async handleMessage(client: Socket, payload: { chatSenderID: string; chatRoomID: string; chatMessage: string }): Promise<void> {
@@ -61,8 +76,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const filteredMessage = filter.clean(payload.chatMessage);
       const chat = await this.chatService.createMessage({ ...payload, chatMessage: filteredMessage });
 
+      this.redisPublisher.publish('chat', JSON.stringify(chat));
+
       // 저장 후, 특정 chatroom에 있는 Client들은 'newMessage' 이벤트 발생 시 해당 내용을 받아가도록 구성
-      this.chatServer.to(payload.chatRoomID).emit('newMessage', chat);
+      // this.chatServer.to(payload.chatRoomID).emit('newMessage', chat);
 
     } catch (error) {
       console.error('Error handling message:', error);

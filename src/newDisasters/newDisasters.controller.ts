@@ -1,3 +1,4 @@
+
 import { Controller, Get, Param } from '@nestjs/common';
 import { NewDisastersService } from './newDisasters.service';
 import { NewDisastersEntity } from './newDisasters.entity';
@@ -39,3 +40,4 @@ export class NewDisastersController {
         return this.disastersService.getDisastersByStatusService(status);
     }
 }
+

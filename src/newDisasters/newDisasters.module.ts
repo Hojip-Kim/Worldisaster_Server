@@ -10,11 +10,12 @@ import { NewDisastersGateway } from './newDisasters.gateway';
 
 import { AuthModule } from 'src/auth/auth.module';
 import { EmailAlertsModule } from 'src/emailAlerts/emailAlerts.module';
+import { RedisModule } from 'src/Redis/redis.module';
 
 @Module({
   imports: [
     HttpModule, AuthModule, EmailAlertsModule,
-    TypeOrmModule.forFeature([NewDisastersEntity, CountryMappings]),
+    TypeOrmModule.forFeature([NewDisastersEntity, CountryMappings]), RedisModule
   ],
   controllers: [NewDisastersController],
   providers: [NewDisastersService, NewDisastersGateway],

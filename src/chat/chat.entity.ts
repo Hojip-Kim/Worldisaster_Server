@@ -16,4 +16,5 @@ export class ChatEntity {
 
     @CreateDateColumn()
     createdAt: Date;
+
 }

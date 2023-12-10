@@ -80,7 +80,7 @@ export class NewDisastersService {
 
     /* 여기서부터는 주기적으로 RSS 피드를 확인하고 처리하는 역할 */
 
-    @Cron(CronExpression.EVERY_MINUTE)
+    @Cron(CronExpression.EVERY_30_SECONDS)
     async handleDisasterUpdate() {
         console.log('\nGDACS Disaster Update Initiated...');
 

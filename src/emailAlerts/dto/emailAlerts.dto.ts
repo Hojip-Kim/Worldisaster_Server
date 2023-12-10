@@ -5,7 +5,7 @@ export class CreateEmailAlertDto {
     alertCountryName: string;
     alertDistrictName: string;
 
-    @Type(() => Number)
+    @Type(() => Float32Array)
     @IsNumber({}, { message: "Latitude must be a valid number." })
     @Min(-65, { message: "Latitude must be at least -65." })
     @Max(70, { message: "Latitude must be at most 70." })
@@ -19,8 +19,8 @@ export class CreateEmailAlertDto {
 
     @Type(() => Number)
     @IsNumber({}, { message: "Distance must be an integer." }) // 거리 범위는 50~500km
-    @Min(50, { message: "Distance must be at least 50 km." })
-    @Max(500, { message: "Distance must not exceed 500 km." })
+    @Min(100, { message: "Distance must be at least 100 km." })
+    @Max(2000, { message: "Distance must not exceed 2000 km." })
     alertRadius: number;
 
     @Type(() => Boolean)
