@@ -6,7 +6,7 @@ import { CountryEntity } from './country.entity';
 import { CountryMappings } from './script_init/country-table.entity';
 
 import { HttpService } from '@nestjs/axios'; // HTTP 요청 라이브러리
-import * as sanitizeHtml from 'sanitize-html'; // HTTP 태그 정리 라이브러리
+import * as he from 'he'; // HTML Entity 정리하는 라이브러리
 import { Cron, CronExpression } from '@nestjs/schedule'; // 스케쥴링 라이브러리
 import { firstValueFrom } from 'rxjs'; // 첫 요청을 promise로 돌려줌
 
@@ -183,8 +183,11 @@ export class CountryService {
             return text;
         }
 
+        // he 라이브러리로 entity 교체
+        const decoded = he.decode(text);
+
         // Regex로 HTML 태그 제거
-        const noHtml = text.replace(/<[^>]*>/g, '');
+        const noHtml = decoded.replace(/<[^>]*>/g, '');
 
         // 첫번째 글자 대문자로 처리 (CIA Factbook은 새로운 문장 없이 세미콜론으로 내용 구성)
         return noHtml.charAt(0).toUpperCase() + noHtml.slice(1);
