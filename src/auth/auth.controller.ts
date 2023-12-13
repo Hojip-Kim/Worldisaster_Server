@@ -12,7 +12,7 @@ export interface JwtPayload {
     email: string;
 }
 
-interface CustomRequest extends Request {
+export interface CustomRequest extends Request {
     user?: GoogleUser;
 
 }
@@ -88,11 +88,10 @@ export class AuthController {
             redirectUrl = decodeURIComponent(req.query.preLoginUrl);
         }
 
-
-        res.redirect(redirectUrl);
-
-
+        // res.redirect(redirectUrl);
+        res.redirect('https://worldisaster.com/earth');
     }
+
     @UseGuards(AuthGuard('jwt-access'))
     @Get('/logout')
     async logout(@Req() req: CustomRequest, @Res() res: Response) {
@@ -178,7 +177,7 @@ export class AuthController {
             }
 
             await this.authService.updateUser(user);
-            console.log(req.body);
+            // console.log(req.body);
             res.status(200).json({ success: true, greenAlert: (await user).subscriptionLevel_Green, orangeAlert: (await user).subscriptionLevel_Orange, redAlert: (await user).subscriptionLevel_Red, nation1: (await user).subscriptionCountry1, nation2: (await user).subscriptionCountry2, nation3: (await user).subscriptionCountry3 });
         } catch (error) {
             res.status(500).json({ success: false, message: error.message });

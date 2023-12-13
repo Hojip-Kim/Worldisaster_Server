@@ -1,3 +1,4 @@
+
 import { Controller, Get, Param } from '@nestjs/common';
 import { NewDisastersService } from './newDisasters.service';
 import { NewDisastersEntity } from './newDisasters.entity';
@@ -18,19 +19,19 @@ export class NewDisastersController {
 
     @Get('/')
     async getAllDetails(): Promise<NewDisastersEntity[]> {
-        console.log("\nAPI : GET call made to fetch all oldDisasters detail");
+        console.log("\nAPI : GET call made to fetch all newDisasters detail");
         return await this.disastersService.getAllDisasters();
     }
 
     @Get('/year/:year/')
     async getByYear(@Param('year') year: string): Promise<NewDisastersEntity[]> {
-        console.log("\nAPI : GET call made to fetch all oldDisasters by year");
+        console.log("\nAPI : GET call made to fetch all newDisasters by year");
         return this.disastersService.getGdacsDisastesByYear(year);
     }
 
     @Get('/year/:year/:status')
     async getByYearAndStatus(@Param('year') year: string, @Param('status') status: string): Promise<NewDisastersEntity[]> {
-        console.log("\nAPI : GET call made to fetch all oldDisasters by year and status");
+        console.log("\nAPI : GET call made to fetch all newDisasters by year and status");
         return this.disastersService.getGdacsDisastesByYearAndStatus(year, status);
     }
 
@@ -39,3 +40,4 @@ export class NewDisastersController {
         return this.disastersService.getDisastersByStatusService(status);
     }
 }
+

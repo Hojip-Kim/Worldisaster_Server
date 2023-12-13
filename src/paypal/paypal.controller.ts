@@ -25,7 +25,7 @@ export class PayPalController {
   @Get('/')
   async getUrgentDisasters(@Res() res: Response) {
     try {
-      const disasters = await this.disastersService.getUrgentDisasters();
+      const disasters = await this.disastersService.getUrgentGdacsDisasters();
       res.json(disasters);
     } catch (error) {
       res.status(500).json({ message: 'Internal Server Error' });
@@ -44,7 +44,7 @@ export class PayPalController {
 
     try {
       const user = await this.authService.findUserByEmail(email);
-      const disaster = await this.disastersService.findDisasterByID(dID);
+      const disaster = await this.disastersService.getGdacsDisasterByID(dID);
 
       if (!user) {
         throw new Error('User not found');
@@ -128,7 +128,7 @@ export class PayPalController {
         throw new Error('Payment not found');
       }
 
-      res.redirect('https://worldisaster.com/support');
+      res.redirect('https://worldisaster.com/earth');
 
     } catch (error) {
       console.error(error);
@@ -146,8 +146,8 @@ export class PayPalController {
   async getHistory(@Req() req: CustomRequest, @Res() res: Response) {
     const { email } = req.user;
     const history = await this.paymentRepository.find({ where: { useremail: email, status: 'completed' } });
-      const historyWithDisasterDetails = await Promise.all(history.map(async (payment) => {
-      const disaster = await this.disastersService.findDisasterByID(payment.dId);
+    const historyWithDisasterDetails = await Promise.all(history.map(async (payment) => {
+      const disaster = await this.disastersService.getGdacsDisasterByID(payment.dId);
       return {
         email: payment.useremail,
         name: payment.username,
