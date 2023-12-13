@@ -12,7 +12,7 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt-access') {
         });
     }
     async validate(payload: JwtPayload) {
-        console.log('payload : ', payload);
+        // console.log('payload : ', payload);
 
         return {
             email: payload.email,

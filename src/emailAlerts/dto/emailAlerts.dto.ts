@@ -5,7 +5,7 @@ export class CreateEmailAlertDto {
     alertCountryName: string;
     alertDistrictName: string;
 
-    @Type(() => Float32Array)
+    @Type(() => Number)
     @IsNumber({}, { message: "Latitude must be a valid number." })
     @Min(-65, { message: "Latitude must be at least -65." })
     @Max(70, { message: "Latitude must be at most 70." })

@@ -7,9 +7,9 @@ import { UploadVideoDto } from './dto/upload-video.dto';
 import { Video } from './video.entity';
 @Controller('upload')
 export class UploadController {
-    constructor(private readonly uploadService: UploadService) {}
+    constructor(private readonly uploadService: UploadService) { }
 
-    
+
     @Post('/:dID')
     @UseInterceptors(FileInterceptor('file'))
     async uploadFile(
@@ -18,12 +18,13 @@ export class UploadController {
     ) {
         console.log("@@@@@@upload video start@@@@@@");
         return await this.uploadService.upload(file.originalname, file.buffer, dID);
-        
+
     }
     @Get('/:dID')
     async getVideoPage(@Param('dID') dID: string, @Res() res: Response) {
-        
+
         const videos = await this.uploadService.getVideoUrl(dID);
+        console.log("비디오요청왔음");
         // if(videos.length === 0) {
         //     console.log('Video not found');
         //     return res.status(404).send('Video not found');
@@ -33,5 +34,5 @@ export class UploadController {
 
         return res.json(videos);
     }
-    
+
 }

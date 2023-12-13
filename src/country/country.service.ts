@@ -136,30 +136,30 @@ export class CountryService {
         profile.cCountry_other = other_name ?? null;
         profile.cCountry_wiki = wiki_name ?? null;
         profile.cCountry_official = wiki_official ?? null;
-        profile.cContinent = continent.charAt(0).toUpperCase() + continent.slice(1);
+        profile.cContinent = this.cleanAndCapitalizeText(continent);
         // profile.cContinent = countryData.Geography['Map references']?.text ?? null; // "Map references"
         profile.cTimeDifference = countryData.Government?.Capital?.['time difference']?.text ?? null; // "Government" - "Capital" - "time difference"
 
-        profile.cLocation = countryData.Geography?.Location?.text ?? null; // "Location"
+        profile.cLocation = this.cleanAndCapitalizeText(countryData.Geography?.Location?.text ?? null); // "Location"
         profile.cGeoCoordinates = countryData.Geography?.['Geographic coordinates']?.text ?? null; // "Geographic coordinates"
         profile.cSize = countryData.Geography?.Area?.total?.text ?? null; // "Area" - "total"
 
-        profile.cClimate = countryData.Environment?.Climate?.text ?? null; // "Environment" - "Climate"
-        profile.cNaturalHazards = countryData.Geography?.['Natural hazards']?.text ?? null; // "Natural hazards"
-        profile.cEnvironmentalIssues = countryData.Environment?.['Environment - current issues']?.text ?? null; // "Environment" - "Environment - current issues"
+        profile.cClimate = this.cleanAndCapitalizeText(countryData.Environment?.Climate?.text ?? null); // "Environment" - "Climate"
+        profile.cNaturalHazards = this.cleanAndCapitalizeText(countryData.Geography?.['Natural hazards']?.text ?? null); // "Natural hazards"
+        profile.cEnvironmentalIssues = this.cleanAndCapitalizeText(countryData.Environment?.['Environment - current issues']?.text ?? null); // "Environment" - "Environment - current issues"
 
         profile.cPopulation = countryData['People and Society']?.Population?.text ?? null; // "Population"
-        profile.cPopulationDistribution = countryData['People and Society']?.['Population distribution']?.text ?? null; // "Population distribution"
+        profile.cPopulationDistribution = this.cleanAndCapitalizeText(countryData['People and Society']?.['Population distribution']?.text ?? null); // "Population distribution"
         profile.cUrbanPopulation = countryData['People and Society']?.Urbanization?.['urban population']?.text ?? null; // "Urbanization" - "urban population"
         profile.cUrbanRate = countryData['People and Society']?.Urbanization?.['rate of urbanization']?.text ?? null; // "Urbanization" - "rate of urbanization"
         profile.cMajorUrbanPopulation = countryData['People and Society']?.['Major urban areas - population']?.text ?? null; // "Major urban areas - population"
 
         profile.cCountryOfficialName = countryData.Government?.['Country name']?.['conventional longform']?.text ?? null; // "Government" - "Country name" - "conventional long form"
-        profile.cCapitalName = countryData.Government?.Capital?.name?.text ?? null; // "Government" - "Capital" - "name"
+        profile.cCapitalName = this.cleanAndCapitalizeText(countryData.Government?.Capital?.name?.text ?? null); // "Government" - "Capital" - "name"
         profile.cCapitalCoordinates = countryData.Government?.Capital?.['geographic coordinates']?.text ?? null; // "Government" - "Capital" - "geographic coordinates"
-        profile.cGovernmentType = countryData.Government?.['Government type']?.text ?? null; // "Government" - "Government type"
+        profile.cGovernmentType = this.cleanAndCapitalizeText(countryData.Government?.['Government type']?.text ?? null); // "Government" - "Government type"
 
-        profile.cEconomicOverview = countryData.Economy?.['Economic overview']?.text ?? null; // "Economy" - "Economic overview"
+        profile.cEconomicOverview = this.cleanAndCapitalizeText(countryData.Economy?.['Economic overview']?.text ?? null); // "Economy" - "Economic overview"
         profile.cGDP = countryData.Economy?.['GDP (official exchange rate)']?.text ?? null; // "Economy" - "GDP (official exchange rate)"
         profile.cRealGDPPerCapita = this.parseRealGDPPerCapita(countryData.Economy?.['Real GDP per capita']); // "Economy" - "Real GDP per capita"
 
@@ -175,6 +175,19 @@ export class CountryService {
 
         const key = Object.keys(realGDPData)[0];
         return realGDPData[key]?.text ?? null;
+    }
+
+    // response.data로 받아온 데이터 클렌징 함수
+    private cleanAndCapitalizeText(text: string): string {
+        if (!text || text.length === 0) {
+            return text;
+        }
+
+        // Regex로 HTML 태그 제거
+        const noHtml = text.replace(/<[^>]*>/g, '');
+
+        // 첫번째 글자 대문자로 처리 (CIA Factbook은 새로운 문장 없이 세미콜론으로 내용 구성)
+        return noHtml.charAt(0).toUpperCase() + noHtml.slice(1);
     }
 
     // 정해진 시간마다 여기서 함수가 시작, updateCountryProfiles()를 실행

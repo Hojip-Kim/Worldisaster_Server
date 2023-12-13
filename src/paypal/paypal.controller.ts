@@ -128,7 +128,7 @@ export class PayPalController {
         throw new Error('Payment not found');
       }
 
-      res.redirect('https://worldisaster.com/support');
+      res.redirect('https://worldisaster.com/earth');
 
     } catch (error) {
       console.error(error);
