@@ -184,7 +184,7 @@ export class NewDisastersService {
             // 마지막으로 실제 broadcast 진행 (웹소켓, 이메일)
             if (newDisastersForBroadcast.length <= 5) {
                 for (const newDisaster of newDisastersForBroadcast) {
-                    if (newDisaster.dStatus === 'real-time') {
+                    if (newDisaster.dStatus === 'real-time' || 'ongoing') {
 
                         // Timeout 5초 (다른 작업들 처리될 시간 주기))
                         setTimeout(async () => {
