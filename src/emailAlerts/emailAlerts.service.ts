@@ -32,10 +32,11 @@ export class EmailAlertsService {
     /* 알림 조회를 위한 API 함수, */
     async getEmailAlerts(userEmail: string): Promise<EmailAlertsEntity[]> {
 
-        return this.emailAlertsRepository.find({
+        const results = await this.emailAlertsRepository.find({
             where: { alertEmail: userEmail },
             order: { createdAt: 'DESC' }
         });
+        return results;
     }
 
     /* 알림 생성을 위한 API 함수 */

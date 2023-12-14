@@ -16,10 +16,10 @@ export class EmailAlertsEntity {
     @Column({ nullable: false })
     alertDistrictName: string;
 
-    @Column({ nullable: false })
+    @Column({ nullable: false, type: "float" })
     alertLatitude: number;
 
-    @Column({ nullable: false })
+    @Column({ nullable: false, type: "float" })
     alertLongitude: number;
 
     @Column({ nullable: false })

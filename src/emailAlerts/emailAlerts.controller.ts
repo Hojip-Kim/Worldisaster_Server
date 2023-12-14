@@ -22,7 +22,8 @@ export class EmailAlertsController {
         }
 
         console.log(`\nAPI : GET call made to fetch all alert values for ${email}`);
-        return this.emailAlertsService.getEmailAlerts(email);
+        const result = await this.emailAlertsService.getEmailAlerts(email);
+        return result;
     }
 
     /* 특정 유저의 이메일 알림을 새로 생성하는 POST API */
@@ -46,7 +47,8 @@ export class EmailAlertsController {
         }
 
         console.log(`\nAPI : POST call made to create new alert for ${email}`);
-        return this.emailAlertsService.createEmailAlert(email, createEmailAlertDto);
+        const result = await this.emailAlertsService.createEmailAlert(email, createEmailAlertDto);
+        return result;
     }
 
     /* 특정 유저의 단일 알림을 삭제하는 DELETE API */
@@ -74,6 +76,7 @@ export class EmailAlertsController {
         }
 
         console.log(`\nAPI : DELETE call made to delete all alerts for ${email}`);
-        return this.emailAlertsService.deleteAllAlerts(email);
+        const result = await this.emailAlertsService.deleteAllAlerts(email);
+        return result;
     }
 }

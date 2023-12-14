@@ -30,7 +30,7 @@ export class AuthController {
             throw new UnauthorizedException('No user from Google');
         }
 
-        console.log('접근했음');
+        console.log('\nAPI : GET call made to fetch user details');
 
         const { email } = req.user;
         const user = this.authService.findUserByEmail(email);
