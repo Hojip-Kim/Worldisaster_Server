@@ -3,6 +3,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { JwtPayload } from 'jsonwebtoken';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 
+require('dotenv').config()
+
 @Injectable()
 export class AtStrategy extends PassportStrategy(Strategy, 'jwt-access') {
     constructor() {
@@ -12,8 +14,6 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt-access') {
         });
     }
     async validate(payload: JwtPayload) {
-        // console.log('payload : ', payload);
-
         return {
             email: payload.email,
             id: payload.sub,

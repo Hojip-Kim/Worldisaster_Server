@@ -14,6 +14,7 @@ import { NewDisastersModule } from './newDisasters/newDisasters.module';
 import { EmailAlertsModule } from './emailAlerts/emailAlerts.module';
 import { PayPalModule } from './paypal/paypal.module';
 import { ArchiveNewsModule } from './archiveNews/archiveNews.module';
+import { RedisModule } from './Redis/redis.module';
 
 
 @Module({
@@ -25,7 +26,7 @@ import { ArchiveNewsModule } from './archiveNews/archiveNews.module';
     ScheduleModule.forRoot(),
     AuthModule, ChatModule, EmailAlertsModule,
     CountryModule, OldDisastersModule, NewDisastersModule,
-    LiveNewsModule, ArchiveNewsModule, UploadModule, PayPalModule
+    LiveNewsModule, ArchiveNewsModule, UploadModule, PayPalModule, RedisModule,
   ],
 })
 export class AppModule { }

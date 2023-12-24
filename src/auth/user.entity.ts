@@ -8,10 +8,10 @@ export class User extends BaseEntity {
     id: string;
 
     @Column({ nullable: true })
-    username: string;
+    username: string; // username - (회원가입 추가 시)
 
     @Column({ nullable: true })
-    password: string;
+    password: string; // password - (회원가입 추가 시)
 
     @Column({ nullable: true })
     provider: string; // OAuth 제공자 - 예 : 'google'

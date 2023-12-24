@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -9,6 +9,8 @@ import { HttpService } from '@nestjs/axios'; // HTTP 요청 라이브러리
 import * as sanitizeHtml from 'sanitize-html'; // HTTP 태그 정리 라이브러리
 import { Cron, CronExpression } from '@nestjs/schedule'; // 스케쥴링 라이브러리
 import { firstValueFrom } from 'rxjs'; // 첫 요청을 promise로 돌려줌
+import { Redis } from 'ioredis';
+import { log } from 'console';
 
 // 새로운 재난이 발생하면 Push 해주는 웹소켓 등이 없으니, 주기적으로 리스트 확인이 필요함
 @Injectable()
@@ -21,6 +23,7 @@ export class OldDisastersService {
         private countryMappingRepository: Repository<CountryMappings>,
         @InjectRepository(OldDisastersEntity)
         private disasterDetailRepository: Repository<OldDisastersEntity>,
+        @Inject('REDIS_CLIENT') private readonly redisClient: Redis,
     ) { }
 
     /* 여기서부터는 API에 대응하는 Service */
@@ -28,6 +31,20 @@ export class OldDisastersService {
     async getAllDisasters(): Promise<OldDisastersEntity[]> {
         return this.disasterDetailRepository.createQueryBuilder('disaster').getMany();
     }
+
+    // Redis 캐싱 적용 getAllDisasters
+
+    // async getAllDisasters(): Promise<OldDisastersEntity[]> {
+    //     const cacheKey = 'allDisasters';
+    //     const cacheData = await this.redisClient.get(cacheKey);
+
+    //     if (cacheData) {
+    //         return JSON.parse(cacheData);
+    //     }
+    //     const data = await this.disasterDetailRepository.find();
+    //     await this.redisClient.set(cacheKey, JSON.stringify(data), 'EX', 3600);
+    //     return data;
+    // }
 
     async getDisastersByCountryCode(countryCode: string): Promise<OldDisastersEntity[]> {
         return this.disasterDetailRepository

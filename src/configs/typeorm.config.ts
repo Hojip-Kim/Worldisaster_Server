@@ -9,13 +9,15 @@ import { ChatEntity } from 'src/chat/chat.entity';
 import { LiveNewsEntity } from 'src/liveNews/liveNews.entity';
 import { Video } from 'src/upload/video.entity';
 
+require('dotenv').config()
+
 export const typeORMConfig: TypeOrmModuleOptions = {
     type: 'postgres',
-    host: 'worldisaster-database.c1bs1dug29ac.ap-northeast-2.rds.amazonaws.com',
+    host: process.env.RDS_URL,
     port: 5432,
-    username: 'worldisaster',
-    password: 'world123',
-    database: 'worldisaster_db',
+    username: process.env.RDS_NAME,
+    password: process.env.RDS_PASS,
+    database: process.env.RDS_DB,
     entities: [__dirname + '/../**/*.entity.{js,ts}',
         CountryMappings,
         CountryEntity,

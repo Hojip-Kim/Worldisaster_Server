@@ -36,8 +36,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /* 채팅 서비스에 필요한 함수/기능들 Import */
   constructor(private chatService: ChatService) {
-    this.redisPublisher = new Redis({ host: '13.209.68.244', port: 6379 })
-    this.redisSubscriber = new Redis({ host: '13.209.68.244', port: 6379 })
+    this.redisPublisher = new Redis({ host: process.env.REDIS_SERVER, port: 6379 })
+    this.redisSubscriber = new Redis({ host: process.env.REDIS_SERVER, port: 6379 })
 
     this.redisSubscriber.subscribe('chat');
     this.redisSubscriber.on('message', this.handleRedisMessage.bind(this));

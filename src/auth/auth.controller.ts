@@ -37,11 +37,6 @@ export class AuthController {
         res.json({ name: (await user).name, email: (await user).email, provider: (await user).provider });
     }
 
-    @Get('/google/url')
-    async getGoogleAuthUrl(@Query('preLoginUrl') preLoginUrl: string, @Res() res: Response) {
-        const url = this.authService.createGoogleOAuthURL(preLoginUrl);
-        res.json({ url });
-    }
 
     @Get('/google')
     @UseGuards(AuthGuard('google'))
@@ -51,12 +46,11 @@ export class AuthController {
     @Get('/google/redirect')
     @UseGuards(AuthGuard('google'))
     async googleAuthRedirect(@Req() req: CustomRequest, @Res() res: Response) {
-        console.log('Received preLoginUrl:', req.query.preLoginUrl);
         if (!req.user) {
             throw new UnauthorizedException('No user from Google');
         }
 
-        const twoHours = 1000 * 60 * 60 * 2; // expires 5분
+        const twoHours = 1000 * 60 * 60 * 2; // expires 2시간
         const expiresTime = new Date(Date.now() + twoHours);
 
 
@@ -72,32 +66,15 @@ export class AuthController {
             sameSite: 'none',
             expires: expiresTime
         });
-        await res.cookie('refresh-token', refreshToken, {
-            domain: 'worldisaster.com',
-            path: '/',
-            secure: true,
-            sameSite: 'none'
-        });
 
         await this.authService.updateHashedRefreshToken(user.id, refreshToken);
-        let redirectUrl = 'https://worldisaster.com'; // 기본 리다이렉트 URL
 
-        // preLoginUrl 쿼리 파라미터가 문자열인 경우에만 사용
-        if (typeof req.query.preLoginUrl === 'string' && req.query.preLoginUrl) {
-
-            redirectUrl = decodeURIComponent(req.query.preLoginUrl);
-        }
-
-        // res.redirect(redirectUrl);
         res.redirect('https://worldisaster.com/earth');
     }
 
     @UseGuards(AuthGuard('jwt-access'))
     @Get('/logout')
     async logout(@Req() req: CustomRequest, @Res() res: Response) {
-        // if (!req.user) {
-        //     await this.authService.revokeToken(req.user.id);
-        // }
 
         res.clearCookie('access-token', {
             domain: 'worldisaster.com',
@@ -113,13 +90,6 @@ export class AuthController {
         });
 
         res.redirect('https://worldisaster.com/');
-    }
-
-    @UseGuards(AuthGuard('jwt-access'))
-    @Get('Test')
-    async test(@Req() req: CustomRequest, @Res() res: Response) {
-        console.log('req.user', req.user);
-        res.send('test');
     }
 
     @UseGuards(AuthGuard('jwt-refresh'))

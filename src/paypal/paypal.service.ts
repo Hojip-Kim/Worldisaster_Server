@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import * as paypal from 'paypal-rest-sdk';
 
+require('dotenv').config()
+
 @Injectable()
 export class PayPalService {
   constructor() {

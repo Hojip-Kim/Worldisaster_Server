@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 
@@ -11,6 +11,7 @@ import { CountryMappings } from 'src/country/script_init/country-table.entity';
 import { NewDisastersEntity } from './newDisasters.entity';
 import { NewDisastersGateway } from './newDisasters.gateway';
 import { EmailAlertsService } from 'src/emailAlerts/emailAlerts.service';
+import { Redis } from 'ioredis';
 
 @Injectable()
 export class NewDisastersService {
@@ -26,6 +27,7 @@ export class NewDisastersService {
 
         @InjectRepository(NewDisastersEntity) // NewDisastersEntity 테이블도 불러오고
         private disasterDetailRepository: Repository<NewDisastersEntity>,
+        @Inject('REDIS_CLIENT') private readonly redisClient: Redis,
     ) { }
 
     /* API 대응용 함수들 (cc. newDisasters.service) */
@@ -33,6 +35,19 @@ export class NewDisastersService {
     async getAllDisasters(): Promise<NewDisastersEntity[]> {
         return this.disasterDetailRepository.createQueryBuilder('disaster').getMany();
     }
+
+    // Redis 캐싱 적용 getAllDisasters
+    // async getAllDisasters(): Promise<NewDisastersEntity[]> {
+    //     const cacheKey = 'allNewDisasters';
+    //     const cacheData = await this.redisClient.get(cacheKey);
+
+    //     if (cacheData) {
+    //         return JSON.parse(cacheData);
+    //     }
+    //     const data = await this.disasterDetailRepository.find();
+    //     await this.redisClient.set(cacheKey, JSON.stringify(data), 'EX', 3600);
+    //     return data;
+    // }
 
 
     async getGdacsDisasterByID(dID: string): Promise<NewDisastersEntity | undefined> {
