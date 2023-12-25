@@ -1,4 +1,7 @@
-#Worldisaster
+# **Worldisaster**
+---
+
+<img width="1106" alt="스크린샷 2023-12-25 오후 2 04 24" src="https://github.com/Hojip-Kim/Worldisaster_Server/assets/101489057/5bf5bcec-21b2-4a8c-a03e-4eef608a7f78">
 
 ---
 # 🗓 **프로젝트 소개**
@@ -10,28 +13,30 @@
 
 ## 📌 주요 기능
 
-<table>
-  <tr>
-    <td align="center">
-      <h3><b>📌 1. 재난 상세 정보 및 관련 뉴스기사 제공</b></h3>
-      <img src="https://github.com/Hojip-Kim/Worldisaster_Server/assets/101489057/48985a8d-fc86-43ba-b4c5-358b144e999b" width="400px" />
-    </td>
-    <td align="center">
-      <h3><b>📌 2. 재난 유형별 필터링 및 연도별 아카이빙</b></h3>
-      <img src="https://github.com/Hojip-Kim/Worldisaster_Server/assets/101489057/5162b96e-4a1d-439a-8820-bfe210a4874a" width="400px" />
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <h3><b>📌 3. 실시간 재난 알림 서비스 (온라인)</b></h3>
-      <img src="https://github.com/Hojip-Kim/Worldisaster_Server/assets/101489057/17f774ba-4b7c-4fb8-81a2-c74ddcb4c00d" width="400px" />
-    </td>
-    <td align="center">
-      <h3><b>📌 4. 실시간 재난 알림 구독 서비스 (오프라인 - Gmail)</b></h3>
-      <img src="https://github.com/Hojip-Kim/Worldisaster_Server/assets/101489057/e8536f85-ac2a-4bdc-97f1-c88f37930105" width="400px" />
-    </td>
-  </tr>
-</table>
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <h3><b>📌 1. 재난 상세 정보 및 관련 뉴스기사 제공</b></h3>
+        <img src="https://github.com/Hojip-Kim/Worldisaster_Server/assets/101489057/48985a8d-fc86-43ba-b4c5-358b144e999b" width="400px" />
+      </td>
+      <td align="center">
+        <h3><b>📌 2. 재난 유형별 필터링 및 연도별 아카이빙</b></h3>
+        <img src="https://github.com/Hojip-Kim/Worldisaster_Server/assets/101489057/5162b96e-4a1d-439a-8820-bfe210a4874a" width="400px" />
+      </td>
+    </tr>
+    <tr>
+      <td align="center">
+        <h3><b>📌 3. 실시간 재난 알림 서비스 (온라인)</b></h3>
+        <img src="https://github.com/Hojip-Kim/Worldisaster_Server/assets/101489057/17f774ba-4b7c-4fb8-81a2-c74ddcb4c00d" width="400px" />
+      </td>
+      <td align="center">
+        <h3><b>📌 4. 실시간 재난 알림 구독 서비스 (오프라인 - Gmail)</b></h3>
+        <img src="https://github.com/Hojip-Kim/Worldisaster_Server/assets/101489057/e8536f85-ac2a-4bdc-97f1-c88f37930105" width="400px" />
+      </td>
+    </tr>
+  </table>
+</div>
 
 ## 📌 추가 서비스
 
